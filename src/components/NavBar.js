@@ -6,7 +6,6 @@ import {
     AppBar,
     Typography,
     Toolbar,
-
 } from "@material-ui/core"
 
 export default function NavBar() {
@@ -23,7 +22,7 @@ export default function NavBar() {
                         <Button color="inherit"　onClick={() => auth.logout()}>ログアウト</Button>
                     </Fragment>
                 ) : (
-                    <Button color="inherit" onClick={() => auth.login()}>ログイン</Button>
+                    <Link to="/login">ログイン</Link>
                 )}
             </Toolbar>
         </AppBar>

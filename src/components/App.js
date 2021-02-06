@@ -7,6 +7,8 @@ import {
 } from "react-router-dom";
 import NavBar from "./NavBar";
 import PrivateRoute from "./auth/PrivateRoute";
+import Login from "./Login";
+import Top from "./Top";
 
 
 function App() {
@@ -15,8 +17,11 @@ function App() {
             <Router>
                 <NavBar />
                 <Switch>
-                    <Route>
-
+                    <Route exact path="/">
+                        <Top />
+                    </Route>
+                    <Route exact path="/login">
+                        <Login />
                     </Route>
                     <PrivateRoute>
                         
