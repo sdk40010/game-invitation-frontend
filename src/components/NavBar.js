@@ -18,7 +18,7 @@ export default function NavBar() {
                 </Typography>
                 { auth.user ? (
                     <Fragment>
-                        <Link to="#">{auth.user.email}</Link>
+                        <Link to="#">{auth.user.displayName}</Link>
                         <Button color="inherit"　onClick={() => auth.logout()}>ログアウト</Button>
                     </Fragment>
                 ) : (

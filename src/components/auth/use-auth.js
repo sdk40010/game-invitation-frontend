@@ -31,8 +31,11 @@ function useProvideAuth() {
         return firebase
             .auth()
             .signInWithPopup(provider)
-            .then(res => {
-                setUser(res.user);
+            .then(result => {
+                return sendIdToken(result.user);
+            })
+            .then(({ res, user }) => {
+                setUser(user);
             });
     }
 
@@ -45,7 +48,27 @@ function useProvideAuth() {
             });
     }
 
+    async function sendIdToken(user) {
+        const idToken = await user.getIdToken();
+        const res = await apiCall("/api/v1/auth", "POST", { idToken });
+        return { res, user };
+    }
+
+    const apiCall = async (path, method, data = {}) => {
+        const apiServerRoot = process.env.REACT_APP_API_SERVER_ROOT;
+        const res = await fetch(apiServerRoot + path, { 
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        return res.json();
+    }
+
+
     useEffect(() => {
+        console.log('unsubscribe');
         const unsubscribe = firebase.auth().onAuthStateChanged(user => {
             if (user) {
                 setUser(user);
@@ -60,7 +83,8 @@ function useProvideAuth() {
     return {
         user,
         login,
-        logout
+        logout,
+        apiCall
     };
 }
 

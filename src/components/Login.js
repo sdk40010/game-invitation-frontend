@@ -1,4 +1,4 @@
-import React from "react";
+import React , { useEffect, useState }from "react";
 import { Redirect, useLocation } from "react-router-dom";
 import { useAuth } from "./auth/use-auth";
 import { 
@@ -15,18 +15,18 @@ export default function Login() {
     const location = useLocation();
     const from = location.state ? location.state.from : "/";
 
-    return(
-        auth.user ? (
-            <Redirect to={from} />
-        ) : (
+    if (auth.user) {
+        return <Redirect to={from} />;
+    } else {
+        return (
             <Card>
                 <CardHeader>
                     <Typography>ログイン</Typography>
                 </CardHeader>
                 <CardContent>
-                    <Button color="inherit" onClick={() => auth.login()}>ログイン</Button>
+                    <Button color="inherit" onClick={() => auth.login()}>Gooleでログイン</Button>
                 </CardContent>
             </Card>
-        )
-    );
+        );
+    }
 }
