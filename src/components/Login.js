@@ -1,4 +1,4 @@
-import React , { useEffect, useState }from "react";
+import React from "react";
 import { Redirect, useLocation } from "react-router-dom";
 import { useAuth } from "./auth/use-auth";
 import { 
@@ -20,9 +20,9 @@ export default function Login() {
     } else {
         return (
             <Card>
-                <CardHeader>
-                    <Typography>ログイン</Typography>
-                </CardHeader>
+                <CardHeader 
+                    title={<Typography variant="h6" component="h1">ログイン</Typography>}
+                />
                 <CardContent>
                     <Button color="inherit" onClick={() => auth.login()}>Gooleでログイン</Button>
                 </CardContent>

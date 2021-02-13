@@ -26,50 +26,53 @@ export const useAuth = () => {
 function useProvideAuth() {
     const [user, setUser] = useState(null);
 
-    const login = () => {
+    const login = async () => {
         const provider = new firebase.auth.GoogleAuthProvider();
-        return firebase
-            .auth()
-            .signInWithPopup(provider)
-            .then(result => {
-                return sendIdToken(result.user);
-            })
-            .then(({ res, user }) => {
-                setUser(user);
-            });
+        const result = await firebase.auth().signInWithPopup(provider);
+        const res = await sendIdToken(result.user);
+        if (res.ok) {
+            setUser(result.user);
+        } else {
+            await firebase.auth().signOut();
+        }
     }
 
-    const logout = () => {
-        return firebase
-            .auth()
-            .signOut()
-            .then(() => {
-                setUser(false);
-            });
+    const logout = async () => {
+        await firebase.auth().signOut();
+        await apiCall("/api/v1/logout", "POST");
+        setUser(false);
     }
 
-    async function sendIdToken(user) {
+    const sendIdToken = async (user) => {
         const idToken = await user.getIdToken();
-        const res = await apiCall("/api/v1/auth", "POST", { idToken });
-        return { res, user };
+        return await apiCall("/api/v1/login", "POST", { idToken });
     }
 
     const apiCall = async (path, method, data = {}) => {
         const apiServerRoot = process.env.REACT_APP_API_SERVER_ROOT;
+        const xsrfToken = user ?
+            document.cookie.split("; ").find(row => row.startsWith("XSRF-TOKEN"))?.split("=")[1] : 
+            ""
         const res = await fetch(apiServerRoot + path, { 
             method: method,
+            mode: "cors",
+            credentials: "include",
             headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
+                "X-Requested-With": "XMLHttpRequest",
+                "X-XSRF-TOKEN": decodeURIComponent(xsrfToken),
             },
             body: JSON.stringify(data)
+        }).catch(e => {
+            console.log("Error: " + e);
         });
-        return res.json();
+        return res;
     }
 
 
     useEffect(() => {
-        console.log('unsubscribe');
         const unsubscribe = firebase.auth().onAuthStateChanged(user => {
+            console.log("unsubscribe");
             if (user) {
                 setUser(user);
             } else {

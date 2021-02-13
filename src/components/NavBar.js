@@ -1,12 +1,8 @@
 import { Button } from "@material-ui/core";
-import React, { Fragment } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "./auth/use-auth";
-import { 
-    AppBar,
-    Typography,
-    Toolbar,
-} from "@material-ui/core"
+import { AppBar, Typography, Toolbar } from "@material-ui/core"
 
 export default function NavBar() {
     const auth = useAuth();
@@ -17,10 +13,11 @@ export default function NavBar() {
                     SITE NAME
                 </Typography>
                 { auth.user ? (
-                    <Fragment>
+                    <>
+                        <Link to="/invitations/new"><Button>新規作成</Button></Link>
                         <Link to="#">{auth.user.displayName}</Link>
-                        <Button color="inherit"　onClick={() => auth.logout()}>ログアウト</Button>
-                    </Fragment>
+                        <Button onClick={() => auth.logout()}>ログアウト</Button>
+                    </>
                 ) : (
                     <Link to="/login">ログイン</Link>
                 )}

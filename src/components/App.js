@@ -9,6 +9,7 @@ import NavBar from "./NavBar";
 import PrivateRoute from "./auth/PrivateRoute";
 import Login from "./Login";
 import Top from "./Top";
+import NewInvitation from "./invitaion/NewInvitation"
 
 
 function App() {
@@ -20,11 +21,11 @@ function App() {
                     <Route exact path="/">
                         <Top />
                     </Route>
-                    <Route exact path="/login">
+                    <Route path="/login">
                         <Login />
                     </Route>
                     <PrivateRoute>
-                        
+                        <NewInvitation />
                     </PrivateRoute>
                 </Switch>
             </Router>

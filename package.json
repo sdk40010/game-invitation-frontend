@@ -3,13 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@date-io/date-fns": "1.x",
     "@material-ui/core": "^4.11.3",
+    "@material-ui/pickers": "^3.2.10",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
+    "date-fns": "^2.17.0",
     "firebase": "^8.2.6",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "react-dropzone": "^11.3.1",
+    "react-hook-form": "^6.15.1",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.2",
     "web-vitals": "^1.0.1"
@@ -37,5 +42,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@testing-library/react-hooks": "^5.0.3"
   }
 }
