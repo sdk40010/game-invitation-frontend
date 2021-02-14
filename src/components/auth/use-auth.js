@@ -64,15 +64,16 @@ function useProvideAuth() {
             },
             body: JSON.stringify(data)
         }).catch(e => {
-            console.log("Error: " + e);
+            console.log("error: " + e);
         });
         return res;
     }
 
 
     useEffect(() => {
+        // unsubscribeはonAuthStateChangedに渡されたイベントリスナーを削除するための関数
         const unsubscribe = firebase.auth().onAuthStateChanged(user => {
-            console.log("unsubscribe");
+            console.log("state changed");
             if (user) {
                 setUser(user);
             } else {

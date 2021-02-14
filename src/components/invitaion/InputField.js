@@ -2,7 +2,14 @@ import React from 'react';
 import DateFnsUtils from  '@date-io/date-fns';
 import format from "date-fns/format";
 import ja from "date-fns/locale/ja";
-import { FormControl, FormHelperText, Select, InputLabel, MenuItem } from '@material-ui/core';
+import {
+    FormControl,
+    FormHelperText,
+    Select,
+    InputLabel,
+    MenuItem,
+    TextField
+} from '@material-ui/core';
 import {
     MuiPickersUtilsProvider,
     KeyboardDatePicker,
@@ -11,87 +18,9 @@ import {
 } from '@material-ui/pickers';
 import { useController } from "react-hook-form";
 
-export function DatePicker({name, label, control, watch, errors}) {
-    const { field, meta } = useController({
-        name,
-        control,
-        rules: {
-            required: true,
-            validate: {
-                future: date => date > new Date()
-            }
-        },
-    });
-
-    const helperText = 
-        errors[name]?.type === "required" ?
-            `${label}は必須です。` :
-        errors[name]?.type === "future" ?
-            "過去の日付は指定できません。" :
-         "";
-
-      return (
-            <MuiPickersUtilsProvider utils={CustomDateFnsUtils}　locale={ja}>
-                <KeyboardDatePicker
-                    name={name}
-                    value={watch(name) || null}
-                    inputVariant="outlined"
-                    label={label}
-                    format="yyyy/M/d"
-                    okLabel="決定"
-                    cancelLabel="キャンセル"
-                    autoOk={true}
-                    minDate={new Date()}
-                    onChange={field.onChange}
-                    error={errors[name]}
-                    helperText={errors[name] && helperText}
-                />
-            </MuiPickersUtilsProvider>
-        );
-}
-
-export function TimePicker({name, label, control, watch, errors, before, after}) {
-    const { field, meta } = useController({
-        name,
-        control,
-        rules: {
-            required: true,
-            validate: {
-                before: time => after ? time < watch(after) : true,
-                after: time => before ? time > watch(before) : true,
-            }
-        },
-    });
-
-    const helperText =
-        errors[name]?.type === "required" ?
-            `${label}は必須です。` :
-        errors[name]?.type === "before" ?
-            "終了時刻より前の時刻を指定してください。" :
-        errors[name]?.type === "after" ?
-            "開始時刻より後の時刻を指定してください。" :
-        "";
-
-    return (
-            <MuiPickersUtilsProvider utils={CustomDateFnsUtils}　locale={ja}>
-                <KeyboardTimePicker 
-                    name={name}
-                    value={watch(name) || null}
-                    inputVariant="outlined"
-                    label={label}
-                    format="HH:mm"
-                    ampm={false}
-                    okLabel="決定"
-                    cancelLabel="キャンセル"
-                    autoOk={true}
-                    onChange={field.onChange}
-                    error={errors[name]}
-                    helperText={errors[name] && helperText}
-                />
-            </MuiPickersUtilsProvider>
-        );
-}
-
+/**
+ * 日付・時間選択用のコンポーネント
+ */
 export function DateTimePicker({name, label, control, watch, errors, before, after}) {
     const { field, meta } = useController({
         name,
@@ -99,8 +28,26 @@ export function DateTimePicker({name, label, control, watch, errors, before, aft
         rules: {
             required: true,
             validate: {
-                before: time => after ? time < watch(after) : true,
-                after: time => before ? time > watch(before) : true,
+                before: time => {
+                    if (after) {
+                        // ミリ秒単位の比較を防ぐために、ミリ秒以下を切り捨てるフォーマットをかけてから比較する
+                        const d1 = new Date(formatTime(time));
+                        const d2 = new Date(formatTime(watch(after)));
+                        console.log(d1.getTime(), d2.getTime());
+                        return d1.getTime() < d2.getTime();
+                    } else {
+                        return true;
+                    }
+                },
+                after: time => {
+                    if (before) {
+                        const d1 = new Date(formatTime(time));
+                        const d2 = new Date(formatTime(watch(before)));
+                        return d1.getTime() > d2.getTime();
+                    } else {
+                        return true;
+                    }
+                }
             }
         },
     });
@@ -135,6 +82,9 @@ export function DateTimePicker({name, label, control, watch, errors, before, aft
     );
 }
 
+/**
+ * 日付や時間の表記を日本式するためのクラス
+ */
 class CustomDateFnsUtils extends DateFnsUtils {
     getCalendarHeaderText(date) {
       return format(date, "yo MMM", { locale: this.locale });
@@ -149,18 +99,18 @@ class CustomDateFnsUtils extends DateFnsUtils {
     }
 }
 
-// export function formatDate(date) {
-//     return format(date, "yyyy/MM/dd") ;
-// }
-
-// export function formatTime(time) {
-//     return format(time, "HH:mm") ;
-// }
-
+/**
+ * Date型の値をyyyy-MM-dd HH:mm:ss形式の文字列に変換する
+ * 秒数は切り捨てて0にする
+ * @param {Date} time 
+ */
 export function formatTime(time) {
-    return format(time, "yyyy/MM/dd HH:mm");
+    return format(time.setSeconds(0), "yyyy-MM-dd HH:mm:ss");
 }
 
+/**
+ * 定員選択用のコンポーネント
+ */
 export function CapacitySelecter({name, label, control, errors}) {
     const { field, meta } = useController({
         name,
@@ -173,17 +123,32 @@ export function CapacitySelecter({name, label, control, errors}) {
     });
     
     const seq = [...Array(10)].map((_, i) => ++i);
+    const ITEM_HEIGHT = 48;
+    const ITEM_PADDING_TOP = 8;
+    const MenuProps = {
+      PaperProps: {
+        style: {
+          maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+          width: 250,
+        },
+      },
+    };
 
     return (
         <FormControl
             variant="outlined"
+            fullWidth
             error={errors[name]}
         >
-            <InputLabel >{label}</InputLabel>
-            <Select onChange={field.onChange}>
+            <InputLabel id="label">{label}</InputLabel>
+            <Select
+                labelId="label"
+                MenuProps={MenuProps}
+                onChange={field.onChange}
+            >
                 {seq.map(i => <MenuItem key={i} value={i}>{i+"人"}</MenuItem>)}
             </Select>
             {errors[name] && <FormHelperText>{errors[name].message}</FormHelperText>}
-      </FormControl>
+        </FormControl>
     )
 }

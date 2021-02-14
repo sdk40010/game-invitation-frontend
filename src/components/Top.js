@@ -1,9 +1,12 @@
 import React from "react";
 import { useAuth } from "./auth/use-auth";
+import MainContainer from "./utils/MainContainer";
 
 export default function Top() {
 
     return(
-        <div>Top</div>
+        <MainContainer maxWidth="lg">
+            <div>Top</div>
+        </MainContainer>
     );
 }

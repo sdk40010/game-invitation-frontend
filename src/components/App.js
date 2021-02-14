@@ -1,10 +1,12 @@
+import "../css/index.css";
 import React from "react";
 import { ProvideAuth } from "./auth/use-auth";
 import { 
     BrowserRouter as Router,
     Switch,
-    Route
+    Route,
 } from "react-router-dom";
+import CssBaseline from '@material-ui/core/CssBaseline'
 import NavBar from "./NavBar";
 import PrivateRoute from "./auth/PrivateRoute";
 import Login from "./Login";
@@ -15,6 +17,7 @@ import NewInvitation from "./invitaion/NewInvitation"
 function App() {
     return (
         <ProvideAuth>
+            <CssBaseline />
             <Router>
                 <NavBar />
                 <Switch>
@@ -24,7 +27,7 @@ function App() {
                     <Route path="/login">
                         <Login />
                     </Route>
-                    <PrivateRoute>
+                    <PrivateRoute path="/invitations/new">
                         <NewInvitation />
                     </PrivateRoute>
                 </Switch>
