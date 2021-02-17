@@ -29,18 +29,17 @@ export function DateTimePicker({name, label, control, watch, errors, before, aft
             required: true,
             validate: {
                 before: time => {
-                    if (after) {
+                    if (after && watch(after)) {
                         // ミリ秒単位の比較を防ぐために、ミリ秒以下を切り捨てるフォーマットをかけてから比較する
                         const d1 = new Date(formatTime(time));
                         const d2 = new Date(formatTime(watch(after)));
-                        console.log(d1.getTime(), d2.getTime());
                         return d1.getTime() < d2.getTime();
                     } else {
                         return true;
                     }
                 },
                 after: time => {
-                    if (before) {
+                    if (before && watch(before)) {
                         const d1 = new Date(formatTime(time));
                         const d2 = new Date(formatTime(watch(before)));
                         return d1.getTime() > d2.getTime();

@@ -17,10 +17,11 @@ import {
 const useStyles = makeStyles((theme) => ({
     siteName: {
         flexGrow: 1,
-        color: theme.palette.common.white
     },
     link: {
         textDecoration: "none",
+        color: theme.palette.common.white,
+        display: "inline-block"
     },
     button: {
         backgroundColor: theme.palette.common.white,
@@ -46,11 +47,13 @@ export default function NavBar() {
     }
 
     return (
-        <AppBar position="absolute">
+        <AppBar>
             <Toolbar>
-                <Link to="/" className={`${classes.link} ${classes.siteName}`}>
-                    <Typography variant="h6">SITE NAME</Typography>
-                </Link>
+                <div className={classes.siteName}>
+                    <Link to="/" className={classes.link}>
+                        <Typography variant="h6" component="span">SITE NAME</Typography>
+                    </Link>
+                </div>
                 { auth.user ? (
                     <>
                         <Link to="/invitations/new" className={classes.link}>

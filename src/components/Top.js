@@ -3,9 +3,10 @@ import { useAuth } from "./auth/use-auth";
 import MainContainer from "./utils/MainContainer";
 
 export default function Top() {
+    const auth = useAuth();
 
     return(
-        <MainContainer maxWidth="lg">
+        <MainContainer error={auth.error} maxWidth="lg">
             <div>Top</div>
         </MainContainer>
     );

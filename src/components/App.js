@@ -12,13 +12,14 @@ import PrivateRoute from "./auth/PrivateRoute";
 import Login from "./Login";
 import Top from "./Top";
 import NewInvitation from "./invitaion/NewInvitation"
+import ShowInvitation from "./invitaion/ShowInvitation";
 
 
 function App() {
     return (
-        <ProvideAuth>
+        <Router>
             <CssBaseline />
-            <Router>
+            <ProvideAuth>
                 <NavBar />
                 <Switch>
                     <Route exact path="/">
@@ -30,9 +31,12 @@ function App() {
                     <PrivateRoute path="/invitations/new">
                         <NewInvitation />
                     </PrivateRoute>
+                    <PrivateRoute path="/invitations/:id">
+                        <ShowInvitation />
+                    </PrivateRoute>
                 </Switch>
-            </Router>
-        </ProvideAuth>
+            </ProvideAuth>
+        </Router>
     );
 }
 
