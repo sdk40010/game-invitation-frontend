@@ -83,7 +83,6 @@ function useProvideAuth() {
     useEffect(() => {
         // unsubscribeはonAuthStateChangedに渡されたイベントリスナーを削除するための関数
         const unsubscribe = firebase.auth().onAuthStateChanged(user => {
-            console.log("state changed");
             // !errorではなく、(error === false)としているのは、
             // APIサーバーから認証を受ける前（errorがnull（初期値）のとき）に
             // setUserが実行されるのを防ぐため
@@ -98,8 +97,21 @@ function useProvideAuth() {
         return () => unsubscribe();
     });
 
-    // 認証に関するエラーを他のページに影響を与えないように、
-    // ページ遷移するたびにエラーをクリアする
+    // useEffect(() => {
+    //     const loginCheck = async () => {
+    //         try {
+    //             const json = await apiCall("/api/v1/login/check", "GET");
+    //             if (!json.isLoggedIn) {
+    //                 logout();
+    //             }
+    //         } catch (err) {
+    //             setError(err);
+    //         }
+    //     }
+    //     loginCheck();
+    // }, []);
+
+    // 認証に関するエラーが他のページに影響を与えないように、ページ遷移するたびにエラーを消去する
     useEffect(() => {
         setError(false);
     }, [location]);

@@ -10,7 +10,6 @@ import {
     Typography,
     Card,
     CardHeader,
-    CardActionArea,
     CardContent,
     Button,
     Avatar,
@@ -23,7 +22,6 @@ const useStyles = makeStyles((theme) => ({
         flexGrow: 1
     },
     headerAction: {
-        alignSelf: "center",
         marginTop: 0,
         marginRight: 0
     },
@@ -39,6 +37,9 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+/**
+ * 募集閲覧ページ
+ */
 export default function ShowInvitation() {
     const auth = useAuth();
     const { id } = useParams();
@@ -53,19 +54,15 @@ export default function ShowInvitation() {
         getInvitation();
     }, [])
 
-    const data = invitationAPI.data || null;
-
+    const data = invitationAPI.data;
 
     const title = data ? (
-        <Typography variant="h5" component="h1">{data.title}</Typography>
+        <Typography variant="h5" component="h1" paragraph>{data.title}</Typography>
     ) : (
         ""
     );
 
-    const subHeader = data ? ( data.createdAt
-    ) : (
-        ""
-    );
+    const subHeader = data ? `${data.createdAt}に投稿` : "";
 
     const participationButton = data ? (
         <Button color="primary" variant="contained">参加する</Button>
@@ -153,7 +150,7 @@ export default function ShowInvitation() {
 }
 
 /**
- * 募集の詳細用の見出し
+ * 募集詳細用の見出し
  */
 function Heading({children}) {
     const classes = useStyles();

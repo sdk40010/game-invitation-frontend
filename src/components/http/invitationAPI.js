@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import apiCall from "../http/http";
 
 export default function useInvitationAPI() {
@@ -7,13 +7,31 @@ export default function useInvitationAPI() {
 
     /**
      * 指定されたIDに対応する募集を取得する
+     * @returns {Object} json - 取得した募集データ
      */
     const get = async (id) => {
         try {
             const json = await apiCall(`/api/v1/invitations/${id}`, "GET");
             setData(json);
+            return json;
         } catch (err) {
             setError(err);
+            return {};
+        }
+    }
+
+    /**
+     * 募集を投稿する
+     * @returns {boolean} success - 投稿が成功したかどうか
+     */
+    const post = async (input) => {
+        try {
+            const json = await apiCall("/api/v1/invitations", "POST", input);
+            setData(json);
+            return true;
+        } catch (err) {
+            setError(err);
+            return false;
         }
     }
 
@@ -23,8 +41,9 @@ export default function useInvitationAPI() {
      */
     const update = async (userId, invitationId, input) => {
         try {
-            const json = await apiCall(
+            await apiCall(
                 `/api/v1/users/${userId}invitations/${invitationId}`,
+                "PUT",
                 input
             );
             return true;
@@ -37,7 +56,9 @@ export default function useInvitationAPI() {
     return {
         data,
         error,
-        get
+        get,
+        post,
+        update
     }
 
 }

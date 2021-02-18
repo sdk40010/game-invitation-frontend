@@ -8,23 +8,19 @@ import {
     Select,
     InputLabel,
     MenuItem,
-    TextField
 } from '@material-ui/core';
-import {
-    MuiPickersUtilsProvider,
-    KeyboardDatePicker,
-    KeyboardTimePicker,
-    KeyboardDateTimePicker
-} from '@material-ui/pickers';
+import {　MuiPickersUtilsProvider,　KeyboardDateTimePicker　} from '@material-ui/pickers';
 import { useController } from "react-hook-form";
 
 /**
  * 日付・時間選択用のコンポーネント
  */
-export function DateTimePicker({name, label, control, watch, errors, before, after}) {
+export function DateTimePicker(props) {
+    const { name, label, control, watch, errors, before, after } = props;
     const { field, meta } = useController({
         name,
         control,
+        defaultValue: null,
         rules: {
             required: true,
             validate: {
@@ -64,7 +60,7 @@ export function DateTimePicker({name, label, control, watch, errors, before, aft
         <MuiPickersUtilsProvider utils={CustomDateFnsUtils}　locale={ja}>
                 <KeyboardDateTimePicker
                     name={name}
-                    value={watch(name) || null}
+                    value={watch(name)}
                     inputVariant="outlined"
                     label={label}
                     format="yyyy/MM/dd HH:mm"
@@ -82,7 +78,7 @@ export function DateTimePicker({name, label, control, watch, errors, before, aft
 }
 
 /**
- * 日付や時間の表記を日本式するためのクラス
+ * 日付や時間の表記を日本式にするためのクラス
  */
 class CustomDateFnsUtils extends DateFnsUtils {
     getCalendarHeaderText(date) {
@@ -110,7 +106,8 @@ export function formatTime(time) {
 /**
  * 定員選択用のコンポーネント
  */
-export function CapacitySelecter({name, label, control, errors}) {
+export function CapacitySelecter(props) {
+    const { name, label, control, watch, errors } = props;
     const { field, meta } = useController({
         name,
         control,
@@ -142,6 +139,8 @@ export function CapacitySelecter({name, label, control, errors}) {
             <InputLabel id="label">{label}</InputLabel>
             <Select
                 labelId="label"
+                name={name}
+                value={watch(name)}
                 MenuProps={MenuProps}
                 onChange={field.onChange}
             >

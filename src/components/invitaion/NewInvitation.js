@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Redirect } from "react-router-dom";
 import { useAuth } from "../auth/use-auth";
-import apiCall from "../http/http";
+import useInvitationAPI from "../http/invitationAPI";
 import useErrors from "../utils/use-erros";
 import { DateTimePicker, formatTime, CapacitySelecter } from "./InputField";
 import { useForm } from "react-hook-form";
@@ -16,33 +16,45 @@ import {
     Grid
 } from "@material-ui/core";
 
+const defaultValues = {
+    title: "",
+    description: "",
+    startTime: null,
+    endTime: null,
+    capacity: null
+}
+
 /**
  * 募集投稿ページ
  */
 export default function NewInvitation() {
     const auth = useAuth();
-    const { register, handleSubmit, watch, control, errors } = useForm();
-    const postInvitation = usePostInvitation();
-    const pageError = useErrors(postInvitation.error, auth.error);
+    const invitationAPI = useInvitationAPI();
+    const pageError = useErrors(invitationAPI.error, auth.error);
+
+    const { register, handleSubmit, watch, control, errors } = useForm({ defaultValues });
+
     const [sumbitSuccess, setSubmitSuccess] = useState(false);
 
+    // 募集を投稿する
     const onSubmit = async (input) => {
         const { startTime, endTime, ...rest } = input;
         input.startTime = formatTime(startTime);
         input.endTime = formatTime(endTime);
 
-        const success = await postInvitation.post(input);
+        const success = await invitationAPI.post(input);
         setSubmitSuccess(success);
     };
 
+    // 描画処理
     if (sumbitSuccess) {
-        return <Redirect to={postInvitation.redirectTo}/>;
+        return <Redirect to={invitationAPI.data.redirectTo} />
     } else {
         return (
             <MainContainer error={pageError} maxWidth="sm">
                 <Card>
                     <CardHeader 
-                        title={<Typography variant="h5" component='h1'>募集の新規作成</Typography>}
+                        title={<Typography variant="h6" component='h1'>募集の新規作成</Typography>}
                     />
                     <CardContent>
                         <form onSubmit={handleSubmit(onSubmit)}>
@@ -96,6 +108,7 @@ export default function NewInvitation() {
                                     <CapacitySelecter
                                         name="capacity"
                                         label="定員"
+                                        watch={watch}
                                         control={control}
                                         errors={errors}
                                     />
@@ -109,34 +122,5 @@ export default function NewInvitation() {
                 </Card>
             </MainContainer>
         );
-    }
-}
-
-/**
- * 募集投稿用のフック
- */
-function usePostInvitation() {
-    const [redirectTo, setRedirctTo] = useState("");
-    const [error, setError] = useState(null);
-
-    /**
-     * 募集を投稿する
-     * @returns {boolean} success - 投稿が成功したかどうか
-     */
-    const post = async (input) => {
-        try {
-            const json = await apiCall("/api/v1/invitations", "POST", input);
-            setRedirctTo(json.redirectTo);
-            return true;
-        } catch (err) {
-            setError(err);
-            return false;
-        }
-    }
-
-    return {
-        post,
-        redirectTo,
-        error
     }
 }

@@ -13,6 +13,7 @@ import Login from "./Login";
 import Top from "./Top";
 import NewInvitation from "./invitaion/NewInvitation"
 import ShowInvitation from "./invitaion/ShowInvitation";
+import EditInvitation from "./invitaion/EditInvitation";
 
 
 function App() {
@@ -33,6 +34,9 @@ function App() {
                     </PrivateRoute>
                     <PrivateRoute path="/invitations/:id">
                         <ShowInvitation />
+                    </PrivateRoute>
+                    <PrivateRoute path="/users/:userId/invitations/:invitationId">
+                        <EditInvitation />
                     </PrivateRoute>
                 </Switch>
             </ProvideAuth>
