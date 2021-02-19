@@ -143,6 +143,11 @@ export default function EditInvitation() {
                         title={<Typography variant="h6" component='h1'>募集の編集</Typography>}
                     />
                     <CardContent>
+                        {/* invitationAPi.dataで描画内容の出し分けをすると、
+                            defaultValuesを更新する前にformが描画がされてしまい、
+                            テキストフィールドの表示がおかしくなるので、
+                            isLoadingで描画内容の出し分ける
+                         */}
                         {isLoading ? (
                             <CenteredCircularProgress />
                         ) : (

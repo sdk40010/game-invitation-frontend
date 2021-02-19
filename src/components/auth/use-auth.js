@@ -50,8 +50,8 @@ function useProvideAuth() {
         const provider = new firebase.auth.GoogleAuthProvider();
         try {
             const result = await firebase.auth().signInWithPopup(provider);
-            await sendIdToken(result.user);
-            setUser(result.user);
+            const user = await sendIdToken(result.user);
+            setUser(user);
             setError(false);
         } catch (err) {
             await firebase.auth().signOut();
@@ -60,11 +60,13 @@ function useProvideAuth() {
     }
 
     /**
-     * APIサーバーにユーザーのIDトークンを送る
+     * APIサーバーにユーザーのIDトークンを送り、認証を受ける
+     * @returns {Object} user - 認証を受けたユーザーの情報
      */
     const sendIdToken = async (user) => {
         const idToken = await user.getIdToken();
-        await apiCall("/api/v1/login", "POST", { idToken });
+        const json = await apiCall("/api/v1/login", "POST", { idToken });
+        return json.user;
     }
 
     /**
@@ -80,40 +82,29 @@ function useProvideAuth() {
         }
     }
 
+    // リロード時にログイン状態を維持するための処理
     useEffect(() => {
-        // unsubscribeはonAuthStateChangedに渡されたイベントリスナーを削除するための関数
-        const unsubscribe = firebase.auth().onAuthStateChanged(user => {
-            // !errorではなく、(error === false)としているのは、
-            // APIサーバーから認証を受ける前（errorがnull（初期値）のとき）に
-            // setUserが実行されるのを防ぐため
-            const canSetUser = (error === false);
-            if (user && canSetUser) {
-                setUser(user);
-            } else {
-                setUser(false);
+        const loginCheck = async () => {
+            try {
+                const json = await apiCall("/api/v1/login/check", "GET");
+                if (json.user) {
+                    setUser(json.user);
+                    setError(false);
+                } else {
+                    logout();
+                }
+            } catch (err) {
+                setError(err);
             }
-        });
-
-        return () => unsubscribe();
-    });
-
-    // useEffect(() => {
-    //     const loginCheck = async () => {
-    //         try {
-    //             const json = await apiCall("/api/v1/login/check", "GET");
-    //             if (!json.isLoggedIn) {
-    //                 logout();
-    //             }
-    //         } catch (err) {
-    //             setError(err);
-    //         }
-    //     }
-    //     loginCheck();
-    // }, []);
+        }
+        loginCheck();
+    }, []);
 
     // 認証に関するエラーが他のページに影響を与えないように、ページ遷移するたびにエラーを消去する
     useEffect(() => {
-        setError(false);
+        if (error) {
+            setError(null);
+        }
     }, [location]);
 
     return {

@@ -61,8 +61,8 @@ export default function NavBar() {
                         </Link>
                         <IconButton onClick={handleClick}>
                             <Avatar
-                                alt={auth.user.displayName}
-                                src={auth.user.photoURL}
+                                alt={auth.user.name}
+                                src={auth.user.iconUrl}
                             />
                         </IconButton>
                         <Menu
