@@ -89,8 +89,8 @@ export default function NewInvitation() {
                                         control={control}
                                         watch={watch}
                                         errors={errors}
-                                        before=""
-                                        after="endTime"
+                                        before={null}
+                                        after={{ name: "endTime", label: "終了時刻"}}
                                     />
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
@@ -100,8 +100,8 @@ export default function NewInvitation() {
                                         control={control}
                                         watch={watch}
                                         errors={errors}
-                                        before="startTime"
-                                        after=""
+                                        before={{ name: "startTime", label: "開始時刻"}}
+                                        after={null}
                                     />
                                 </Grid>
                                 <Grid item xs={6}>

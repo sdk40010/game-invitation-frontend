@@ -25,19 +25,19 @@ export function DateTimePicker(props) {
             required: true,
             validate: {
                 before: time => {
-                    if (after && watch(after)) {
+                    if (after && watch(after.name)) {
                         // ミリ秒単位の比較を防ぐために、ミリ秒以下を切り捨てるフォーマットをかけてから比較する
                         const d1 = new Date(formatTime(time));
-                        const d2 = new Date(formatTime(watch(after)));
+                        const d2 = new Date(formatTime(watch(after.name)));
                         return d1.getTime() < d2.getTime();
                     } else {
                         return true;
                     }
                 },
                 after: time => {
-                    if (before && watch(before)) {
+                    if (before && watch(before.name)) {
                         const d1 = new Date(formatTime(time));
-                        const d2 = new Date(formatTime(watch(before)));
+                        const d2 = new Date(formatTime(watch(before.name)));
                         return d1.getTime() > d2.getTime();
                     } else {
                         return true;
@@ -51,9 +51,9 @@ export function DateTimePicker(props) {
         errors[name]?.type === "required" ?
             `${label}は必須です。` :
         errors[name]?.type === "before" ?
-            "終了時刻より前の時刻を指定してください。" :
+            `${after.label}より前の時刻を指定してください。` :
         errors[name]?.type === "after" ?
-            "開始時刻より後の時刻を指定してください。" :
+            `${before.label}より後の時刻を指定してください。` :
         "";
 
     return (

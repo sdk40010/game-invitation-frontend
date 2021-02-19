@@ -35,11 +35,11 @@ export default async function apiCall (path, method, bodyData = {}) {
 const handleError = (res) => {
     switch (res.status) {
       case 400: throw Error("Bad Request");
-      case 401: throw Error("Unauthenticated");
+      case 401: throw Error("Unauthorized");
+      case 404: throw Error("Not Found");
       case 419: throw Error("CSRF Token Mismatch")
       case 500: throw Error("Internal Server Error");
       case 502: throw Error("Bad Gateway");
-      case 404: throw Error("Not Found");
       default:  throw Error("Unhandled Error");
     } 
   };

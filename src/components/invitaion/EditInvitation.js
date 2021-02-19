@@ -31,11 +31,12 @@ const defaultValues = {
 export default function EditInvitation() {
     const auth = useAuth();
     const invitationAPI = useInvitationAPI();
-    const pageError = useErrors(invitationAPI.error, auth.error);
+    const [permissionError, setPermissionError] = useState(null);
+    const pageError = useErrors(invitationAPI.error, auth.error, permissionError);
 
-    const { userId, invitationId } = useParams();
+    const { id } = useParams();
 
-    const { register, handleSubmit, watch, control, errors, reset } = useForm({defaultValues});
+    const { register, handleSubmit, watch, control, errors, reset } = useForm({ defaultValues });
 
     const [isLoading, setIsLoading] = useState(true);
     const [sumbitSuccess, setSubmitSuccess] = useState(false);
@@ -43,18 +44,26 @@ export default function EditInvitation() {
     // 募集の取得
     useEffect(() => {
         const getInvitation = async () => {
-            const json = await invitationAPI.get(invitationId);
-            // defaultValuesを更新する
-            reset({
-                title: json.title,
-                description: json.description,
-                startTime: new Date(json.startTime),
-                endTime: new Date(json.endTime),
-                capacity: json.capacity
-            });
-            setIsLoading(false);
+            const json = await invitationAPI.get(id);
+            if (json.user.id === auth.user.id) {
+                // defaultValuesを更新する
+                reset({
+                    title: json.title,
+                    description: json.description,
+                    startTime: new Date(json.startTime),
+                    endTime: new Date(json.endTime),
+                    capacity: json.capacity
+                });
+                setIsLoading(false);
+            } else {
+                throw new Error("編集権限がありません。");
+            }
+            
         }
-        getInvitation();
+
+        getInvitation().catch(err => {
+            setPermissionError(err);
+        });
     }, []);
 
     // 募集の更新
@@ -62,9 +71,8 @@ export default function EditInvitation() {
         const { startTime, endTime, ...rest } = input;
         input.startTime = formatTime(startTime);
         input.endTime = formatTime(endTime);
-        console.log(input);
 
-        const success = await invitationAPI.update(userId, invitationId, input);
+        const success = await invitationAPI.update(id, input);
         setSubmitSuccess(success);
     };
 
@@ -101,8 +109,8 @@ export default function EditInvitation() {
                         control={control}
                         watch={watch}
                         errors={errors}
-                        before=""
-                        after="endTime"
+                        before={null}
+                        after={{ name: "endTime", label: "終了時刻"}}
                     />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -112,8 +120,8 @@ export default function EditInvitation() {
                         control={control}
                         watch={watch}
                         errors={errors}
-                        before="startTime"
-                        after=""
+                        before={{ name: "startTime", label: "開始時刻"}}
+                        after={null}
                     />
                 </Grid>
                 <Grid item xs={6}>
@@ -134,7 +142,7 @@ export default function EditInvitation() {
 
     // 描画処理
     if (sumbitSuccess) {
-        return <Redirect to={`/invitations/${invitationId}`}/>;
+        return <Redirect to={`/invitations/${id}`}/>;
     } else {
         return (
             <MainContainer error={pageError} maxWidth="sm">
@@ -146,7 +154,7 @@ export default function EditInvitation() {
                         {/* invitationAPi.dataで描画内容の出し分けをすると、
                             defaultValuesを更新する前にformが描画がされてしまい、
                             テキストフィールドの表示がおかしくなるので、
-                            isLoadingで描画内容の出し分ける
+                            isLoadingで描画内容を出し分ける
                          */}
                         {isLoading ? (
                             <CenteredCircularProgress />

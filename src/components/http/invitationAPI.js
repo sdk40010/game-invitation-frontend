@@ -39,10 +39,10 @@ export default function useInvitationAPI() {
      * 指定されたIDに対応する募集を更新する
      * @returns {boolean} success - 更新が成功したかどうか
      */
-    const update = async (userId, invitationId, input) => {
+    const update = async (id, input) => {
         try {
             await apiCall(
-                `/api/v1/users/${userId}invitations/${invitationId}`,
+                `/api/v1/invitations/${id}`,
                 "PUT",
                 input
             );

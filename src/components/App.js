@@ -32,10 +32,10 @@ function App() {
                     <PrivateRoute path="/invitations/new">
                         <NewInvitation />
                     </PrivateRoute>
-                    <PrivateRoute path="/invitations/:id">
+                    <PrivateRoute exact path="/invitations/:id">
                         <ShowInvitation />
                     </PrivateRoute>
-                    <PrivateRoute path="/users/:userId/invitations/:invitationId">
+                    <PrivateRoute path="/invitations/:id/edit">
                         <EditInvitation />
                     </PrivateRoute>
                 </Switch>
