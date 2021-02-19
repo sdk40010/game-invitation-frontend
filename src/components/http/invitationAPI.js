@@ -53,12 +53,23 @@ export default function useInvitationAPI() {
         }
     }
 
+    const remove = async (id) => {
+        try {
+            await apiCall(`/api/v1/invitations/${id}`, "DELETE");
+            return true;
+        } catch (err) {
+            setError(err);
+            return false;
+        }
+    }
+
     return {
         data,
         error,
         get,
         post,
-        update
+        update,
+        remove
     }
 
 }

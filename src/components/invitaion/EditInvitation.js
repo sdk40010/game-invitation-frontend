@@ -6,6 +6,8 @@ import useInvitationAPI from "../http/invitationAPI";
 import { useForm } from "react-hook-form";
 import { DateTimePicker, formatTime, CapacitySelecter } from "./InputField";
 import MainContainer from "../utils/MainContainer";
+import { makeStyles } from "@material-ui/core/styles";
+import { fade } from '@material-ui/core/styles/colorManipulator';
 import CenteredCircularProgress from "../utils/CenteredCircularProgress";
 import {
     Typography,
@@ -14,8 +16,27 @@ import {
     CardHeader,
     CardContent,
     Button,
-    Grid
+    Grid,
+    Dialog,
+    DialogActions,
+    DialogTitle,
+    DialogContent,
+    DialogContentText
 } from "@material-ui/core";
+
+const useStyles = makeStyles((theme) => ({
+    deleteButtonContainer: {
+        marginTop: theme.spacing(4)
+    },
+    deleteButton: {
+        color: theme.palette.error.main,
+        borderColor: fade(theme.palette.error.main, .5),
+        "&:hover": {
+            backgroundColor: theme.palette.error.main,
+            color: theme.palette.common.white
+        }
+    }
+}));
 
 const defaultValues = {
     title: "",
@@ -40,6 +61,9 @@ export default function EditInvitation() {
 
     const [isLoading, setIsLoading] = useState(true);
     const [sumbitSuccess, setSubmitSuccess] = useState(false);
+    const [deleteSuccess, setDeleteSuccess] = useState(false);
+
+    const classes = useStyles();
 
     // 募集の取得
     useEffect(() => {
@@ -76,6 +100,7 @@ export default function EditInvitation() {
         setSubmitSuccess(success);
     };
 
+    // 編集用フォーム
     const form = (
         <form onSubmit={handleSubmit(onSubmit)}>
             <Grid container spacing={2}>
@@ -134,16 +159,63 @@ export default function EditInvitation() {
                     />
                 </Grid>
                 <Grid item xs={12}>
-                    <Button variant="contained" color="primary" type="submit">更新する</Button>
+                    <Button variant="contained" color="primary" type="submit">更新</Button>
                 </Grid>
             </Grid>
         </form>
     );
 
+    // 削除用ダイアログ
+    const [open, setOpen] = useState(false);
+    const handleClickOpen = () => {
+        setOpen(true);
+    }
+    const handleClose = () => {
+        setOpen(false);
+    }
+    const handleDelete = async () => {
+        setOpen(false);
+        const success = await invitationAPI.remove(id);
+        setDeleteSuccess(success);
+    }
+
+    const deleteDialog = (
+        <Grid container justify="center" className={classes.deleteButtonContainer}>
+            <Grid item>
+                <Button
+                    variant="outlined"
+                    className={classes.deleteButton}
+                    onClick={handleClickOpen}
+                >
+                    削除
+                </Button>
+                <Dialog
+                    open={open}
+                    onClose={handleClose}
+                    fullWidth
+                >
+                    <DialogTitle>削除の確認</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            募集を削除しますか？
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button variant="contained" color="primary" onClick={handleClose}>キャンセル</Button>
+                        <Button variant="outlined" color="primary" onClick={handleDelete}>削除</Button>
+                    </DialogActions>
+                </Dialog>
+            </Grid>
+        </Grid>
+    )
+
     // 描画処理
     if (sumbitSuccess) {
         return <Redirect to={`/invitations/${id}`}/>;
-    } else {
+    } else if (deleteSuccess) {
+        return <Redirect to="/"/>
+    }
+    else {
         return (
             <MainContainer error={pageError} maxWidth="sm">
                 <Card>
@@ -164,6 +236,7 @@ export default function EditInvitation() {
                         }
                     </CardContent>
                 </Card>
+                {deleteDialog}
             </MainContainer>
         );
     }
