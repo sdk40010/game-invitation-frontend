@@ -30,7 +30,7 @@ const defaultValues = {
 export default function NewInvitation() {
     const auth = useAuth();
     const invitationAPI = useInvitationAPI();
-    const pageError = useErrors(invitationAPI.error, auth.error);
+    const pageError = useErrors(auth.error, invitationAPI.error);
 
     const { register, handleSubmit, watch, control, errors } = useForm({ defaultValues });
 

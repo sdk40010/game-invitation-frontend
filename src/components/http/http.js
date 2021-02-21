@@ -3,7 +3,7 @@
  * レスポンスのステータスコードが200番台でないときはエラーを投げる
  */
 export default async function apiCall (path, method, bodyData = {}) {
-    const apiServerRoot = process.env.REACT_APP_API_SERVER_ROOT;
+    const apiServerURL = process.env.REACT_APP_API_SERVER_URL;
     const xsrfToken = document
         .cookie
         .split("; ")
@@ -11,7 +11,7 @@ export default async function apiCall (path, method, bodyData = {}) {
         ?.split("=")[1]
         || "";
 
-    const res = await fetch(apiServerRoot + path, { 
+    const res = await fetch(apiServerURL + path, { 
         method: method,
         mode: "cors",
         credentials: "include",

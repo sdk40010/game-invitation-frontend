@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 
 /**
  * ページ内で発生する複数のエラーをまとめるためのフック
- * MainConteinerコンポーネントにerrorプロパティを渡すために使用する
+ * @param {Error[]} errors - ページ内で発生するエラーの配列
+ * @returns {Error} error - errorsの中で実際に発生したエラー
  */
 export default function useErrors(...errors) {
     const [error, setError] = useState(null);

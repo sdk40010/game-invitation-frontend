@@ -9,7 +9,7 @@ import {
 import CssBaseline from '@material-ui/core/CssBaseline'
 import NavBar from "./NavBar";
 import PrivateRoute from "./auth/PrivateRoute";
-import Login from "./Login";
+import Login from "./auth/Login";
 import Top from "./Top";
 import NewInvitation from "./invitaion/NewInvitation"
 import ShowInvitation from "./invitaion/ShowInvitation";

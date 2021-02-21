@@ -5,6 +5,7 @@ import useErrors from "../utils/use-erros";
 import useInvitationAPI from "../http/invitationAPI";
 import MainContainer from "../utils/MainContainer";
 import CenteredCircularProgress from "../utils/CenteredCircularProgress";
+import Heading from "../utils/Heading";
 import { makeStyles } from "@material-ui/core/styles";
 import {
     Typography,
@@ -28,13 +29,6 @@ const useStyles = makeStyles((theme) => ({
     posterGrid: {
         marginBottom: theme.spacing(2)
     },
-    heading: {
-        color: theme.palette.grey[700]
-    },
-    fromTo: {
-        marginLeft: theme.spacing(1),
-        marginRight: theme.spacing(1)
-    },
 }));
 
 /**
@@ -42,9 +36,11 @@ const useStyles = makeStyles((theme) => ({
  */
 export default function ShowInvitation() {
     const auth = useAuth();
-    const { id } = useParams();
     const invitationAPI = useInvitationAPI();
     const pageError = useErrors(invitationAPI.error, auth.error);
+
+    const { id } = useParams();
+
     const classes = useStyles();
 
     useEffect(() => {
@@ -59,7 +55,7 @@ export default function ShowInvitation() {
     const title = data ? (
         <Typography variant="h5" component="h1" paragraph>{data.title}</Typography>
     ) : (
-        ""
+        <></>
     );
 
     const subHeader = data ? `${data.createdAt}に投稿` : "";
@@ -67,7 +63,7 @@ export default function ShowInvitation() {
     const participationButton = data ? (
         <Button color="primary" variant="contained">参加する</Button>
     ) : (
-        ""
+        <></>
     );
 
     const poster = data ? (
@@ -90,9 +86,8 @@ export default function ShowInvitation() {
                 <Button color="primary" variant="outlined">フレンド申請</Button>
             </Grid>
         </Grid>
-        
     ) : (
-        ""
+        <></>
     );
 
     const content = data ? (
@@ -108,11 +103,11 @@ export default function ShowInvitation() {
             }
             <Box>
                 <Heading>時間</Heading>
-                <Grid container>
+                <Grid container spacing={1}>
                     <Grid item>
                         <Typography variant="body1" paragraph>{data.startTime}</Typography>
                     </Grid>
-                    <Grid item className={classes.fromTo}>〜</Grid>
+                    <Grid item>〜</Grid>
                     <Grid item>
                         <Typography variant="body1" paragraph>{data.endTime}</Typography>
                     </Grid>
@@ -149,18 +144,3 @@ export default function ShowInvitation() {
     );
 }
 
-/**
- * 募集詳細用の見出し
- */
-function Heading({children}) {
-    const classes = useStyles();
-
-    return (
-        <Typography
-            variant="caption"
-            className={classes.heading}
-        >
-            {children}
-        </Typography>
-    )
-}
