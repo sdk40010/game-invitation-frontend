@@ -1,6 +1,6 @@
 import "../css/index.css";
 import React from "react";
-import { ProvideAuth } from "./auth/use-auth";
+import { ProvideAuth } from "./auth/useAuth";
 import { 
     BrowserRouter as Router,
     Switch,

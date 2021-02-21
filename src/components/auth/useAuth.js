@@ -19,8 +19,7 @@ firebase.initializeApp({
 const authContext = createContext();
 
 /**
- * useAuthを呼び出したコンポーネント内で認証オブジェクト（useProvideAuthの戻り値）を
- * 利用できるようにするコンテキストプロバイダー
+ * 認証オブジェクトを提供するコンテキストプロバイダー
  */
 export function ProvideAuth({ children }) {
     const auth = useProvideAuth();
@@ -35,7 +34,7 @@ export const useAuth = () => {
 }
 
 /**
- * 認証オブジェクトを返す
+ * コンテキストプロバイダーに認証オブジェクトを渡すためのフック
  */
 function useProvideAuth() {
     const [user, setUser] = useState(null);

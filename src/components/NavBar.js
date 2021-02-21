@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "./auth/use-auth";
+import { useAuth } from "./auth/useAuth";
 import { makeStyles } from "@material-ui/core/styles";
 import {
     AppBar,

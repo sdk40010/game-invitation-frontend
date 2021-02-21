@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Redirect } from "react-router-dom";
-import { useAuth } from "../auth/use-auth";
+import { useAuth } from "../auth/useAuth";
 import useInvitationAPI from "../http/invitationAPI";
-import useErrors from "../utils/use-erros";
+import useErrors from "../utils/useErros";
 import { DateTimePicker, formatTime, CapacitySelecter } from "./InputField";
 import { useForm } from "react-hook-form";
 import MainContainer from "../utils/MainContainer";

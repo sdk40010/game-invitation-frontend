@@ -1,9 +1,9 @@
 import React, { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useAuth } from "./auth/use-auth";
+import { useAuth } from "./auth/useAuth";
 import useInvitationAPI from "./http/invitationAPI";
-import useErrors from "./utils/use-erros";
-import useQuery from "./utils/use-query";
+import useErrors from "./utils/useErros";
+import useQuery from "./utils/useQuery";
 import useScrollToTop from "./utils/useScrollToTop";
 import MainContainer from "./utils/MainContainer";
 import CenteredCircularProgress from "./utils/CenteredCircularProgress";

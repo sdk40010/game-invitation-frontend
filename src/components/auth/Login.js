@@ -1,6 +1,6 @@
 import React from "react";
 import { Redirect, useLocation } from "react-router-dom";
-import { useAuth } from "./use-auth";
+import { useAuth } from "./useAuth";
 import MainContainer from "../utils/MainContainer";
 import { 
     Card,

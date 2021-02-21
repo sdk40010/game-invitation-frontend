@@ -1,4 +1,4 @@
-import { useAuth } from "./use-auth";
+import { useAuth } from "./useAuth";
 import { Route, Redirect } from "react-router-dom";
 
 export default function PrivateRoute({ children, ...rest }) {

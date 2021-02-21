@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useAuth } from "../auth/use-auth";
-import useErrors from "../utils/use-erros";
+import { useAuth } from "../auth/useAuth";
+import useErrors from "../utils/useErros";
 import useInvitationAPI from "../http/invitationAPI";
 import MainContainer from "../utils/MainContainer";
 import CenteredCircularProgress from "../utils/CenteredCircularProgress";
