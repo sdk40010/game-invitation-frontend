@@ -11,7 +11,7 @@ export default function useInvitationAPI() {
     /**
      * クエリーに基づいて募集一覧を取得する
      * @param {URLSearchParams} query - クエリー
-     * @returns {Object} json - 取得した募集一覧データ
+     * @returns {Object} json - 募集一覧
      */
     const getAll = async (query) => {
         try {

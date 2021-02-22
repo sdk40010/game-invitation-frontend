@@ -1,11 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Redirect } from "react-router-dom";
 import { useAuth } from "../auth/useAuth";
 import useInvitationAPI from "../http/invitationAPI";
+import useTagAPI from "../http/tagAPI";
 import useErrors from "../utils/useErros";
-import { DateTimePicker, formatTime, CapacitySelecter } from "./InputField";
 import { useForm } from "react-hook-form";
 import MainContainer from "../utils/MainContainer";
+import {
+    DateTimePicker,
+    formatTime,
+    CapacitySelecter,
+    TagSelector
+} from "./InputField";
 import {
     Typography,
     TextField,
@@ -21,7 +27,8 @@ const defaultValues = {
     description: "",
     startTime: null,
     endTime: null,
-    capacity: null
+    capacity: "",
+    tags: []
 }
 
 /**
@@ -30,11 +37,19 @@ const defaultValues = {
 export default function NewInvitation() {
     const auth = useAuth();
     const invitationAPI = useInvitationAPI();
-    const pageError = useErrors(auth.error, invitationAPI.error);
+    const tagAPI = useTagAPI();
+    const pageError = useErrors(auth.error, invitationAPI.error, tagAPI.error);
 
     const { register, handleSubmit, watch, control, errors } = useForm({ defaultValues });
 
     const [sumbitSuccess, setSubmitSuccess] = useState(false);
+
+    // タグ一覧の取得
+    useEffect(() => {
+        (async () => {
+            await tagAPI.getAll();
+        })();
+    }, []);
 
     // 募集を投稿する
     const onSubmit = async (input) => {
@@ -59,6 +74,7 @@ export default function NewInvitation() {
                     <CardContent>
                         <form onSubmit={handleSubmit(onSubmit)}>
                             <Grid container spacing={2}>
+
                                 <Grid item xs={12}>
                                     <TextField
                                         name="title"
@@ -73,6 +89,7 @@ export default function NewInvitation() {
                                         helperText={errors.title && errors.title.message}
                                     />
                                 </Grid>
+
                                 <Grid item xs={12}>
                                     <TextField
                                         name="description"
@@ -82,6 +99,7 @@ export default function NewInvitation() {
                                         inputRef={register}
                                     />
                                 </Grid>
+
                                 <Grid item xs={12} sm={6}>
                                     <DateTimePicker 
                                         name="startTime"
@@ -93,6 +111,7 @@ export default function NewInvitation() {
                                         after={{ name: "endTime", label: "終了時刻"}}
                                     />
                                 </Grid>
+
                                 <Grid item xs={12} sm={6}>
                                     <DateTimePicker 
                                         name="endTime"
@@ -104,18 +123,32 @@ export default function NewInvitation() {
                                         after={null}
                                     />
                                 </Grid>
-                                <Grid item xs={6}>
+
+                                <Grid item xs={12} sm={6}>
                                     <CapacitySelecter
                                         name="capacity"
                                         label="定員"
                                         watch={watch}
                                         control={control}
                                         errors={errors}
+                                        data={tagAPI.data}
                                     />
                                 </Grid>
+
+                                <Grid item xs={12}>
+                                    <TagSelector 
+                                        name="tags"
+                                        label="タグ"
+                                        control={control}
+                                        errors={errors}
+                                        data={tagAPI.data}
+                                    />
+                                </Grid>
+
                                 <Grid item xs={12}>
                                     <Button variant="contained" color="primary" type="submit">投稿</Button>
                                 </Grid>
+
                             </Grid>
                         </form>
                     </CardContent>

@@ -15,7 +15,7 @@ export default function useErrors(...errors) {
                 break;
             }
         }
-    }, errors);
+    }, [errors]);
 
     return error;
 }

@@ -1,23 +1,28 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import DateFnsUtils from  '@date-io/date-fns';
 import format from "date-fns/format";
 import ja from "date-fns/locale/ja";
+import {　MuiPickersUtilsProvider,　KeyboardDateTimePicker } from '@material-ui/pickers';
+import { useController } from "react-hook-form";
 import {
     FormControl,
     FormHelperText,
     Select,
     InputLabel,
     MenuItem,
-} from '@material-ui/core';
-import {　MuiPickersUtilsProvider,　KeyboardDateTimePicker　} from '@material-ui/pickers';
-import { useController } from "react-hook-form";
+    TextField,
+    Checkbox,
+} from "@material-ui/core";
+import { Autocomplete, createFilterOptions } from "@material-ui/lab";
+import { CheckBoxOutlineBlankOutlined, CheckBox } from "@material-ui/icons";
+
 
 /**
  * 日付・時間選択用のコンポーネント
  */
 export function DateTimePicker(props) {
     const { name, label, control, watch, errors, before, after } = props;
-    const { field, meta } = useController({
+    const { field } = useController({
         name,
         control,
         defaultValue: null,
@@ -72,6 +77,7 @@ export function DateTimePicker(props) {
                     onChange={field.onChange}
                     error={errors[name]}
                     helperText={errors[name] && helperText}
+                    style={{ width: "100%"}}
                 />
             </MuiPickersUtilsProvider>
     );
@@ -108,7 +114,7 @@ export function formatTime(time) {
  */
 export function CapacitySelecter(props) {
     const { name, label, control, watch, errors } = props;
-    const { field, meta } = useController({
+    const { field } = useController({
         name,
         control,
         rules: {
@@ -150,3 +156,98 @@ export function CapacitySelecter(props) {
         </FormControl>
     )
 }
+
+/**
+ * タグ選択用のコンポーネント
+ */
+const icon = <CheckBoxOutlineBlankOutlined fontSize="small" />;
+const checkedIcon = <CheckBox fontSize="small" />;
+const filter = createFilterOptions();
+
+export function TagSelector(props) {
+    const { name, label, control, errors, data } = props;
+    const { field } = useController({
+        name,
+        control,
+        rules: {
+            validate: {
+                limit: tags => tags.length <= 10
+            }
+        },
+    });
+
+    const helperText =
+        errors[name]?.type === "limit" ?
+            "10個以下のタグを指定してください。" :
+        "";
+
+    // 選択肢の初期化
+    const [options, setOptions] = useState([]);
+    useEffect(() => {
+        setOptions(data);
+    }, [data])
+    
+    return (
+        <Autocomplete
+            multiple
+            options={options}
+            disableCloseOnSelect
+            clearOnBlur={false}
+            getOptionLabel={option => option.name}
+            renderOption={(option, { selected }) => (
+                <>
+                    <Checkbox 
+                        icon={icon}
+                        checkedIcon={checkedIcon}
+                        checked={selected}
+                    />
+                    {option.name}
+                </>
+            )}
+            renderInput={params => (
+                <TextField
+                    {...params}
+                    name={name}
+                    label={label}
+                    variant="outlined"
+                    placeholder="タグを検索"
+                    error={errors[name]}
+                    helperText={errors[name] && helperText}
+                />
+            )}
+            filterOptions={(options, params) => {
+                const filtered = filter(options, params);
+                const hasSameOption = filtered.some(option => option.name === params.inputValue);
+
+                // 入力値と一致する選択肢がないときは、新しいタグを追加する選択肢も表示する
+                if (params.inputValue !== "" && !hasSameOption) {
+                    filtered.unshift({
+                        inputValue: params.inputValue,
+                        name: `${params.inputValue}を追加`
+                    });
+                }
+
+                return filtered;
+            }}
+            onChange={(event, value) => {
+                const last = value.pop();
+
+                if (last && last.inputValue) { // 新しいタグを追加したとき
+                    const newTag = { name: last.inputValue };
+
+                    value.push(newTag);
+                    setOptions(prevOptions => {
+                        prevOptions.push(newTag)
+                        return prevOptions;
+                    });
+                } else if (last) { // 既存のタグを追加したとき
+                    value.push(last);
+                }
+
+                // react-hook-formに値を渡す
+                field.onChange(value);
+            }}
+        />
+    );
+}
+
