@@ -56,6 +56,7 @@ export default function NewInvitation() {
 
     // 募集を投稿する
     const onSubmit = async (input) => {
+        // 時刻の表示形式を整える
         const { startTime, endTime } = input;
         input.startTime = formatTime(startTime);
         input.endTime = formatTime(endTime);
@@ -107,8 +108,8 @@ export default function NewInvitation() {
                                     <DateTimePicker 
                                         name="startTime"
                                         label="開始時刻"
-                                        control={control}
                                         watch={watch}
+                                        control={control}
                                         errors={errors}
                                         before={null}
                                         after={{ name: "endTime", label: "終了時刻"}}
@@ -119,8 +120,8 @@ export default function NewInvitation() {
                                     <DateTimePicker 
                                         name="endTime"
                                         label="終了時刻"
-                                        control={control}
                                         watch={watch}
+                                        control={control}
                                         errors={errors}
                                         before={{ name: "startTime", label: "開始時刻"}}
                                         after={null}
@@ -142,6 +143,7 @@ export default function NewInvitation() {
                                     <TagSelector 
                                         name="tags"
                                         label="タグ"
+                                        watch={watch}
                                         control={control}
                                         errors={errors}
                                         data={tagAPI.data}

@@ -25,13 +25,12 @@ export function DateTimePicker(props) {
     const { field } = useController({
         name,
         control,
-        defaultValue: null,
         rules: {
             required: true,
             validate: {
                 before: time => {
                     if (after && watch(after.name)) {
-                        // ミリ秒単位の比較を防ぐために、ミリ秒以下を切り捨てるフォーマットをかけてから比較する
+                        // 秒単位の比較を防ぐために、秒数以下を切り捨てるフォーマットをかけてから比較する
                         const d1 = new Date(formatTime(time));
                         const d2 = new Date(formatTime(watch(after.name)));
                         return d1.getTime() < d2.getTime();
@@ -165,7 +164,7 @@ const checkedIcon = <CheckBox fontSize="small" />;
 const filter = createFilterOptions();
 
 export function TagSelector(props) {
-    const { name, label, control, errors, data } = props;
+    const { name, label, watch, control, errors, data } = props;
     const { field } = useController({
         name,
         control,
@@ -192,8 +191,15 @@ export function TagSelector(props) {
             multiple
             options={options}
             disableCloseOnSelect
-            clearOnBlur={false}
+            value={watch(name)}
             getOptionLabel={option => option.name}
+            getOptionSelected={(option, value) => {
+                if (!option.id || !value.id) {
+                    // 新しいタグはidを持っていないので、名前で比較を行う
+                    return option.name === value.name;
+                }
+                return option.id === value.id;
+            }}
             renderOption={(option, { selected }) => (
                 <>
                     <Checkbox 
@@ -210,7 +216,7 @@ export function TagSelector(props) {
                     name={name}
                     label={label}
                     variant="outlined"
-                    placeholder="タグを検索"
+                    placeholder="検索"
                     error={errors[name] && true}
                     helperText={errors[name] && helperText}
                 />

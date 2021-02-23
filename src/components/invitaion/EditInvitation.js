@@ -54,7 +54,8 @@ const defaultValues = {
     description: "",
     startTime: null,
     endTime: null,
-    capacity: null
+    capacity: "",
+    tags: []
 }
 
 /**
@@ -95,25 +96,23 @@ export default function EditInvitation() {
 
     const classes = useStyles();
 
+    // 募集とそれに付けられたタグ一覧の取得
     useEffect(() => {
-        const getInvitation = async () => {
-            const json = await invitationAPI.get(id);
+        (async () => {
+            const invitation = await invitationAPI.get(id);
+            const tags = await tagmapAPI.getTags(id);
             // defaultValuesを更新する
             reset({
-                title: json.title,
-                description: json.description,
-                startTime: new Date(json.startTime),
-                endTime: new Date(json.endTime),
-                capacity: json.capacity
+                title: invitation.title,
+                description: invitation.description,
+                startTime: new Date(invitation.startTime),
+                endTime: new Date(invitation.endTime),
+                capacity: invitation.capacity,
+                tags: tags
             });
             setIsLoading(false);
-            
-        }
-
-        getInvitation();
+        })();
     }, []);
-
-
 
     // タグ一覧の取得
     useEffect(() => {
@@ -122,16 +121,16 @@ export default function EditInvitation() {
         })();
     }, []);
 
-    // 募集に付けられたタグ一覧の取得
-    useEffect(() => {
-
-    }, []);
 
     // 募集の更新
     const onSubmit = async (input) => {
+        // 時刻の表示形式を整える
         const { startTime, endTime } = input;
         input.startTime = formatTime(startTime);
         input.endTime = formatTime(endTime);
+
+        // 編集前のタグ一覧を送信情報に追加する
+        input.tagsBeforeEdit = tagmapAPI.data;
 
         const success = await invitationAPI.update(id, input);
         setSubmitSuccess(success);
@@ -205,6 +204,7 @@ export default function EditInvitation() {
                     <TagSelector 
                         name="tags"
                         label="タグ"
+                        watch={watch}
                         control={control}
                         errors={errors}
                         data={tagAPI.data}
