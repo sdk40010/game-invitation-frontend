@@ -75,7 +75,7 @@ export function DateTimePicker(props) {
                     autoOk={true}
                     minDate={new Date()}
                     onChange={field.onChange}
-                    error={errors[name]}
+                    error={errors[name] && true}
                     helperText={errors[name] && helperText}
                     style={{ width: "100%"}}
                 />
@@ -112,7 +112,7 @@ export function formatTime(time) {
 /**
  * 定員選択用のコンポーネント
  */
-export function CapacitySelecter(props) {
+export function CapacitySelector(props) {
     const { name, label, control, watch, errors } = props;
     const { field } = useController({
         name,
@@ -140,7 +140,7 @@ export function CapacitySelecter(props) {
         <FormControl
             variant="outlined"
             fullWidth
-            error={errors[name]}
+            error={errors[name] && true}
         >
             <InputLabel id="label">{label}</InputLabel>
             <Select
@@ -211,7 +211,7 @@ export function TagSelector(props) {
                     label={label}
                     variant="outlined"
                     placeholder="タグを検索"
-                    error={errors[name]}
+                    error={errors[name] && true}
                     helperText={errors[name] && helperText}
                 />
             )}

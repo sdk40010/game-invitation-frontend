@@ -1,14 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { Redirect, useParams } from "react-router-dom";
+
 import { useAuth } from "../auth/useAuth";
-import useErrors from "../utils/useErros";
+import usePermission from "../utils/usePermission";
 import useInvitationAPI from "../http/invitationAPI";
+import useTagAPI from "../http/tagAPI";
+import useTagmapAPI from "../http/tagmapAPI";
+import useErrors from "../utils/useErros";
+
 import { useForm } from "react-hook-form";
-import { DateTimePicker, formatTime, CapacitySelecter } from "./InputField";
+
 import MainContainer from "../utils/MainContainer";
+import CenteredCircularProgress from "../utils/CenteredCircularProgress";
 import { makeStyles } from "@material-ui/core/styles";
 import { fade } from '@material-ui/core/styles/colorManipulator';
-import CenteredCircularProgress from "../utils/CenteredCircularProgress";
+import {
+    DateTimePicker,
+    formatTime,
+    CapacitySelector,
+    TagSelector
+} from "./InputField";
 import {
     Typography,
     TextField,
@@ -52,8 +63,27 @@ const defaultValues = {
 export default function EditInvitation() {
     const auth = useAuth();
     const invitationAPI = useInvitationAPI();
-    const [permissionError, setPermissionError] = useState(null);
-    const pageError = useErrors(invitationAPI.error, auth.error, permissionError);
+    const tagAPI = useTagAPI();
+    const tagmapAPI = useTagmapAPI();
+    const permission = usePermission(
+        () => {
+            if (auth.user && invitationAPI.data) {
+                return auth.user.id === invitationAPI.data.user.id;
+            }
+            return true;
+        },
+        "編集権限がありません。",
+        auth.user,
+        invitationAPI.data
+    );
+
+    const pageError = useErrors(
+        auth.error,
+        invitationAPI.error,
+        tagAPI.error,
+        tagmapAPI.error,
+        permission.error,
+    );
 
     const { id } = useParams();
 
@@ -65,34 +95,41 @@ export default function EditInvitation() {
 
     const classes = useStyles();
 
-    // 募集の取得
     useEffect(() => {
         const getInvitation = async () => {
             const json = await invitationAPI.get(id);
-            if (json.user.id === auth.user.id) {
-                // defaultValuesを更新する
-                reset({
-                    title: json.title,
-                    description: json.description,
-                    startTime: new Date(json.startTime),
-                    endTime: new Date(json.endTime),
-                    capacity: json.capacity
-                });
-                setIsLoading(false);
-            } else {
-                throw new Error("編集権限がありません。");
-            }
+            // defaultValuesを更新する
+            reset({
+                title: json.title,
+                description: json.description,
+                startTime: new Date(json.startTime),
+                endTime: new Date(json.endTime),
+                capacity: json.capacity
+            });
+            setIsLoading(false);
             
         }
 
-        getInvitation().catch(err => {
-            setPermissionError(err);
-        });
+        getInvitation();
+    }, []);
+
+
+
+    // タグ一覧の取得
+    useEffect(() => {
+        (async () => {
+            await tagAPI.getAll();
+        })();
+    }, []);
+
+    // 募集に付けられたタグ一覧の取得
+    useEffect(() => {
+
     }, []);
 
     // 募集の更新
     const onSubmit = async (input) => {
-        const { startTime, endTime, ...rest } = input;
+        const { startTime, endTime } = input;
         input.startTime = formatTime(startTime);
         input.endTime = formatTime(endTime);
 
@@ -104,6 +141,7 @@ export default function EditInvitation() {
     const form = (
         <form onSubmit={handleSubmit(onSubmit)}>
             <Grid container spacing={2}>
+
                 <Grid item xs={12}>
                     <TextField
                         name="title"
@@ -118,6 +156,7 @@ export default function EditInvitation() {
                         helperText={errors.title && errors.title.message}
                     />
                 </Grid>
+
                 <Grid item xs={12}>
                     <TextField
                         name="description"
@@ -127,6 +166,7 @@ export default function EditInvitation() {
                         inputRef={register}
                     />
                 </Grid>
+
                 <Grid item xs={12} sm={6}>
                     <DateTimePicker 
                         name="startTime"
@@ -138,6 +178,7 @@ export default function EditInvitation() {
                         after={{ name: "endTime", label: "終了時刻"}}
                     />
                 </Grid>
+
                 <Grid item xs={12} sm={6}>
                     <DateTimePicker 
                         name="endTime"
@@ -149,8 +190,9 @@ export default function EditInvitation() {
                         after={null}
                     />
                 </Grid>
+
                 <Grid item xs={6}>
-                    <CapacitySelecter
+                    <CapacitySelector
                         name="capacity"
                         label="定員"
                         watch={watch}
@@ -158,9 +200,21 @@ export default function EditInvitation() {
                         errors={errors}
                     />
                 </Grid>
+
+                <Grid item xs={12}>
+                    <TagSelector 
+                        name="tags"
+                        label="タグ"
+                        control={control}
+                        errors={errors}
+                        data={tagAPI.data}
+                    />
+                </Grid>
+
                 <Grid item xs={12}>
                     <Button variant="contained" color="primary" type="submit">更新</Button>
                 </Grid>
+
             </Grid>
         </form>
     );
@@ -214,8 +268,7 @@ export default function EditInvitation() {
         return <Redirect to={`/invitations/${id}`}/>;
     } else if (deleteSuccess) {
         return <Redirect to="/"/>
-    }
-    else {
+    }　else {
         return (
             <MainContainer error={pageError} maxWidth="sm">
                 <Card>
@@ -223,10 +276,8 @@ export default function EditInvitation() {
                         title={<Typography variant="h6" component='h1'>募集の編集</Typography>}
                     />
                     <CardContent>
-                        {/* invitationAPi.dataで描画内容の出し分けをすると、
-                            defaultValuesを更新する前にformが描画がされてしまい、
-                            テキストフィールドの表示がおかしくなるので、
-                            isLoadingで描画内容を出し分ける
+                        {/* invitationAPi.dataで描画内容の出し分けをすると、defaultValuesを更新する前にformが描画がされてしまい、
+                            テキストフィールドの表示がおかしくなるので、isLoadingで描画内容を出し分ける
                          */}
                         {isLoading ? (
                             <CenteredCircularProgress />

@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { Redirect } from "react-router-dom";
+
 import { useAuth } from "../auth/useAuth";
 import useInvitationAPI from "../http/invitationAPI";
 import useTagAPI from "../http/tagAPI";
 import useErrors from "../utils/useErros";
+
 import { useForm } from "react-hook-form";
+
 import MainContainer from "../utils/MainContainer";
 import {
     DateTimePicker,
     formatTime,
-    CapacitySelecter,
+    CapacitySelector,
     TagSelector
 } from "./InputField";
 import {
@@ -53,7 +56,7 @@ export default function NewInvitation() {
 
     // 募集を投稿する
     const onSubmit = async (input) => {
-        const { startTime, endTime, ...rest } = input;
+        const { startTime, endTime } = input;
         input.startTime = formatTime(startTime);
         input.endTime = formatTime(endTime);
 
@@ -85,7 +88,7 @@ export default function NewInvitation() {
                                             required: { value: true, message: "タイトルは必須です。"　},
                                             maxLength:{ value: 255, message: "タイトルには255文字までの文字列を指定してください。"　}
                                         })}
-                                        error={errors.title}
+                                        error={errors.title && true}
                                         helperText={errors.title && errors.title.message}
                                     />
                                 </Grid>
@@ -125,7 +128,7 @@ export default function NewInvitation() {
                                 </Grid>
 
                                 <Grid item xs={12} sm={6}>
-                                    <CapacitySelecter
+                                    <CapacitySelector
                                         name="capacity"
                                         label="定員"
                                         watch={watch}
