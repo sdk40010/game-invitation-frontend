@@ -5,7 +5,6 @@ import { useAuth } from "../auth/useAuth";
 import usePermission from "../utils/usePermission";
 import useInvitationAPI from "../http/invitationAPI";
 import useTagAPI from "../http/tagAPI";
-import useTagmapAPI from "../http/tagmapAPI";
 import useErrors from "../utils/useErros";
 
 import { useForm } from "react-hook-form";
@@ -65,13 +64,11 @@ export default function EditInvitation() {
     const auth = useAuth();
     const invitationAPI = useInvitationAPI();
     const tagAPI = useTagAPI();
-    const tagmapAPI = useTagmapAPI();
     const permission = usePermission(
         () => {
             if (auth.user && invitationAPI.data) {
                 return auth.user.id === invitationAPI.data.user.id;
             }
-            return true;
         },
         "編集権限がありません。",
         auth.user,
@@ -82,7 +79,6 @@ export default function EditInvitation() {
         auth.error,
         invitationAPI.error,
         tagAPI.error,
-        tagmapAPI.error,
         permission.error,
     );
 
@@ -96,11 +92,10 @@ export default function EditInvitation() {
 
     const classes = useStyles();
 
-    // 募集とそれに付けられたタグ一覧の取得
+    // 募集の取得
     useEffect(() => {
         (async () => {
             const invitation = await invitationAPI.get(id);
-            const tags = await tagmapAPI.getTags(id);
             // defaultValuesを更新する
             reset({
                 title: invitation.title,
@@ -108,7 +103,7 @@ export default function EditInvitation() {
                 startTime: new Date(invitation.startTime),
                 endTime: new Date(invitation.endTime),
                 capacity: invitation.capacity,
-                tags: tags
+                tags: invitation.tags
             });
             setIsLoading(false);
         })();
@@ -130,7 +125,7 @@ export default function EditInvitation() {
         input.endTime = formatTime(endTime);
 
         // 編集前のタグ一覧を送信情報に追加する
-        input.tagsBeforeEdit = tagmapAPI.data;
+        input.tagsBeforeEdit = invitationAPI.data.tags;
 
         const success = await invitationAPI.update(id, input);
         setSubmitSuccess(success);
@@ -268,7 +263,7 @@ export default function EditInvitation() {
         return <Redirect to={`/invitations/${id}`}/>;
     } else if (deleteSuccess) {
         return <Redirect to="/"/>
-    }　else {
+    } else {
         return (
             <MainContainer error={pageError} maxWidth="sm">
                 <Card>

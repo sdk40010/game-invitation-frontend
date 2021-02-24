@@ -12,7 +12,9 @@ export default function usePermission(check, message, ...deps) {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        if (!check()) {
+        if (check()) {
+            setError(false);
+        } else if (check() === false) {
             setError(new Error(message));
         }
     }, [...deps]);

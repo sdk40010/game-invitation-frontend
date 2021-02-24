@@ -15,7 +15,8 @@ import {
     Button,
     Avatar,
     Grid,
-    Box
+    Box,
+    Chip,
 } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
@@ -58,7 +59,7 @@ export default function ShowInvitation() {
         <></>
     );
 
-    const subHeader = data ? `${data.createdAt}に投稿` : "";
+    const subHeader = data ? (`${data.createdAt}に投稿`) : "";
 
     const participationButton = data ? (
         <Button color="primary" variant="contained">参加する</Button>
@@ -92,34 +93,48 @@ export default function ShowInvitation() {
 
     const content = data ? (
         <>
+            <Box mb={2}>
+                <Grid container spacing={1}>
+                    {data.tags.map(tag => (
+                        <Grid item>
+                            <Chip label={tag.name} />
+                        </Grid>
+                    ))}
+                </Grid>
+            </Box>
+
             {data.description ? (
-                <Box>
+                <Box mb={2}>
                     <Heading>説明</Heading>
-                    <Typography variant="body1" paragraph>{data.description}</Typography>
+                    <Typography variant="body1">{data.description}</Typography>
                 </Box>
             ) : (
                 <></>
             )
             }
-            <Box>
+
+            <Box mb={2}>
                 <Heading>時間</Heading>
                 <Grid container spacing={1}>
                     <Grid item>
-                        <Typography variant="body1" paragraph>{data.startTime}</Typography>
+                        <Typography variant="body1">{data.startTime}</Typography>
                     </Grid>
                     <Grid item>〜</Grid>
                     <Grid item>
-                        <Typography variant="body1" paragraph>{data.endTime}</Typography>
+                        <Typography variant="body1">{data.endTime}</Typography>
                     </Grid>
                 </Grid>
             </Box>
-            <Box>
+
+            <Box mb={2}>
                 <Heading>定員</Heading>
-                <Typography variant="body1" paragraph>{data.capacity}人</Typography>
+                <Typography variant="body1">{data.capacity}人</Typography>
             </Box>
-            <Box>
+
+            <Box mb={2}>
                 <Heading>参加者</Heading>
             </Box>
+
         </>
     ) : (
         <CenteredCircularProgress />

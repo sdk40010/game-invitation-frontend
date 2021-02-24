@@ -18,6 +18,7 @@ import {
     CardContent,
     Avatar,
     Box,
+    Chip,
 }
 from "@material-ui/core";
 import { Pagination, PaginationItem }from "@material-ui/lab";
@@ -27,6 +28,17 @@ const useStyles = makeStyles((theme) => ({
         display: "block",
         textDecoration: "none",
         color: "inherit"
+    },
+    cardContent: {
+        paddingTop: 0
+    },
+    tagContainer : {
+        overflow: "scroll",
+        "-ms-overflow-style": "none", /* IE, Edge 対応 */
+        "scrollbar-width": "none",    /* Firefox 対応 */
+        "&::-webkit-scrollbar" : {  /* Chrome, Safari 対応 */
+            display: "none"
+        }
     }
 }));
 
@@ -61,7 +73,7 @@ export default function Top() {
         data.invitations.map((invitation, i) => {
             const title = <Typography variant="body1">{invitation.title}</Typography>
             
-            const subHeader = invitation.createdAt;
+            const subHeader = `${invitation.createdAt}に投稿`;
 
             const poster = <Avatar
                 alt={invitation.user.name}
@@ -70,6 +82,16 @@ export default function Top() {
 
             const content = (
                 <>
+                    <Box>
+                        <Grid container spacing={1} wrap="nowrap" className={classes.tagContainer}>
+                            {invitation.tags.map(tag => (
+                                <Grid item>
+                                    <Chip label={tag.name} size="small" />
+                                </Grid>
+                            ))}
+                        </Grid>
+                    </Box>
+
                     <Box>
                         <Grid container spacing={1} alignItems="center">
                             <Grid item>
@@ -114,7 +136,7 @@ export default function Top() {
                                     subheader={subHeader}
                                     avatar={poster}
                                 />
-                                <CardContent>
+                                <CardContent className={classes.cardContent}>
                                     {content}
                                 </CardContent>
                             </Card>

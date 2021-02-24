@@ -22,7 +22,7 @@ export default async function apiCall (path, method, bodyData = {}) {
         },
         body: method === "GET" ? null : JSON.stringify(bodyData)
     }).catch(err => {
-        throw new Error(err.message);
+        throw err;
     });
 
     if (res.ok) {
@@ -34,12 +34,13 @@ export default async function apiCall (path, method, bodyData = {}) {
 
 const handleError = (res) => {
     switch (res.status) {
-      case 400: throw Error("Bad Request");
-      case 401: throw Error("Unauthorized");
-      case 404: throw Error("Not Found");
-      case 419: throw Error("CSRF Token Mismatch")
-      case 500: throw Error("Internal Server Error");
-      case 502: throw Error("Bad Gateway");
-      default:  throw Error("Unhandled Error");
+      case 400: throw new Error("Bad Request");
+      case 401: throw new Error("Unauthorized");
+      case 403: throw new Error("Forbidden");
+      case 404: throw new Error("Not Found");
+      case 419: throw new Error("CSRF Token Mismatch")
+      case 500: throw new Error("Internal Server Error");
+      case 502: throw new Error("Bad Gateway");
+      default:  throw new Error("Unhandled Error");
     } 
   };
