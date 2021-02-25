@@ -82,10 +82,10 @@ export default function Top() {
 
             const content = (
                 <>
-                    <Box>
+                    <Box mb={1}>
                         <Grid container spacing={1} wrap="nowrap" className={classes.tagContainer}>
-                            {invitation.tags.map(tag => (
-                                <Grid item>
+                            {invitation.tags.map((tag, i) => (
+                                <Grid item key={i}>
                                     <Chip label={tag.name} size="small" />
                                 </Grid>
                             ))}
@@ -151,7 +151,7 @@ export default function Top() {
 
     // ページネーション
     const pagenataion = data ? (
-        <Box m={4}>
+        <Box mt={4}>
             <Grid container justify="center">
                 <Grid item>
                     <Pagination

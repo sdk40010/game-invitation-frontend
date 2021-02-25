@@ -1,8 +1,14 @@
 /**
  * バックエンドのAPIサーバーにアクセスする
  * レスポンスのステータスコードが200番台でないときはエラーを投げる
+ * 
+ * @param {string} path - APIのパス
+ * @param {string} method - HTTPメソッド
+ * @param {Object} bodyData - 送信データ
+ * @returns {Object} json - JSONレスポンス
+ * @throws {Error} error - エラー
  */
-export default async function apiCall (path, method, bodyData = {}) {
+export default async function apiCall(path, method, bodyData = {}) {
     const apiServerURL = process.env.REACT_APP_API_SERVER_URL;
     const xsrfToken = document
         .cookie

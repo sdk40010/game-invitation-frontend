@@ -1,6 +1,7 @@
 import React from "react";
 import {
     Container,
+    Box,
     Card,
     CardHeader,
     CardContent,
@@ -9,9 +10,12 @@ import {
 import { makeStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles((theme) => ({
+    main: {
+        marginBottom: theme.spacing(4)
+    },
     appBarSpacer: theme.mixins.toolbar,
-    container: {
-        paddingTop: theme.spacing(4),
+    wrapper : {
+        marginTop: theme.spacing(4),
         paddingLeft: 0,
         paddingRight: 0,
     }
@@ -29,10 +33,12 @@ export default function MainContainer({children, error, maxWidth, ...rest}) {
         <Container
             component="main"
             maxWidth={error ? "xs" : maxWidth}
+            className={classes.main}
             {...rest}
         >
             <div className={classes.appBarSpacer} />
-            <Container className={classes.container}>
+
+            <Box className={classes.wrapper}>
                 {error ? (
                     <Card>
                         <CardHeader
@@ -45,7 +51,8 @@ export default function MainContainer({children, error, maxWidth, ...rest}) {
                 ) : (
                     children
                 )}
-            </Container>
+            </Box>
+
         </Container>
     )
 }

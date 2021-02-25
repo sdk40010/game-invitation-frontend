@@ -101,6 +101,8 @@ export default function NewInvitation() {
                                         fullWidth
                                         label="説明"
                                         inputRef={register}
+                                        multiline
+                                        rowsMax={5}
                                     />
                                 </Grid>
 

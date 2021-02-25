@@ -26,7 +26,7 @@ export default function useInvitationAPI() {
     }
 
     /**
-     * 指定されたIDに対応する募集を取得する
+     * 募集を取得する
      * @param {number} id - 募集ID
      * @returns {Object} json - 取得した募集データ
      */
@@ -43,7 +43,7 @@ export default function useInvitationAPI() {
 
     /**
      * 募集を投稿する
-     * @param {Object} input - フォームの入力値
+     * @param {Object} input - 募集フォームの入力値
      * @returns {boolean} success - 投稿が成功したかどうか
      */
     const post = async (input) => {
@@ -58,7 +58,7 @@ export default function useInvitationAPI() {
     }
 
     /**
-     * 指定されたIDに対応する募集を更新する
+     * 募集を更新する
      * @param {number} id - 募集ID
      * @param {Object} input - フォームの入力値
      * @returns {boolean} success - 更新が成功したかどうか
@@ -78,7 +78,7 @@ export default function useInvitationAPI() {
     }
 
     /**
-     * 指定されたIDに対応する募集を削除する
+     * 募集を削除する
      * @param {number} id - 募集ID
      * @returns {bookean} success - 削除が成功したかどうか
      */

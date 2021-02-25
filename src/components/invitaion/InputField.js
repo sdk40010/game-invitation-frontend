@@ -243,7 +243,7 @@ export function TagSelector(props) {
 
                     value.push(newTag);
                     setOptions(prevOptions => {
-                        prevOptions.push(newTag)
+                        prevOptions.push(newTag);
                         return prevOptions;
                     });
                 } else if (last) { // 既存のタグを追加したとき

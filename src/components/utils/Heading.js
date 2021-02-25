@@ -4,7 +4,6 @@ import {　Typography　} from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
     heading: {
-        color: theme.palette.grey[700],
         fontSize: ".75rem"
     }
 }));
@@ -19,9 +18,9 @@ export default function Heading({children, ...rest}) {
         <Typography
             variant="subtitle2"
             component="div"
+            color="textSecondary"
             className={classes.heading}
             {...rest}
-            // gutterBottom
         >
             {children}
         </Typography>
