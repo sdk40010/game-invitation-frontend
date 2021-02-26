@@ -176,9 +176,9 @@ export function TagSelector(props) {
     });
 
     const helperText =
-        errors[name]?.type === "limit" ?
-            "10個以下のタグを指定してください。" :
-        "";
+        errors[name]?.type === "limit"
+            ?　"10個以下のタグを指定してください。"
+            :　"";
 
     // 選択肢の初期化
     const [options, setOptions] = useState([]);

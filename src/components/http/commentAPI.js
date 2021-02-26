@@ -29,7 +29,7 @@ export default function useCommentAPI() {
      * 募集にコメントを投稿する
      * 
      * @param {Object} input - コメントフォームの入力値
-     * @param {*} id - 募集ID
+     * @param {string} id - 募集ID
      * @returns {boolean} success - 投稿が成功したかどうか
      */
     const post = async (input, id) => {
@@ -42,11 +42,39 @@ export default function useCommentAPI() {
             return false;
         }
     }
+    
+    /**
+     * 募集へのコメントを更新する
+     * 
+     * @param {Object} input - コメントフォームの入力値
+     * @param {string} invitationId - 募集ID
+     * @param {string} commentId - コメントID
+     * @returns {boolean} success - 更新が成功したかどうか
+     */
+    const update = async (input, invitationId, commentId) => {
+        try {
+            const json = await apiCall(
+                `/api/v1/invitations/${invitationId}/comments/${commentId}`,
+                "PUT",
+                input
+            );
+            setData(prevData => {
+                const index = prevData.findIndex(comment => comment.id === json.id);
+                prevData.splice(index, 1, json);
+                return [...prevData];
+            });
+            return true;
+        } catch (err) {
+            setError(err);
+            return false;
+        }
+    }
 
     return {
         data,
         error,
         getAll,
         post,
+        update,
     };
 }

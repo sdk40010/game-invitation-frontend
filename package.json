@@ -22,7 +22,7 @@
     "web-vitals": "^1.0.1"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "react-app-rewired start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -46,6 +46,8 @@
     ]
   },
   "devDependencies": {
-    "@testing-library/react-hooks": "^5.0.3"
+    "@testing-library/react-hooks": "^5.0.3",
+    "customize-cra": "^1.0.0",
+    "react-app-rewired": "^2.1.8"
   }
 }

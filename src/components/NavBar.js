@@ -70,7 +70,10 @@ export default function NavBar() {
                             open={Boolean(anchorEl)}
                             onClose={handleClose}
                         >
-                            <MenuItem onClick={() => {handleClose(); auth.logout();}}>
+                            <MenuItem onClick={() => {
+                                handleClose();
+                                auth.logout();
+                            }}>
                                 <Typography component="span" variant="button">ログアウト</Typography>
                             </MenuItem>
                             <MenuItem onClick={handleClose}>

@@ -11,6 +11,7 @@ import { useForm, useWatch } from "react-hook-form";
 import MainContainer from "../utils/MainContainer";
 import CenteredCircularProgress from "../utils/CenteredCircularProgress";
 import Heading from "../utils/Heading";
+import SimpleMenu from "../utils/SimpleMenu";
 import { makeStyles } from "@material-ui/core/styles";
 import {
     Typography,
@@ -24,7 +25,9 @@ import {
     Chip,
     TextField,
     Snackbar,
+    Collapse,
 } from "@material-ui/core";
+import { MoreVert } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
     headerAction: {
@@ -36,6 +39,11 @@ const useStyles = makeStyles((theme) => ({
     },
     commentItem: {
         overflowWrap: "break-word"
+    },
+    commentPosterButtonWrapper: {
+        "& > *:not(:last-child)": {
+            marginRight: theme.spacing(1)
+        }
     }
 }));
 
@@ -65,8 +73,8 @@ export default function ShowInvitation() {
     }, []);
 
     // コメントの投稿
-    const onCommentSubmit = (input) => {
-        commentAPI.post(input, id);
+    const onCommentSubmit = async (input) => {
+        await commentAPI.post(input, id);
     }
 
     return (
@@ -83,8 +91,14 @@ export default function ShowInvitation() {
                                 title={<Typography variant="h6" component="h2">コメント</Typography> }
                             />
                             <CardContent>
-                                <CommentPoser onCommentSubmit={onCommentSubmit} />
-                                <CommentList comments={commentAPI.data} />
+                                <Box mb={4}>
+                                    <CommentPoser
+                                        onCommentSubmit={onCommentSubmit}
+                                        buttonLabel="投稿"
+                                        snackbarMessage="コメントが投稿されました。"
+                                    />
+                                </Box>
+                                <CommentList commentAPI={commentAPI} />
                             </CardContent>
                         </Card>
                     </Box>
@@ -198,74 +212,171 @@ function InvitationCard({invitation}) {
 }
 
 /**
- * コメント投稿フォーム
+ * コメント投稿・更新フォーム
  */
-function CommentPoser({onCommentSubmit}) {
-    const { register, control, handleSubmit, setValue } = useForm();
+function CommentPoser(props) {
+    const {
+        onCommentSubmit,
+        defaultInput = "",
+        onCancel = () => {},
+        buttonLabel,
+        snackbarMessage = "",
+    } = props;
+
+    const auth = useAuth();
+
+    const classes = useStyles();
+
+    const defaultValues = { comment: defaultInput };
+    const { register, control, handleSubmit, setValue } = useForm({defaultValues});
     const comment = useWatch({ name: "comment", control });
 
-    const [open, setOpen] = useState(false);
+    // キャンセル・投稿ボタン用
+    const [expanded, setExpanded] = useState(false);
+    const handleFocus = () => setExpanded(true);
+    const handleCancelClick = () => {
+        onCancel();
+        setExpanded(false);
+    }
 
-    const onSubmit = (input) => {
-        onCommentSubmit(input);
+    // 投稿の完了を通知するためのスナックバー用
+    const [open, setOpen] = useState(false);
+    const handleClose = () => setOpen(false);
+
+    // コメントの投稿・更新
+    const onSubmit = async (input) => {
+        await onCommentSubmit(input);
         setValue("comment", "");
+        setExpanded(false);
         setOpen(true);
     }
 
     return (
-        <Box mb={4}>
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <Grid container spacing={1} alignItems="center">
+        <form onSubmit={handleSubmit(onSubmit)}>
+            <Grid container spacing={1}>
 
-                    <Grid item xs>
-                        <TextField
-                            name="comment"
-                            label="コメントを入力"
-                            variant="outlined"
-                            inputRef={register({
-                                minLength: { value: 1, message: "コメントには1文字以上の文字列を指定してください。"}
-                            })}
-                            fullWidth
-                            size="small"
-                            multiline
-                            rowsMax={5}
-                        />
-                    </Grid>
+                <Grid container item>
 
                     <Grid item>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            type="submit"
-                            disabled={!comment && true}
-                        >
-                            投稿
-                        </Button>
-                        <Snackbar
-                            anchorOrigin={{ vertical: "bottom", horizontal: "left"}}
-                            open={open}
-                            message="コメントが投稿されました。"
-                            autoHideDuration={3000}
-                            onClose={() => setOpen(false)}
-                        />
+                        <Avatar alt={auth.user.name} src={auth.user.iconUrl} />
+                    </Grid>
+
+                    <Grid item xs>
+                        <Box pl={1}>
+                            <TextField
+                                name="comment"
+                                placeholder="コメントを入力"
+                                variant="outlined"
+                                inputRef={register({
+                                    minLength: { value: 1, message: "コメントには1文字以上の文字列を指定してください。"}
+                                })}
+                                fullWidth
+                                size="small"
+                                multiline
+                                onFocus={handleFocus}
+                            />
+                        </Box>
                     </Grid>
 
                 </Grid>
-            </form>
-        </Box>
+
+                <Grid container item spacing={2} justify="flex-end">
+
+                    <Grid item>
+                        <Collapse
+                            in={expanded}
+                            timeout={0}
+                            unmountOnExit
+                            classes={{
+                                wrapperInner: classes.commentPosterButtonWrapper
+                            }}
+                        >
+                            <Button color="primary" onClick={handleCancelClick}>
+                                キャンセル
+                            </Button>
+
+                            <Button variant="contained" color="primary" type="submit" disabled={!comment && true}>
+                                {buttonLabel}
+                            </Button>
+                        </Collapse>
+                    </Grid>
+
+                </Grid>
+
+            </Grid>
+
+            {snackbarMessage ? (
+                <Snackbar
+                    anchorOrigin={{ vertical: "bottom", horizontal: "left"}}
+                    open={open}
+                    message={snackbarMessage}
+                    autoHideDuration={3000}
+                    onClose={handleClose}
+                />
+            ) : (
+                <></>
+            )}
+        </form>
     );
 }
 
 /**
  * コメント一覧
  */
-function CommentList({comments}) {
+function CommentList({commentAPI}) {
+    return (
+        <>
+            {commentAPI.data.map((comment, i) => (
+                <CommentListItem
+                    comment={comment}
+                    commentAPI={commentAPI}
+                    key={i}
+                />
+            ))}
+        </>
+    );
+}
+
+/**
+ * コメント一覧アイテム
+ */
+function CommentListItem({comment, commentAPI}) {
+    const auth = useAuth();
+
     const classes = useStyles();
 
+    // コメント更新フォーム用
+    const [expanded, setExpanded] = useState(false);
+    const handleEdit = () => setExpanded(true);
+    const handleCancel = () => setExpanded(false);
+
+    const menuItems = [
+        {
+            label: "編集",
+            onClick: handleEdit 
+        },
+        {
+            label: "削除",
+            onClick: () => console.log("削除")
+        }
+    ];
+
+    // 更新の完了を通知するためのスナックバー用
+    const [open, setOpen] = useState(false);
+    const handleClose = () => setOpen(false);
+
+    // コメントの更新
+    const onCommentSubmit = async (input) => {
+        await commentAPI.update(input, comment.invitationId, comment.id);
+        setExpanded(false);
+        setOpen(true);
+    }
+
     return (
-        comments.map((comment, i) => (
-            <Box mb={2} key={i}>
+        <Box mb={2}>
+            <Collapse in={!expanded} timeout={0} unmountOnExit>
                 <Grid container spacing={1} wrap="nowrap">
+
                     <Grid item>
                         <Avatar
                             alt={comment.user.name}
@@ -273,7 +384,7 @@ function CommentList({comments}) {
                         />
                     </Grid>
 
-                    <Grid item zeroMinWidth>
+                    <Grid item xs zeroMinWidth>
                         <Box pl={1} mt={-1}> {/** mt=-1はアイコンと高さを揃えるため */}
                             <Grid container spacing={1}>
                                 <Grid item>
@@ -297,16 +408,38 @@ function CommentList({comments}) {
                                 <Grid item>
                                     <Typography variant="body2" color="textSecondary">返信</Typography>
                                 </Grid>
-                                <Grid item>
-                                    <Typography variant="body2" color="textSecondary">削除</Typography>
-                                </Grid>
                             </Grid>
                         </Box>
                     </Grid>
-                    
+
+                    <Grid item>
+                        {auth.user.id === comment.user.id ? (
+                            <SimpleMenu icon={<MoreVert />} menuItems={menuItems} />
+                        ) : (
+                            <Box ml={6}/>
+                        )}
+                    </Grid>
+
                 </Grid>
-            </Box>
-        ))
+
+                <Snackbar
+                    anchorOrigin={{ vertical: "bottom", horizontal: "left"}}
+                    open={open}
+                    message="コメントが更新されました。"
+                    autoHideDuration={3000}
+                    onClose={handleClose}
+                />
+            </Collapse>
+
+            <Collapse in={expanded} timeout={0} unmountOnExit>
+                <CommentPoser
+                    onCommentSubmit={onCommentSubmit}
+                    defaultInput={comment.content}
+                    onCancel={handleCancel}
+                    buttonLabel="更新"
+                />
+            </Collapse>
+        </Box>
     );
 }
 
