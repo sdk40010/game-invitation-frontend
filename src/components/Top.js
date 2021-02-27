@@ -73,7 +73,7 @@ export default function Top() {
         data.invitations.map((invitation, i) => {
             const title = <Typography variant="body1">{invitation.title}</Typography>
             
-            const subHeader = `${invitation.createdAt}に投稿`;
+            const subHeader = invitation.createdAt;
 
             const poster = <Avatar
                 alt={invitation.user.name}

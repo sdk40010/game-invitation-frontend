@@ -214,9 +214,9 @@ export default function EditInvitation() {
         </form>
     );
 
-    // 削除用ダイアログ
+    // 削除の確認をするダイアログ用
     const [open, setOpen] = useState(false);
-    const handleClickOpen = () => {
+    const handleDeleteClick = () => {
         setOpen(true);
     }
     const handleClose = () => {
@@ -234,7 +234,7 @@ export default function EditInvitation() {
                 <Button
                     variant="outlined"
                     className={classes.deleteButton}
-                    onClick={handleClickOpen}
+                    onClick={handleDeleteClick}
                 >
                     削除
                 </Button>
@@ -250,8 +250,8 @@ export default function EditInvitation() {
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
-                        <Button variant="contained" color="primary" onClick={handleClose}>キャンセル</Button>
-                        <Button variant="outlined" color="primary" onClick={handleDelete}>削除</Button>
+                        <Button color="primary" onClick={handleClose}>キャンセル</Button>
+                        <Button variant="contained" color="primary" onClick={handleDelete}>削除</Button>
                     </DialogActions>
                 </Dialog>
             </Grid>
@@ -266,23 +266,23 @@ export default function EditInvitation() {
     } else {
         return (
             <MainContainer error={pageError} maxWidth="sm">
-                <Card>
-                    <CardHeader 
-                        title={<Typography variant="h6" component='h1'>募集の編集</Typography>}
-                    />
-                    <CardContent>
-                        {/* invitationAPi.dataで描画内容の出し分けをすると、defaultValuesを更新する前にformが描画がされてしまい、
-                            テキストフィールドの表示がおかしくなるので、isLoadingで描画内容を出し分ける
-                         */}
-                        {isLoading ? (
-                            <CenteredCircularProgress />
-                        ) : (
-                            form
-                        )
-                        }
-                    </CardContent>
-                </Card>
-                {deleteDialog}
+                {/* invitationAPi.dataで描画内容の出し分けをすると、defaultValuesを更新する前にformが描画がされてしまい、
+                    テキストフィールドの表示がおかしくなるので、isLoadingで描画内容を出し分ける
+                */}
+                {isLoading ? (
+                    <CenteredCircularProgress />
+                ) : (
+                <>
+                    <Card>
+                        <CardHeader 
+                            title={<Typography variant="h6" component='h1'>募集の編集</Typography>}
+                        />
+                        <CardContent>{form}</CardContent>
+                    </Card>
+                    {deleteDialog}
+                </>
+                )}
+                
             </MainContainer>
         );
     }

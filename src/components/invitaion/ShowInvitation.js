@@ -26,6 +26,11 @@ import {
     TextField,
     Snackbar,
     Collapse,
+    Dialog,
+    DialogActions,
+    DialogTitle,
+    DialogContent,
+    DialogContentText
 } from "@material-ui/core";
 import { MoreVert } from '@material-ui/icons';
 
@@ -73,7 +78,7 @@ export default function ShowInvitation() {
     }, []);
 
     // コメントの投稿
-    const onCommentSubmit = async (input) => {
+    const handleCommentSubmit = async (input) => {
         await commentAPI.post(input, id);
     }
 
@@ -93,7 +98,7 @@ export default function ShowInvitation() {
                             <CardContent>
                                 <Box mb={4}>
                                     <CommentPoser
-                                        onCommentSubmit={onCommentSubmit}
+                                        onCommentSubmit={handleCommentSubmit}
                                         buttonLabel="投稿"
                                         snackbarMessage="コメントが投稿されました。"
                                     />
@@ -117,7 +122,7 @@ function InvitationCard({invitation}) {
     const classes = useStyles();
 
     const title = <Typography variant="h5" component="h1" paragraph>{invitation.title}</Typography>;
-    const subHeader = `${invitation.createdAt}に投稿`;
+    const subHeader = invitation.createdAt;
     const participationButton = <Button color="primary" variant="contained">参加する</Button>;
 
     // 募集の作成者
@@ -231,24 +236,22 @@ function CommentPoser(props) {
     const { register, control, handleSubmit, setValue } = useForm({defaultValues});
     const comment = useWatch({ name: "comment", control });
 
-    // キャンセル・投稿ボタン用
-    const [expanded, setExpanded] = useState(false);
-    const handleFocus = () => setExpanded(true);
+    // 投稿・キャンセルボタン用
+    const collapse = useOpenState();
     const handleCancelClick = () => {
         onCancel();
-        setExpanded(false);
+        collapse.handleClose();
     }
 
     // 投稿の完了を通知するためのスナックバー用
-    const [open, setOpen] = useState(false);
-    const handleClose = () => setOpen(false);
+    const snackbar = useOpenState();
 
     // コメントの投稿・更新
     const onSubmit = async (input) => {
         await onCommentSubmit(input);
         setValue("comment", "");
-        setExpanded(false);
-        setOpen(true);
+        collapse.handleClose();
+        snackbar.handleOpen();
     }
 
     return (
@@ -273,7 +276,7 @@ function CommentPoser(props) {
                                 fullWidth
                                 size="small"
                                 multiline
-                                onFocus={handleFocus}
+                                onFocus={collapse.handleOpen}
                             />
                         </Box>
                     </Grid>
@@ -284,7 +287,7 @@ function CommentPoser(props) {
 
                     <Grid item>
                         <Collapse
-                            in={expanded}
+                            in={collapse.open}
                             timeout={0}
                             unmountOnExit
                             classes={{
@@ -308,10 +311,10 @@ function CommentPoser(props) {
             {snackbarMessage ? (
                 <Snackbar
                     anchorOrigin={{ vertical: "bottom", horizontal: "left"}}
-                    open={open}
+                    open={snackbar.open}
                     message={snackbarMessage}
                     autoHideDuration={3000}
-                    onClose={handleClose}
+                    onClose={snackbar.handleClose}
                 />
             ) : (
                 <></>
@@ -346,42 +349,56 @@ function CommentListItem({comment, commentAPI}) {
     const classes = useStyles();
 
     // コメント更新フォーム用
-    const [expanded, setExpanded] = useState(false);
-    const handleEdit = () => setExpanded(true);
-    const handleCancel = () => setExpanded(false);
+    const collapse = useOpenState();
 
+    // 更新・削除の完了を通知するためのスナックバー用
+    const snackbar = useOpenState();
+    const [message, setMessage] = useState("");
+
+    // 削除の確認をするダイアログ用
+    const dialog = useOpenState();
+
+    // コメントの操作メニュー用
     const menuItems = [
         {
             label: "編集",
-            onClick: handleEdit 
+            onClick: collapse.handleOpen
         },
         {
             label: "削除",
-            onClick: () => console.log("削除")
+            onClick: dialog.handleOpen
         }
     ];
 
-    // 更新の完了を通知するためのスナックバー用
-    const [open, setOpen] = useState(false);
-    const handleClose = () => setOpen(false);
-
     // コメントの更新
-    const onCommentSubmit = async (input) => {
-        await commentAPI.update(input, comment.invitationId, comment.id);
-        setExpanded(false);
-        setOpen(true);
+    const handleCommentSubmit = async (input) => {
+        const success = await commentAPI.update(input, comment.invitationId, comment.id);
+        collapse.handleClose();
+
+        if (!success) return;
+
+        setMessage("コメントが更新されました。");
+        snackbar.handleOpen();
+    }
+
+    // コメントの削除
+    const handleCommentDelete = async () => {
+        const success = await commentAPI.remove(comment.invitationId, comment.id);
+        dialog.handleClose();
+
+        if (!success) return;
+
+        setMessage("コメントが削除されました。");
+        snackbar.handleOpen();
     }
 
     return (
         <Box mb={2}>
-            <Collapse in={!expanded} timeout={0} unmountOnExit>
+            <Collapse in={!collapse.open} timeout={0} unmountOnExit>
                 <Grid container spacing={1} wrap="nowrap">
 
                     <Grid item>
-                        <Avatar
-                            alt={comment.user.name}
-                            src={comment.user.iconUrl}
-                        />
+                        <Avatar　alt={comment.user.name}　src={comment.user.iconUrl} />
                     </Grid>
 
                     <Grid item xs zeroMinWidth>
@@ -418,28 +435,68 @@ function CommentListItem({comment, commentAPI}) {
                         ) : (
                             <Box ml={6}/>
                         )}
+
+                        <DeleteDialog 
+                            open={dialog.open}
+                            itemName="コメント"
+                            onClose={dialog.handleClose}
+                            onDelete={handleCommentDelete}
+                        />
                     </Grid>
 
                 </Grid>
 
                 <Snackbar
                     anchorOrigin={{ vertical: "bottom", horizontal: "left"}}
-                    open={open}
-                    message="コメントが更新されました。"
+                    open={snackbar.open}
+                    message={message}
                     autoHideDuration={3000}
-                    onClose={handleClose}
+                    onClose={snackbar.handleClose}
                 />
             </Collapse>
 
-            <Collapse in={expanded} timeout={0} unmountOnExit>
+            <Collapse in={collapse.open} timeout={0} unmountOnExit>
                 <CommentPoser
-                    onCommentSubmit={onCommentSubmit}
+                    onCommentSubmit={handleCommentSubmit}
                     defaultInput={comment.content}
-                    onCancel={handleCancel}
+                    onCancel={collapse.handleClose}
                     buttonLabel="更新"
                 />
             </Collapse>
         </Box>
     );
 }
+
+/**
+ * 表示・非表示を切り替えるコンポーネント用のフック
+ */
+function useOpenState() {
+    const [open, setOpen] = useState(false);
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
+    return { open, handleOpen, handleClose };
+}
+
+/**
+ * 削除の確認をするダイアログ
+ */
+function DeleteDialog(props) {
+    const { open, itemName, onClose, onDelete } = props;
+
+    return (
+        <Dialog open={open} onClose={onClose} fullWidth>
+            <DialogTitle>削除の確認</DialogTitle>
+            <DialogContent>
+                <DialogContentText>
+                    {`${itemName}を削除しますか？`}
+                </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+                <Button color="primary" onClick={onClose}>キャンセル</Button>
+                <Button variant="contained" color="primary" onClick={onDelete}>削除</Button>
+            </DialogActions>
+        </Dialog>
+    )
+}
+
 

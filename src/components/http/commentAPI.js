@@ -70,11 +70,34 @@ export default function useCommentAPI() {
         }
     }
 
+    /**
+     * コメントを削除する
+     * 
+     * @param {string} invitationId - 募集ID
+     * @param {string} commentId - コメントID
+     * @returns {boolean} success - 削除が成功したかどうか
+     */
+    const remove = async (invitationId, commentId) => {
+        try {
+            await apiCall(`/api/v1/invitations/${invitationId}/comments/${commentId}`, "DELETE");
+            setData(prevData => {
+                const index = prevData.findIndex(comment => comment.id === commentId);
+                prevData.splice(index, 1);
+                return [...prevData];
+            });
+            return true;
+        } catch (err) {
+            setError(err);
+            return false;
+        }
+    }
+
     return {
         data,
         error,
         getAll,
         post,
         update,
+        remove
     };
 }
