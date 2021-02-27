@@ -54,8 +54,6 @@ export default function Top() {
 
     const location = useLocation();
 
-    const classes = useStyles();
-
     useScrollToTop();
 
     // 募集一覧の取得
@@ -66,128 +64,108 @@ export default function Top() {
         getInvitations();
     }, [location]);
 
-    const data = invitationAPI.data;
-
-    // 募集一覧
-    const list = data ? (
-        data.invitations.map((invitation, i) => {
-            const title = <Typography variant="body1">{invitation.title}</Typography>
-            
-            const subHeader = invitation.createdAt;
-
-            const poster = <Avatar
-                alt={invitation.user.name}
-                src={invitation.user.iconUrl}
-            />;
-
-            const content = (
-                <>
-                    <Box mb={1}>
-                        <Grid container spacing={1} wrap="nowrap" className={classes.tagContainer}>
-                            {invitation.tags.map((tag, i) => (
-                                <Grid item key={i}>
-                                    <Chip label={tag.name} size="small" />
-                                </Grid>
-                            ))}
-                        </Grid>
-                    </Box>
-
-                    <Box>
-                        <Grid container spacing={1} alignItems="center">
-                            <Grid item>
-                                <CustomHeading>時間</CustomHeading>
-                            </Grid>
-                            <Grid item>
-                                <Typography variant="body2">
-                                    {invitation.startTime}
-                                </Typography>
-                            </Grid>
-                            <Grid item>〜</Grid>
-                            <Grid item>
-                                <Typography variant="body2">
-                                    {invitation.endTime}
-                                </Typography>
-                            </Grid>
-                        </Grid>
-                    </Box>
-                    
-                    <Box>
-                        <Grid container spacing={1} alignItems="center">
-                            <Grid item>
-                                <CustomHeading>定員</CustomHeading>
-                            </Grid>
-                            <Grid item>
-                                <Typography variant="body2">
-                                   {invitation.capacity}人
-                                </Typography>
-                            </Grid>
-                        </Grid>
-                    </Box>
-                </>
-            )
-
-            return (
-                <Grid item xs={12} sm={6} md={4} key={i}>
-                    <Link to={`/invitations/${invitation.id}`} className={classes.link}>
-                        <CardActionArea>
-                            <Card>
-                                <CardHeader 
-                                    title={title}
-                                    subheader={subHeader}
-                                    avatar={poster}
-                                />
-                                <CardContent className={classes.cardContent}>
-                                    {content}
-                                </CardContent>
-                            </Card>
-                        </CardActionArea>
-                    </Link>
-                </Grid>
-            );
-        })
-    ) : (
-        <></>
-    );
-
-    // ページネーション
-    const pagenataion = data ? (
-        <Box mt={4}>
-            <Grid container justify="center">
-                <Grid item>
-                    <Pagination
-                        page={data.meta.currentPage}
-                        count={data.meta.lastPage}
-                        renderItem={item => (
-                            <PaginationItem
-                                component={Link}
-                                to={item.page === 1 ? '' : `?page=${item.page}`}
-                                {...item}
-                            />
-                        )}
-                    />
-                </Grid>
-            </Grid>
-        </Box>
-
-    ) : (
-        <></>
-    )
-
-    // 描画処理
     return(
         <MainContainer error={pageError} maxWidth="lg">
-            {data ? (
+            {invitationAPI.data ? (
                 <>
                     <Grid container spacing={2}>
-                        {list}
+                        <InvitationList invitations={invitationAPI.data.invitations} />
                     </Grid>
-                    {pagenataion}
+                    <Paginator meta={invitationAPI.data.meta} />
                 </>
-            ) :(
+            ) : (
                 <CenteredCircularProgress />
-            )
-            }
+            )}
         </MainContainer>
+    );
+}
+
+/**
+ * 募集一覧
+ */
+function InvitationList({ invitations }) {
+    return (
+        <>
+            {invitations.map((invitation, i) => (
+                <InvitationListItem invitation={invitation} key={i} />
+            ))}
+        </>
+    );
+}
+
+/**
+ * 募集一覧アイテム
+ */
+function InvitationListItem({ invitation }) {
+    const classes = useStyles();
+
+    const title = <Typography variant="body1">{invitation.title}</Typography>
+    const subHeader = invitation.createdAt;
+    const poster = <Avatar alt={invitation.user.name} src={invitation.user.iconUrl} />;
+
+    const content = (
+        <>
+            <Box mb={1}>
+                <Grid container spacing={1} wrap="nowrap" className={classes.tagContainer}>
+                    {invitation.tags.map((tag, i) => (
+                        <Grid item key={i}>
+                            <Chip label={tag.name} size="small" />
+                        </Grid>
+                    ))}
+                </Grid>
+            </Box>
+
+            <Box>
+                <Grid container spacing={1} alignItems="center">
+                    <Grid item>
+                        <CustomHeading>時間</CustomHeading>
+                    </Grid>
+                    <Grid item>
+                        <Typography variant="body2">
+                            {invitation.startTime}
+                        </Typography>
+                    </Grid>
+                    <Grid item>〜</Grid>
+                    <Grid item>
+                        <Typography variant="body2">
+                            {invitation.endTime}
+                        </Typography>
+                    </Grid>
+                </Grid>
+            </Box>
+            
+            <Box>
+                <Grid container spacing={1} alignItems="center">
+                    <Grid item>
+                        <CustomHeading>定員</CustomHeading>
+                    </Grid>
+                    <Grid item>
+                        <Typography variant="body2">
+                           {invitation.capacity}人
+                        </Typography>
+                    </Grid>
+                </Grid>
+            </Box>
+        </>
+    )
+
+    return (
+        <Grid item xs={12} sm={6} md={4}>
+            <Link to={`/invitations/${invitation.id}`} className={classes.link}>
+                <CardActionArea>
+                    <Card>
+                        <CardHeader 
+                            title={title}
+                            subheader={subHeader}
+                            avatar={poster}
+                        />
+                        <CardContent className={classes.cardContent}>
+                            {content}
+                        </CardContent>
+                    </Card>
+                </CardActionArea>
+            </Link>
+        </Grid>
     );
 }
 
@@ -200,4 +178,29 @@ function CustomHeading({children}) {
             {children}
         </Heading>
     )
+}
+
+/**
+ * ページ一覧
+ */
+function Paginator({ meta }) {
+    return (
+        <Box mt={4}>
+            <Grid container justify="center">
+                <Grid item>
+                    <Pagination
+                        page={meta.currentPage}
+                        count={meta.lastPage}
+                        renderItem={item => (
+                            <PaginationItem
+                                component={Link}
+                                to={item.page === 1 ? '' : `?page=${item.page}`}
+                                {...item}
+                            />
+                        )}
+                    />
+                </Grid>
+            </Grid>
+        </Box>
+    );
 }
