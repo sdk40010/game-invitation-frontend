@@ -51,14 +51,11 @@ export function DateTimePicker(props) {
         },
     });
     
-    const helperText =
-        errors[name]?.type === "required" ?
-            `${label}は必須です。` :
-        errors[name]?.type === "before" ?
-            `${after.label}より前の時刻を指定してください。` :
-        errors[name]?.type === "after" ?
-            `${before.label}より後の時刻を指定してください。` :
-        "";
+    const helperText
+        = errors[name]?.type === "required" ? `${label}は必須です。`
+        : errors[name]?.type === "before" ? `${after.label}より前の時刻を指定してください。`
+        : errors[name]?.type === "after" ? `${before.label}より後の時刻を指定してください。`
+        : "";
 
     return (
         <MuiPickersUtilsProvider utils={CustomDateFnsUtils}　locale={ja}>
@@ -175,10 +172,9 @@ export function TagSelector(props) {
         },
     });
 
-    const helperText =
-        errors[name]?.type === "limit"
-            ?　"10個以下のタグを指定してください。"
-            :　"";
+    const helperText = errors[name]?.type === "limit"
+        ?　"10個以下のタグを指定してください。"
+        :　"";
 
     // 選択肢の初期化
     const [options, setOptions] = useState([]);
