@@ -5,7 +5,7 @@ import apiCall from "../http/http";
  * コメントに関するAPI用のフック
  */
 export default function useCommentAPI() {
-    const [data, setData] = useState([]);
+    const [data, setData] = useState(null);
     const [error, setError] = useState(null);
 
     /**

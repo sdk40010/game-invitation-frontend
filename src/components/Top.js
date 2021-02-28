@@ -1,13 +1,16 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+
 import { useAuth } from "./auth/useAuth";
 import useInvitationAPI from "./http/invitationAPI";
 import useErrors from "./utils/useErros";
+import useLoading from "./utils/useLoading";
 import useQuery from "./utils/useQuery";
 import useScrollToTop from "./utils/useScrollToTop";
+
 import MainContainer from "./utils/MainContainer";
-import CenteredCircularProgress from "./utils/CenteredCircularProgress";
 import Heading from "./utils/Heading";
+
 import { makeStyles } from "@material-ui/core/styles";
 import {
     Grid,
@@ -19,8 +22,7 @@ import {
     Avatar,
     Box,
     Chip,
-}
-from "@material-ui/core";
+} from "@material-ui/core";
 import { Pagination, PaginationItem }from "@material-ui/lab";
 
 const useStyles = makeStyles((theme) => ({
@@ -48,34 +50,30 @@ const useStyles = makeStyles((theme) => ({
 export default function Top() {
     const auth = useAuth();
     const invitationAPI = useInvitationAPI();
+
     const pageError = useErrors(auth.error, invitationAPI.error);
+    const loading = useLoading(invitationAPI.data);
 
     const query = useQuery();
-
     const location = useLocation();
 
     useScrollToTop();
 
     // 募集一覧の取得
     useEffect(() => {
-        const getInvitations = async () => {
+        (async () => {
             await invitationAPI.getAll(query);
-        }
-        getInvitations();
+        })();
     }, [location]);
 
     return(
-        <MainContainer error={pageError} maxWidth="lg">
-            {invitationAPI.data ? (
-                <>
-                    <Grid container spacing={2}>
-                        <InvitationList invitations={invitationAPI.data.invitations} />
-                    </Grid>
-                    <Paginator meta={invitationAPI.data.meta} />
-                </>
-            ) : (
-                <CenteredCircularProgress />
-            )}
+        <MainContainer error={pageError} loading={loading} maxWidth="lg">
+            <>
+                <Grid container spacing={2}>
+                    <InvitationList invitations={invitationAPI.data?.invitations} />
+                </Grid>
+                <Paginator meta={invitationAPI.data?.meta} />
+            </>
         </MainContainer>
     );
 }

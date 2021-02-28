@@ -27,9 +27,6 @@ import {
 } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
-    deleteButtonContainer: {
-        marginTop: theme.spacing(4)
-    },
     deleteButton: {
         color: theme.palette.error.main,
         borderColor: fade(theme.palette.error.main, .5),

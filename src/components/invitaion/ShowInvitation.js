@@ -5,15 +5,16 @@ import { useAuth } from "../auth/useAuth";
 import useInvitationAPI from "../http/invitationAPI";
 import useCommentAPI from "../http/commentAPI";
 import useErrors from "../utils/useErros";
+import useLoading from "../utils/useLoading";
 import useOpenState from "../utils/useOpenState";
 
 import { useForm, useWatch } from "react-hook-form";
 
 import MainContainer from "../utils/MainContainer";
-import CenteredCircularProgress from "../utils/CenteredCircularProgress";
 import Heading from "../utils/Heading";
 import SimpleMenu from "../utils/SimpleMenu";
 import DeleteDialog from "../utils/DeleteDialog";
+
 import { makeStyles } from "@material-ui/core/styles";
 import {
     Typography,
@@ -36,9 +37,6 @@ const useStyles = makeStyles((theme) => ({
         marginTop: 0,
         marginRight: 0
     },
-    posterContainer: {
-        marginBottom: theme.spacing(2)
-    },
     commentItem: {
         overflowWrap: "break-word"
     },
@@ -56,10 +54,11 @@ export default function ShowInvitation() {
     const auth = useAuth();
     const invitationAPI = useInvitationAPI();
     const commentAPI = useCommentAPI();
+
     const pageError = useErrors(invitationAPI.error, commentAPI.error, auth.error);
+    const loading = useLoading(invitationAPI.data, commentAPI.data);
 
-
-    const { id } = useParams();
+    const { id } = useParams(); // 募集ID
 
     // 募集の取得
     useEffect(() => {
@@ -81,34 +80,30 @@ export default function ShowInvitation() {
     }
 
     return (
-        <MainContainer error={pageError} maxWidth="md">
-            {invitationAPI.data ? (
-                <>
-                    <Box mb={2}>
-                        <InvitationCard invitation={invitationAPI.data}/>
-                    </Box>
+        <MainContainer error={pageError} loading={loading} maxWidth="md">
+            <>
+                <Box mb={2}>
+                    <InvitationCard invitation={invitationAPI.data}/>
+                </Box>
 
-                    <Box>
-                        <Card>
-                            <CardHeader 
-                                title={<Typography variant="h6" component="h2">コメント</Typography> }
-                            />
-                            <CardContent>
-                                <Box mb={4}>
-                                    <CommentPoser
-                                        onCommentSubmit={handleCommentSubmit}
-                                        buttonLabel="投稿"
-                                        snackbarMessage="コメントが投稿されました。"
-                                    />
-                                </Box>
-                                <CommentList commentAPI={commentAPI} />
-                            </CardContent>
-                        </Card>
-                    </Box>
-                </>
-            ) : (
-                <CenteredCircularProgress />
-            )}
+                <Box>
+                    <Card>
+                        <CardHeader 
+                            title={<Typography variant="h6" component="h2">コメント</Typography> }
+                        />
+                        <CardContent>
+                            <Box mb={4}>
+                                <CommentPoser
+                                    onCommentSubmit={handleCommentSubmit}
+                                    buttonLabel="投稿"
+                                    snackbarMessage="コメントが投稿されました。"
+                                />
+                            </Box>
+                            <CommentList commentAPI={commentAPI} />
+                        </CardContent>
+                    </Card>
+                </Box>
+            </>
         </MainContainer>
     );
 }
@@ -125,26 +120,23 @@ function InvitationCard({invitation}) {
 
     // 募集の作成者
     const poster = (
-        <Grid
-            container
-            spacing={1}
-            alignItems="center"
-            className={classes.posterContainer}
-        >
+        <Box mb={2}>
+            <Grid container spacing={1} alignItems="center">
 
-            <Grid item>
-                <Avatar alt={invitation.user.name} src={invitation.user.iconUrl} />
+                <Grid item>
+                    <Avatar alt={invitation.user.name} src={invitation.user.iconUrl} />
+                </Grid>
+
+                <Grid item xs>
+                    <Typography variant="body1">{invitation.user.name}</Typography>
+                </Grid>
+
+                <Grid item>
+                    <Button color="primary" variant="outlined">フレンド申請</Button>
+                </Grid>
+
             </Grid>
-
-            <Grid item xs>
-                <Typography variant="body1">{invitation.user.name}</Typography>
-            </Grid>
-
-            <Grid item>
-                <Button color="primary" variant="outlined">フレンド申請</Button>
-            </Grid>
-
-        </Grid>
+        </Box>
     );
 
     // 募集詳細

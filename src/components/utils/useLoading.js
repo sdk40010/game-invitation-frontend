@@ -9,9 +9,7 @@ export default function useLoading(...resources) {
 
     useEffect(() => {
         setLoading(resources.some(resource => {
-            return Array.isArray(resource)
-                ? ! Boolean(resource.length)
-                : ! Boolean(resource);
+            return ! Boolean(resource);
         }));
     }, [resources]);
 
