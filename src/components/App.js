@@ -20,24 +20,32 @@ function App() {
     return (
         <Router>
             <CssBaseline />
+
             <ProvideAuth>
                 <NavBar />
+
                 <Switch>
+
                     <Route exact path="/">
                         <Top />
                     </Route>
+
                     <Route path="/login">
                         <Login />
                     </Route>
+
                     <PrivateRoute path="/invitations/new">
                         <NewInvitation />
                     </PrivateRoute>
+
                     <PrivateRoute exact path="/invitations/:id">
                         <ShowInvitation />
                     </PrivateRoute>
+
                     <PrivateRoute path="/invitations/:id/edit">
                         <EditInvitation />
                     </PrivateRoute>
+
                 </Switch>
             </ProvideAuth>
         </Router>

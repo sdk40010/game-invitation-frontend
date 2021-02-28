@@ -161,7 +161,7 @@ const checkedIcon = <CheckBox fontSize="small" />;
 const filter = createFilterOptions();
 
 export function TagSelector(props) {
-    const { name, label, watch, control, errors, data } = props;
+    const { name, label, watch, control, errors, tagOptions } = props;
     const { field } = useController({
         name,
         control,
@@ -179,8 +179,8 @@ export function TagSelector(props) {
     // 選択肢の初期化
     const [options, setOptions] = useState([]);
     useEffect(() => {
-        setOptions(data);
-    }, [data])
+        setOptions(tagOptions);
+    }, [tagOptions])
     
     return (
         <Autocomplete

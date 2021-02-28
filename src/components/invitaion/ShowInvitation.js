@@ -5,6 +5,7 @@ import { useAuth } from "../auth/useAuth";
 import useInvitationAPI from "../http/invitationAPI";
 import useCommentAPI from "../http/commentAPI";
 import useErrors from "../utils/useErros";
+import useOpenState from "../utils/useOpenState";
 
 import { useForm, useWatch } from "react-hook-form";
 
@@ -12,6 +13,7 @@ import MainContainer from "../utils/MainContainer";
 import CenteredCircularProgress from "../utils/CenteredCircularProgress";
 import Heading from "../utils/Heading";
 import SimpleMenu from "../utils/SimpleMenu";
+import DeleteDialog from "../utils/DeleteDialog";
 import { makeStyles } from "@material-ui/core/styles";
 import {
     Typography,
@@ -26,11 +28,6 @@ import {
     TextField,
     Snackbar,
     Collapse,
-    Dialog,
-    DialogActions,
-    DialogTitle,
-    DialogContent,
-    DialogContentText
 } from "@material-ui/core";
 import { MoreVert } from '@material-ui/icons';
 
@@ -60,6 +57,7 @@ export default function ShowInvitation() {
     const invitationAPI = useInvitationAPI();
     const commentAPI = useCommentAPI();
     const pageError = useErrors(invitationAPI.error, commentAPI.error, auth.error);
+
 
     const { id } = useParams();
 
@@ -135,10 +133,7 @@ function InvitationCard({invitation}) {
         >
 
             <Grid item>
-                <Avatar
-                    alt={invitation.user.name}
-                    src={invitation.user.iconUrl}
-                />
+                <Avatar alt={invitation.user.name} src={invitation.user.iconUrl} />
             </Grid>
 
             <Grid item xs>
@@ -467,36 +462,5 @@ function CommentListItem({comment, commentAPI}) {
     );
 }
 
-/**
- * 表示・非表示を切り替えるコンポーネント用のフック
- */
-function useOpenState() {
-    const [open, setOpen] = useState(false);
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
-    return { open, handleOpen, handleClose };
-}
-
-/**
- * 削除の確認をするダイアログ
- */
-function DeleteDialog(props) {
-    const { open, itemName, onClose, onDelete } = props;
-
-    return (
-        <Dialog open={open} onClose={onClose} fullWidth>
-            <DialogTitle>削除の確認</DialogTitle>
-            <DialogContent>
-                <DialogContentText>
-                    {`${itemName}を削除しますか？`}
-                </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-                <Button color="primary" onClick={onClose}>キャンセル</Button>
-                <Button variant="contained" color="primary" onClick={onDelete}>削除</Button>
-            </DialogActions>
-        </Dialog>
-    )
-}
 
 

@@ -1,4 +1,5 @@
-import React from "react";
+import CenteredCircularProgress from "../utils/CenteredCircularProgress";
+
 import {
     Container,
     Box,
@@ -23,10 +24,14 @@ const useStyles = makeStyles((theme) => ({
 
 /**
  * mainタグを表すコンポーネント
- * errorプロパティでページ内で発生したエラーを表すオブジェクトを受け取り、
- * エラー発生時には、childrenプロパティの代わりにエラーページを表示する
+ * 
+ * @param {Error} props.error - ページ内で発生したエラー
+ * @param {boolean} props.loading - APIリソースの読み込み状況
+ * @param {string} props.maxWidth - mainタグの横幅の最大値を示す文字列
  */
-export default function MainContainer({children, error, maxWidth, ...rest}) {
+export default function MainContainer(props) {
+    const {children, error, loading, maxWidth, ...rest} = props;
+
     const classes = useStyles();
 
     return (
@@ -48,6 +53,9 @@ export default function MainContainer({children, error, maxWidth, ...rest}) {
                             <Typography variant="body1">{error.message}</Typography>
                         </CardContent>
                     </Card>
+                ) : 
+                loading ? (
+                    <CenteredCircularProgress />
                 ) : (
                     children
                 )}
