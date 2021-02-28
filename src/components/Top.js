@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import { useAuth } from "./auth/useAuth";
 import useInvitationAPI from "./http/invitationAPI";
@@ -55,7 +55,6 @@ export default function Top() {
     const loading = useLoading(invitationAPI.data);
 
     const query = useQuery();
-    const location = useLocation();
 
     useScrollToTop();
 
@@ -64,7 +63,7 @@ export default function Top() {
         (async () => {
             await invitationAPI.getAll(query);
         })();
-    }, [location]);
+    }, [query]);
 
     return(
         <MainContainer error={pageError} loading={loading} maxWidth="lg">
