@@ -71,6 +71,7 @@ export default function Top() {
                 <Grid container spacing={2}>
                     <InvitationList invitations={invitationAPI.data?.invitations} />
                 </Grid>
+                
                 <Paginator meta={invitationAPI.data?.meta} />
             </>
         </MainContainer>
