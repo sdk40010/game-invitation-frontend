@@ -83,7 +83,8 @@ export default function ShowInvitation() {
                             <Box mb={4}>
                                 <CommentPoster
                                     onCommentSubmit={handleCommentSubmit}
-                                    snackbarMessage="コメントが投稿されました。"
+                                    inputProps={{ name: "comment", label:"コメント", defaultValue: "" }}
+                                    snackbarMessage="コメントを投稿しました。"
                                 />
                             </Box>
 

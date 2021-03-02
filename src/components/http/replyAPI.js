@@ -13,20 +13,19 @@ export default function useReplyAPI() {
      */
     const getAll = async (id) => {
         try {
-            const json = await apiCall(`/api/v1/comments/${id}/replies`, "GET");
+            const replies = await apiCall(`/api/v1/comments/${id}/replies`, "GET");
             setData(prevData => {
                 // 返信一覧はコメントIDに紐付けて管理する
                 if (prevData) {
-                    return new Map([ [id, json] , ...prevData.entries() ]);
+                    return new Map([...prevData.set(id, replies).entries()]);
                 } else {
-                    return new Map([ [id, json] ]);
+                    return new Map([ [id, replies] ]);
                 }
-                
             }); 
-            return json;
+            return replies;
         } catch (err) {
             setError(err);
-            return {};
+            return [];
         }
     }
 
@@ -39,8 +38,15 @@ export default function useReplyAPI() {
      */
     const post = async (input, id) => {
         try {
-            const json = await apiCall(`/api/v1/comments/${id}/replies`, "POST", input);
-            setData(prevData => [json, ...prevData]);
+            const replies = await apiCall(`/api/v1/comments/${id}/replies`, "POST", input);
+            setData(prevData => {
+                if (prevData) {
+                    return new Map([...prevData.set(id, replies).entries()]);
+                } else {
+                    return new Map([ [id, replies] ]);
+                }
+            });
+
             return true;
         } catch (err) {
             setError(err);

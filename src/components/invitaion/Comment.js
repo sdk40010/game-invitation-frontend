@@ -1,9 +1,12 @@
-import { useState, useContext, createContext } from "react";
+import { useState, useEffect, useContext, createContext } from "react";
 
 import { useAuth } from "../auth/useAuth";
 import useOpenState from "../utils/useOpenState";
+import useLoading from "../utils/useLoading";
 
 import { useForm, useWatch } from "react-hook-form";
+
+import EventEmitter from 'events';
 
 import SimpleMenu from "../utils/SimpleMenu";
 import DeleteDialog from "../utils/DeleteDialog";
@@ -19,6 +22,7 @@ import {
     TextField,
     Snackbar,
     Collapse,
+    CircularProgress
 } from "@material-ui/core";
 import { MoreVert } from '@material-ui/icons';
 
@@ -50,7 +54,7 @@ const useStyles = makeStyles((theme) => ({
 export function CommentPoster(props) {
     const {
         onCommentSubmit,
-        defaultInput = "",
+        inputProps,
         onCancel = () => {},
         buttonLabel = "投稿",
         snackbarMessage,
@@ -61,9 +65,9 @@ export function CommentPoster(props) {
 
     const classes = useStyles();
 
-    const defaultValues = { comment: defaultInput };
+    const defaultValues = { [inputProps.name]: inputProps.defaultValue };
     const { register, control, handleSubmit, setValue } = useForm({defaultValues});
-    const comment = useWatch({ name: "comment", control });
+    const comment = useWatch({ name: inputProps.name, control });
 
     // 投稿・キャンセルボタン用
     const collapse = useOpenState();
@@ -78,7 +82,7 @@ export function CommentPoster(props) {
     // コメントの投稿
     const onSubmit = async (input) => {
         await onCommentSubmit(input);
-        setValue("comment", "");
+        setValue(inputProps.name, "");
         collapse.handleClose();
         snackbar.handleOpen();
     }
@@ -96,11 +100,11 @@ export function CommentPoster(props) {
                     <Grid item xs>
                         <Box pl={1}>
                             <TextField
-                                name="comment"
-                                placeholder="コメントを入力"
+                                name={inputProps.name}
+                                placeholder={`${inputProps.label}を入力`}
                                 variant="outlined"
                                 inputRef={register({
-                                    minLength: { value: 1, message: "コメントには1文字以上の文字列を指定してください。"}
+                                    minLength: { value: 1, message: `${inputProps.label}には1文字以上の文字列を指定してください。`}
                                 })}
                                 fullWidth
                                 size="small"
@@ -182,7 +186,7 @@ export function CommentList({commentAPI, replyAPI}) {
  * コメント一覧アイテム
  */
 function CommentListItem({comment}) {
-    const { commentAPI } = useCommentContext();
+    const { commentAPI, replyAPI } = useCommentContext();
 
     // コメントの更新
     const handleCommentUpdate = async (input) => {
@@ -196,20 +200,29 @@ function CommentListItem({comment}) {
 
     // 返信の投稿
     const handleReplySubmit = async (input) => {
-        console.log("reply", input);
-        return true;
+        const success1 = await replyAPI.post(input, comment.id);
+        // コメントの返信件数を更新するために、返信先のコメントを再取得する
+        const success2 = await commentAPI.get(comment.invitationId, comment.id);
+        return success1 && success2;
     }
+
+    const eventEmitter = new EventEmitter();
 
     return (
         <Box mb={2}>
             <Comment
                 comment={comment}
+                inputProps={{ name: "comment", label:"コメント", defaultValue: comment.content }}
                 onCommentUpdate={handleCommentUpdate}
                 onCommentDelete={handleCommentDelete}
                 onReplySubmit={handleReplySubmit}
+                eventEmitter={eventEmitter}
             />
 
-            <ReplyList comment={comment} />
+            <ReplyList
+                comment={comment}
+                eventEmitter={eventEmitter}
+            />
         </Box>
     );
 }
@@ -218,7 +231,15 @@ function CommentListItem({comment}) {
  * コメント
  */
 function Comment(props) {
-    const {comment, onCommentUpdate, onCommentDelete, onReplySubmit, iconSize } = props;
+    const {
+        comment,
+        inputProps,
+        onCommentUpdate,
+        onCommentDelete,
+        onReplySubmit,
+        iconSize,
+        eventEmitter
+    } = props;
 
     const auth = useAuth();
 
@@ -252,7 +273,7 @@ function Comment(props) {
         commentCollapse.handleClose();
 
         if (success) {
-            setMessage("コメントが更新されました。");
+            setMessage(`${inputProps.label}を更新しました。`);
             snackbar.handleOpen();
         }
     }
@@ -263,7 +284,7 @@ function Comment(props) {
         dialog.handleClose();
 
         if (success) {
-            setMessage("コメントが削除されました。");
+            setMessage(`${inputProps.label}を削除しました。`);
             snackbar.handleOpen();
         }
     }
@@ -274,10 +295,15 @@ function Comment(props) {
     // 返信の投稿
     const handleReplySubmit = async (input) => {
         const success = await onReplySubmit(input);
-        replyCollapse.handleClose();
 
+        if (eventEmitter) {
+            // ReplyListの返信一覧を開く処理を呼び出す
+            eventEmitter.emit("replySubmit");
+        }
+
+        replyCollapse.handleClose();
         if (success) {
-            setMessage("返信が投稿されました。");
+            setMessage("返信を投稿しました。");
             snackbar.handleOpen();
         }
     }
@@ -290,7 +316,7 @@ function Comment(props) {
                 <Grid container spacing={1} wrap="nowrap">
 
                     <Grid item>
-                        <Avatar　alt={comment.user.name}　src={comment.user.iconUrl} className={classes[iconSize]} />
+                        <Avatar　alt={comment.user.name}　src={comment.user.iconUrl} className={classes[iconSize] ?? ""} />
                     </Grid>
 
                     <Grid item xs zeroMinWidth>
@@ -320,7 +346,7 @@ function Comment(props) {
                                     <Box mt={2}>
                                         <CommentPoster
                                             onCommentSubmit={handleReplySubmit}
-                                            defaultInput=""
+                                            inputProps={{ name: "reply", label:"返信", defaultValue: "" }}
                                             onCancel={replyCollapse.handleClose}
                                             buttonLabel="返信"
                                             iconSize={iconSize}
@@ -362,7 +388,7 @@ function Comment(props) {
             <Collapse in={commentCollapse.open} timeout={0} unmountOnExit>
                 <CommentPoster
                     onCommentSubmit={handleCommentUpdate}
-                    defaultInput={comment.content}
+                    inputProps={inputProps}
                     onCancel={commentCollapse.handleClose}
                     buttonLabel="更新"
                     iconSize={iconSize}
@@ -375,28 +401,39 @@ function Comment(props) {
 /**
  * 返信一覧
  */
-function ReplyList({comment}) {
+function ReplyList({comment, eventEmitter}) {
     const { replyAPI } = useCommentContext();
+
+    const loading = useLoading(replyAPI.data?.get(comment.id));
 
     // 返信一覧用
     const collapse = useOpenState();
 
-    const hasReplies = Boolean(comment.repliesCount);
     const repliesLoaded = Boolean(replyAPI.data?.get(comment.id));
+    const hasReplies = Boolean(comment.repliesCount);
     const replies = replyAPI.data?.get(comment.id) ?? [];
 
     // 返信一覧の表示・非表示
     const handleClick = async () => {
-        if (hasReplies && !repliesLoaded) { // 返信一覧を取得済みでないとき
-            await replyAPI.getAll(comment.id);
-        }
-
         if (collapse.open) {
             collapse.handleClose();
         } else {
             collapse.handleOpen();
         }
+
+        if (hasReplies && !repliesLoaded) { // 返信一覧を取得済みでないとき
+            await replyAPI.getAll(comment.id);
+        }
     }
+
+    useEffect(() => {
+        // Commentコンポーネントで返信が投稿されたときの処理を登録
+        const handleReplySubmit = () => collapse.handleOpen();
+        eventEmitter.on("replySubmit", handleReplySubmit);
+
+        // イベントリスナーの解除
+        return () => eventEmitter.off("replySubmit", handleReplySubmit);
+    }, [])
 
     return (
         hasReplies ? (
@@ -407,12 +444,20 @@ function ReplyList({comment}) {
                     </ActionText>
                 </Box>
             
+
                 <Collapse in={collapse.open} timeout={0} unmountOnExit>
-                    <Box mt={2}>
-                        {replies.map((reply, i) => (
-                            <ReplyListItem reply={reply} comment={comment} key={i} />
-                        ))}
-                    </Box>
+                    {loading ? (
+                        <Box mt={2} mb={1}>
+                            <CircularProgress color="secondary" size={30} />
+                        </Box>
+                    ) : (
+                        <Box mt={2}>
+                            {replies.map((reply, i) => (
+                                <ReplyListItem reply={reply} key={i} />
+                            ))}
+                        </Box>
+                    )}
+                    
                 </Collapse>
                 
             </Box>
@@ -425,28 +470,31 @@ function ReplyList({comment}) {
 /**
  * 返信一覧アイテム
  */
-function ReplyListItem({reply, comment}) {
-    const { replyAPI } = useCommentContext();
+function ReplyListItem({reply}) {
+    const { commentAPI, replyAPI } = useCommentContext();
 
     // 返信の更新
     const handleReplyUpdate = async (input) => {
-        // return replyAPI.update(input, comment.id);
+        // return replyAPI.update(input, reply.commentId, reply.id);
     }
 
     // 返信の削除
     const handleReplyDelete = async () => {
-        // return replyAPI.remove(comment.id, reply.id);
+        // return replyAPI.remove(reply.commentId, reply.id);
     }
 
     // 返信の投稿
     const handleReplySubmit = async (input) => {
-        // return replyAPI.post(input, comment.id);
+        const success1 = replyAPI.post(input, reply.commentId);
+        const success2 = commentAPI.get(reply.comment.invitationId, reply.commentId);
+        return success1 && success2;
     }
 
     return (
         <Box mb={2}>
             <Comment 
                 comment={reply}
+                inputProps={{ name: "reply", label:"返信", defaultValue: reply.content }}
                 onCommentUpdate={handleReplyUpdate}
                 onCommentDelete={handleReplyDelete}
                 onReplySubmit={handleReplySubmit}
