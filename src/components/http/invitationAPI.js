@@ -12,14 +12,14 @@ export default function useInvitationAPI() {
      * クエリーに基づいて募集一覧を取得する
      * 
      * @param {URLSearchParams} query - クエリー
-     * @returns {Object} json - 募集一覧
+     * @returns {Object} 募集一覧（ページング用のメタ情報付）
      */
     const getAll = async (query) => {
         try {
             const queryString = query.toString() ? `?${query.toString()}` : "";
-            const json = await apiCall(`/api/v1/invitations${queryString}`, "GET");
-            setData(json);
-            return json;
+            const invitations = await apiCall(`/api/v1/invitations${queryString}`, "GET");
+            setData(invitations);
+            return invitations;
         } catch (err) {
             setError(err);
             return {};
@@ -30,13 +30,13 @@ export default function useInvitationAPI() {
      * 募集を取得する
      * 
      * @param {number} id - 募集ID
-     * @returns {Object} json - 取得した募集データ
+     * @returns {Object} 募集
      */
     const get = async (id) => {
         try {
-            const json = await apiCall(`/api/v1/invitations/${id}`, "GET");
-            setData(json);
-            return json;
+            const invitation = await apiCall(`/api/v1/invitations/${id}`, "GET");
+            setData(invitation);
+            return invitation;
         } catch (err) {
             setError(err);
             return {};
@@ -47,12 +47,12 @@ export default function useInvitationAPI() {
      * 募集を投稿する
      * 
      * @param {Object} input - 募集フォームの入力値
-     * @returns {boolean} success - 投稿が成功したかどうか
+     * @returns {boolean} 投稿が成功したかどうか
      */
     const post = async (input) => {
         try {
-            const json = await apiCall("/api/v1/invitations", "POST", input);
-            setData(json);
+            const redirectTo = await apiCall("/api/v1/invitations", "POST", input);
+            setData(redirectTo);
             return true;
         } catch (err) {
             setError(err);
@@ -65,15 +65,11 @@ export default function useInvitationAPI() {
      * 
      * @param {number} id - 募集ID
      * @param {Object} input - フォームの入力値
-     * @returns {boolean} success - 更新が成功したかどうか
+     * @returns {boolean} 更新が成功したかどうか
      */
     const update = async (id, input) => {
         try {
-            await apiCall(
-                `/api/v1/invitations/${id}`,
-                "PUT",
-                input
-            );
+            await apiCall(`/api/v1/invitations/${id}`, "PUT", input);
             return true;
         } catch (err) {
             setError(err);
@@ -85,7 +81,7 @@ export default function useInvitationAPI() {
      * 募集を削除する
      * 
      * @param {number} id - 募集ID
-     * @returns {bookean} success - 削除が成功したかどうか
+     * @returns {boolean} 削除が成功したかどうか
      */
     const remove = async (id) => {
         try {

@@ -41,6 +41,7 @@ export default function InvitationForm(props) {
                         fullWidth
                         label="説明"
                         inputRef={register}
+                        multiline
                     />
                 </Grid>
 

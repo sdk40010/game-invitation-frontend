@@ -169,6 +169,7 @@ export function CommentPoster(props) {
     );
 }
 
+// スナックバー用のフック
 const useSnackbar = () => {
     const snackbar = useOpenState();
     const [message, setMessage] = useState("");

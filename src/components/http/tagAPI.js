@@ -7,13 +7,14 @@ export default function useTagAPI() {
 
     /**
      * タグ一覧を取得する
-     * @returns {Object} json - タグ一覧
+     * 
+     * @returns {array} タグ一覧
      */
     const getAll = async () => {
         try {
-            const json = await apiCall("/api/v1/tags", "GET");
-            setData(json);
-            return json;
+            const tags = await apiCall("/api/v1/tags", "GET");
+            setData(tags);
+            return tags;
         } catch (err) {
             setError(err);
         }

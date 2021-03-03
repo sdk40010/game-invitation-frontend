@@ -1,12 +1,8 @@
-import "../css/index.css";
-import React from "react";
+import { useMemo } from "react";
+
 import { ProvideAuth } from "./auth/useAuth";
-import { 
-    BrowserRouter as Router,
-    Switch,
-    Route,
-} from "react-router-dom";
-import CssBaseline from '@material-ui/core/CssBaseline'
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+
 import NavBar from "./NavBar";
 import PrivateRoute from "./auth/PrivateRoute";
 import Login from "./auth/Login";
@@ -15,40 +11,56 @@ import NewInvitation from "./invitaion/NewInvitation"
 import ShowInvitation from "./invitaion/ShowInvitation";
 import EditInvitation from "./invitaion/EditInvitation";
 
+import CssBaseline from "@material-ui/core/CssBaseline";
+import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 
 function App() {
+    const theme = useMemo(
+        () =>
+          createMuiTheme({
+            palette: {
+            //   type: "dark",
+            //   primary: { main: "#90caf9"},
+            //   secondary: {main: "#f48fb1"}
+                type: "light"
+            },
+          }),
+        [],
+    );
+
     return (
-        <Router>
+        <ThemeProvider theme={theme}>
             <CssBaseline />
+            <Router>
+                <ProvideAuth>
+                    <NavBar />
 
-            <ProvideAuth>
-                <NavBar />
+                    <Switch>
 
-                <Switch>
+                        <Route exact path="/">
+                            <Top />
+                        </Route>
 
-                    <Route exact path="/">
-                        <Top />
-                    </Route>
+                        <Route path="/login">
+                            <Login />
+                        </Route>
 
-                    <Route path="/login">
-                        <Login />
-                    </Route>
+                        <PrivateRoute path="/invitations/new">
+                            <NewInvitation />
+                        </PrivateRoute>
 
-                    <PrivateRoute path="/invitations/new">
-                        <NewInvitation />
-                    </PrivateRoute>
+                        <PrivateRoute exact path="/invitations/:id">
+                            <ShowInvitation />
+                        </PrivateRoute>
 
-                    <PrivateRoute exact path="/invitations/:id">
-                        <ShowInvitation />
-                    </PrivateRoute>
+                        <PrivateRoute path="/invitations/:id/edit">
+                            <EditInvitation />
+                        </PrivateRoute>
 
-                    <PrivateRoute path="/invitations/:id/edit">
-                        <EditInvitation />
-                    </PrivateRoute>
-
-                </Switch>
-            </ProvideAuth>
-        </Router>
+                    </Switch>
+                </ProvideAuth>
+            </Router>
+        </ThemeProvider>
     );
 }
 

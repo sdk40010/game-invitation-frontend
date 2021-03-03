@@ -12,13 +12,13 @@ export default function useCommentAPI() {
      * 募集のコメント一覧を取得する
      * 
      * @param {number} id - 募集ID
-     * @returns {Object} comments - コメント一覧
+     * @returns {array} コメント一覧
      */
     const getAll = async (id) => {
         try {
-            const json = await apiCall(`/api/v1/invitations/${id}/comments`, "GET");
-            setData(json);
-            return json;
+            const comments = await apiCall(`/api/v1/invitations/${id}/comments`, "GET");
+            setData(comments);
+            return comments;
         } catch (err) {
             setError(err);
             return {};
@@ -30,7 +30,7 @@ export default function useCommentAPI() {
      * 
      * @param {number} invitationId - 募集ID
      * @param {number} commentId - コメントID
-     * @returns {Object} comment - コメント
+     * @returns {Object} コメント
      */
     const get = async (invitationId, commentId) => {
         try {
@@ -48,7 +48,7 @@ export default function useCommentAPI() {
      * 
      * @param {Object} input - コメントフォームの入力値
      * @param {number} id - 募集ID
-     * @returns {boolean} success - 投稿が成功したかどうか
+     * @returns {boolean} 投稿が成功したかどうか
      */
     const post = async (input, id) => {
         try {
@@ -67,15 +67,11 @@ export default function useCommentAPI() {
      * @param {Object} input - コメントフォームの入力値
      * @param {number} invitationId - 募集ID
      * @param {number} commentId - コメントID
-     * @returns {boolean} success - 更新が成功したかどうか
+     * @returns {boolean} 更新が成功したかどうか
      */
     const update = async (input, invitationId, commentId) => {
         try {
-            const comment = await apiCall(
-                `/api/v1/invitations/${invitationId}/comments/${commentId}`,
-                "PUT",
-                input
-            );
+            const comment = await apiCall(`/api/v1/invitations/${invitationId}/comments/${commentId}`, "PUT", input);
             setData(prevData => {
                 setData(prevData => [...replaceWith(prevData, comment)]);
             });
@@ -91,7 +87,7 @@ export default function useCommentAPI() {
      * 
      * @param {number} invitationId - 募集ID
      * @param {number} commentId - コメントID
-     * @returns {boolean} success - 削除が成功したかどうか
+     * @returns {boolean} 削除が成功したかどうか
      */
     const remove = async (invitationId, commentId) => {
         try {

@@ -9,7 +9,7 @@ export default function useReplyAPI() {
     /**
      * コメントの返信一覧を取得する
      * 
-     * @param {string} id - コメントID
+     * @param {number} id - コメントID
      * @returns {array} コメントの返信一覧
      */
     const getAll = async (id) => {
@@ -33,8 +33,8 @@ export default function useReplyAPI() {
     /**
      * 返信を投稿する
      * 
-     * @param {string} input  返信フォームの入力値
-     * @param {string} id - コメントID
+     * @param {number} input  返信フォームの入力値
+     * @param {number} id - コメントID
      * @returns {boolean} 投稿が成功したかどうか
      */
     const post = async (input, id) => {
@@ -58,8 +58,8 @@ export default function useReplyAPI() {
      * 返信を更新する
      * 
      * @param {Object} input - 返信フォームの入力値
-     * @param {string} commentId - コメントID
-     * @param {string} replyId - 返信ID
+     * @param {number} commentId - コメントID
+     * @param {number} replyId - 返信ID
      * @returns {boolean} 更新が成功したがどうか
      */
     const update = async (input, commentId, replyId) => {
