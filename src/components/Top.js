@@ -68,10 +68,7 @@ export default function Top() {
     return(
         <MainContainer error={pageError} loading={loading} maxWidth="lg">
             <>
-                <Grid container spacing={2}>
-                    <InvitationList invitations={invitationAPI.data?.invitations} />
-                </Grid>
-                
+                <InvitationList invitations={invitationAPI.data?.invitations} />
                 <Paginator meta={invitationAPI.data?.meta} />
             </>
         </MainContainer>
@@ -83,11 +80,11 @@ export default function Top() {
  */
 function InvitationList({ invitations }) {
     return (
-        <>
+        <Grid container spacing={2}>
             {invitations.map((invitation, i) => (
                 <InvitationListItem invitation={invitation} key={i} />
             ))}
-        </>
+        </Grid>
     );
 }
 

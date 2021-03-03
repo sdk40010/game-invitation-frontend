@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, createContext } from "react";
+import { useState, useEffect, useContext, createContext, useMemo } from "react";
 
 import { useAuth } from "../auth/useAuth";
 import useOpenState from "../utils/useOpenState";
@@ -22,7 +22,8 @@ import {
     TextField,
     Snackbar,
     Collapse,
-    CircularProgress
+    CircularProgress,
+    Chip,
 } from "@material-ui/core";
 import { MoreVert } from '@material-ui/icons';
 
@@ -34,6 +35,9 @@ const useStyles = makeStyles((theme) => ({
         "& > *:not(:last-child)": {
             marginRight: theme.spacing(1)
         }
+    },
+    replyToLink: {
+        color: "#065fd4",
     },
     actionText: {
         cursor: "pointer",
@@ -65,7 +69,10 @@ export function CommentPoster(props) {
 
     const classes = useStyles();
 
-    const defaultValues = { [inputProps.name]: inputProps.defaultValue };
+    const defaultValues = inputProps.replyTo
+        ? { [inputProps.name]: inputProps.defaultValue, replyTo: inputProps.replyTo.id } // 返信一覧内で返信する場合
+        : { [inputProps.name]: inputProps.defaultValue };
+
     const { register, control, handleSubmit, setValue } = useForm({defaultValues});
     const comment = useWatch({ name: inputProps.name, control });
 
@@ -99,9 +106,16 @@ export function CommentPoster(props) {
 
                     <Grid item xs>
                         <Box pl={1}>
+                            {inputProps.replyTo && (
+                                <Box mb={1}><Chip label={`@${inputProps.replyTo.name}`} size="small" /></Box>
+                            )}
+
                             <TextField
                                 name={inputProps.name}
-                                placeholder={`${inputProps.label}を入力`}
+                                placeholder={inputProps.replyTo
+                                    ? `${inputProps.replyTo.name}への${inputProps.label}を入力`
+                                    : `${inputProps.label}を入力`
+                                }
                                 variant="outlined"
                                 inputRef={register({
                                     minLength: { value: 1, message: `${inputProps.label}には1文字以上の文字列を指定してください。`}
@@ -112,6 +126,7 @@ export function CommentPoster(props) {
                                 onFocus={collapse.handleOpen}
                             />
                         </Box>
+                        {inputProps.replyTo && <input name="replyTo" ref={register} hidden />}
                     </Grid>
 
                 </Grid>
@@ -141,7 +156,7 @@ export function CommentPoster(props) {
 
             </Grid>
 
-            {snackbarMessage ? (
+            {snackbarMessage && (
                 <Snackbar
                     anchorOrigin={{ vertical: "bottom", horizontal: "left"}}
                     open={snackbar.open}
@@ -149,11 +164,26 @@ export function CommentPoster(props) {
                     autoHideDuration={3000}
                     onClose={snackbar.handleClose}
                 />
-            ) : (
-                <></>
             )}
         </form>
     );
+}
+
+const useSnackbar = () => {
+    const snackbar = useOpenState();
+    const [message, setMessage] = useState("");
+
+    const handleOpen = (message) => {
+        setMessage(message);
+        snackbar.handleOpen();
+    }
+
+    return useMemo(() => ({
+        open: snackbar.open,
+        message,
+        handleOpen,
+        handleClose: snackbar.handleClose
+    }), [snackbar.open]);
 }
 
 // コメント一覧用のコンテキスト
@@ -168,16 +198,23 @@ const useCommentContext = () => {
  * コメント一覧
  */
 export function CommentList({commentAPI, replyAPI}) {
-    const value = { commentAPI, replyAPI };
+    const snackbar = useSnackbar();
+
+    const value = { commentAPI, replyAPI, snackbar };
 
     return (
         <commentListContext.Provider value={value}>
             {commentAPI.data.map((comment, i) => (
-                <CommentListItem
-                    comment={comment}
-                    key={i}
-                />
+                <CommentListItem comment={comment} key={i} />
             ))}
+
+            <Snackbar 
+                anchorOrigin={{ vertical: "bottom", horizontal: "left"}}
+                open={snackbar.open}
+                message={snackbar.message}
+                autoHideDuration={3000}
+                onClose={snackbar.handleClose}
+            />
         </commentListContext.Provider>
     );
 }
@@ -195,7 +232,8 @@ function CommentListItem({comment}) {
 
     // コメントの削除
     const handleCommentDelete = async () => {
-        return await commentAPI.remove(comment.invitationId, comment.id);
+        const success = await commentAPI.remove(comment.invitationId, comment.id);
+        return success;
     }
 
     // 返信の投稿
@@ -203,10 +241,11 @@ function CommentListItem({comment}) {
         const success1 = await replyAPI.post(input, comment.id);
         // コメントの返信件数を更新するために、返信先のコメントを再取得する
         const success2 = await commentAPI.get(comment.invitationId, comment.id);
-        return success1 && success2;
+        return Boolean(success1 && success2);
     }
 
-    const eventEmitter = new EventEmitter();
+    // CommentとReplyListで共有するイベントエミッター
+    const eventEmitter = useMemo(() => new EventEmitter(), []);
 
     return (
         <Box mb={2}>
@@ -238,7 +277,8 @@ function Comment(props) {
         onCommentDelete,
         onReplySubmit,
         iconSize,
-        eventEmitter
+        eventEmitter,
+        replyTo,
     } = props;
 
     const auth = useAuth();
@@ -248,9 +288,8 @@ function Comment(props) {
     // コメント更新フォーム用
     const commentCollapse = useOpenState();
 
-    // 更新・削除の完了を通知するためのスナックバー用
-    const snackbar = useOpenState();
-    const [message, setMessage] = useState("");
+    // 操作の完了を通知するためのスナックバー用
+    const { snackbar } = useCommentContext();
 
     // 削除の確認をするダイアログ用
     const dialog = useOpenState();
@@ -273,8 +312,7 @@ function Comment(props) {
         commentCollapse.handleClose();
 
         if (success) {
-            setMessage(`${inputProps.label}を更新しました。`);
-            snackbar.handleOpen();
+            snackbar.handleOpen(`${inputProps.label}を更新しました。`);
         }
     }
 
@@ -284,8 +322,7 @@ function Comment(props) {
         dialog.handleClose();
 
         if (success) {
-            setMessage(`${inputProps.label}を削除しました。`);
-            snackbar.handleOpen();
+            snackbar.handleOpen(`${inputProps.label}を削除しました。`);
         }
     }
 
@@ -303,8 +340,7 @@ function Comment(props) {
 
         replyCollapse.handleClose();
         if (success) {
-            setMessage("返信を投稿しました。");
-            snackbar.handleOpen();
+            snackbar.handleOpen("返信を投稿しました。");
         }
     }
 
@@ -334,7 +370,12 @@ function Comment(props) {
                             </Box>
 
                             <Box mb={1} className={classes.commentContent}>
-                                <Typography>{comment.content}</Typography>
+                                {comment.to && (
+                                    <Typography component="span" className={classes.replyToLink}>
+                                        {`@${comment.to.name}`}&nbsp;
+                                    </Typography>
+                                )}
+                                <Typography　component="span">{comment.content}</Typography>
                             </Box>
 
                             <Box>
@@ -346,7 +387,7 @@ function Comment(props) {
                                     <Box mt={2}>
                                         <CommentPoster
                                             onCommentSubmit={handleReplySubmit}
-                                            inputProps={{ name: "reply", label:"返信", defaultValue: "" }}
+                                            inputProps={{ name: "reply", label:"返信", defaultValue: "", replyTo }}
                                             onCancel={replyCollapse.handleClose}
                                             buttonLabel="返信"
                                             iconSize={iconSize}
@@ -367,21 +408,13 @@ function Comment(props) {
 
                         <DeleteDialog 
                             open={dialog.open}
-                            itemName="コメント"
+                            itemName={inputProps.label}
                             onClose={dialog.handleClose}
                             onDelete={handleCommentDelete}
                         />
                     </Grid>
 
                 </Grid>
-
-                <Snackbar
-                    anchorOrigin={{ vertical: "bottom", horizontal: "left"}}
-                    open={snackbar.open}
-                    message={message}
-                    autoHideDuration={3000}
-                    onClose={snackbar.handleClose}
-                />
             </Collapse>
 
             {/* 編集時 */}
@@ -433,7 +466,7 @@ function ReplyList({comment, eventEmitter}) {
 
         // イベントリスナーの解除
         return () => eventEmitter.off("replySubmit", handleReplySubmit);
-    }, [])
+    }, []);
 
     return (
         hasReplies ? (
@@ -475,30 +508,33 @@ function ReplyListItem({reply}) {
 
     // 返信の更新
     const handleReplyUpdate = async (input) => {
-        // return replyAPI.update(input, reply.commentId, reply.id);
+        return await replyAPI.update(input, reply.commentId, reply.id);
     }
 
     // 返信の削除
     const handleReplyDelete = async () => {
-        // return replyAPI.remove(reply.commentId, reply.id);
+        const success1 = await replyAPI.remove(reply.commentId, reply.id);
+        const success2 = await commentAPI.get(reply.comment.invitationId, reply.commentId);
+        return Boolean(success1 && success2);
     }
 
     // 返信の投稿
     const handleReplySubmit = async (input) => {
-        const success1 = replyAPI.post(input, reply.commentId);
-        const success2 = commentAPI.get(reply.comment.invitationId, reply.commentId);
-        return success1 && success2;
+        const success1 = await replyAPI.post(input, reply.commentId);
+        const success2 = await commentAPI.get(reply.comment.invitationId, reply.commentId);
+        return Boolean(success1 && success2);
     }
 
     return (
         <Box mb={2}>
             <Comment 
                 comment={reply}
-                inputProps={{ name: "reply", label:"返信", defaultValue: reply.content }}
+                inputProps={{ name: "reply", label:"返信", defaultValue: reply.content, replyTo: reply.to }}
                 onCommentUpdate={handleReplyUpdate}
                 onCommentDelete={handleReplyDelete}
                 onReplySubmit={handleReplySubmit}
                 iconSize="small"
+                replyTo={reply.user}
             />
         </Box>
     );

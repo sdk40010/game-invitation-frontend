@@ -11,7 +11,7 @@ export default function useCommentAPI() {
     /**
      * 募集のコメント一覧を取得する
      * 
-     * @param {string} id - 募集ID
+     * @param {number} id - 募集ID
      * @returns {Object} comments - コメント一覧
      */
     const getAll = async (id) => {
@@ -28,16 +28,13 @@ export default function useCommentAPI() {
     /**
      * コメントを取得する
      * 
-     * @param {string} invitationId - 募集ID
-     * @param {string} commentId - コメントID
+     * @param {number} invitationId - 募集ID
+     * @param {number} commentId - コメントID
      * @returns {Object} comment - コメント
      */
     const get = async (invitationId, commentId) => {
         try {
-            const comment = await apiCall(
-                `/api/v1/invitations/${invitationId}/comments/${commentId}`,
-                "GET"
-            );
+            const comment = await apiCall(`/api/v1/invitations/${invitationId}/comments/${commentId}`, "GET");
             setData(prevData => [...replaceWith(prevData, comment)]);
             return comment;
         } catch (err) {
@@ -50,7 +47,7 @@ export default function useCommentAPI() {
      * 募集にコメントを投稿する
      * 
      * @param {Object} input - コメントフォームの入力値
-     * @param {string} id - 募集ID
+     * @param {number} id - 募集ID
      * @returns {boolean} success - 投稿が成功したかどうか
      */
     const post = async (input, id) => {
@@ -68,21 +65,19 @@ export default function useCommentAPI() {
      * 募集へのコメントを更新する
      * 
      * @param {Object} input - コメントフォームの入力値
-     * @param {string} invitationId - 募集ID
-     * @param {string} commentId - コメントID
+     * @param {number} invitationId - 募集ID
+     * @param {number} commentId - コメントID
      * @returns {boolean} success - 更新が成功したかどうか
      */
     const update = async (input, invitationId, commentId) => {
         try {
-            const json = await apiCall(
+            const comment = await apiCall(
                 `/api/v1/invitations/${invitationId}/comments/${commentId}`,
                 "PUT",
                 input
             );
             setData(prevData => {
-                const index = prevData.findIndex(comment => comment.id === json.id);
-                prevData.splice(index, 1, json);
-                return [...prevData];
+                setData(prevData => [...replaceWith(prevData, comment)]);
             });
             return true;
         } catch (err) {
@@ -94,37 +89,19 @@ export default function useCommentAPI() {
     /**
      * コメントを削除する
      * 
-     * @param {string} invitationId - 募集ID
-     * @param {string} commentId - コメントID
+     * @param {number} invitationId - 募集ID
+     * @param {number} commentId - コメントID
      * @returns {boolean} success - 削除が成功したかどうか
      */
     const remove = async (invitationId, commentId) => {
         try {
             await apiCall(`/api/v1/invitations/${invitationId}/comments/${commentId}`, "DELETE");
-            setData(prevData => {
-                const index = prevData.findIndex(comment => comment.id === commentId);
-                prevData.splice(index, 1);
-                return [...prevData];
-            });
+            setData(prevData => [...removeById(prevData, commentId)]);
             return true;
         } catch (err) {
             setError(err);
             return false;
         }
-    }
-
-    /**
-     * 更新されたコメントとIDが一致するコメント一覧の要素を置き換える
-     * 
-     * @param {array} comments - コメント一覧
-     * @param {Object} updated - 更新されたコメント
-     * @returns {array} replaced - 置換済みのコメント一覧
-     */
-    const replaceWith = (comments, updated) => {
-        const copied = comments.slice();
-        const index = copied.findIndex(comment => comment.id === updated.id);
-        copied.splice(index, 1, updated);
-        return copied;
     }
 
     return {
@@ -136,4 +113,32 @@ export default function useCommentAPI() {
         update,
         remove
     };
+}
+
+/**
+ * 更新されたコメントとIDが一致するコメント一覧の要素を置き換える
+ * 
+ * @param {array} comments - コメント一覧
+ * @param {Object} updated - 更新されたコメント
+ * @returns {array} 置換済みのコメント一覧
+ */
+export const replaceWith = (comments, updated) => {
+    const copied = comments.slice();
+    const index = copied.findIndex(comment => comment.id === updated.id);
+    copied.splice(index, 1, updated);
+    return copied;
+}
+
+/**
+ * コメント一覧から指定されたIDと一致する要素を削除する
+ * 
+ * @param {array} comments コメント一覧
+ * @param {number} id - コメントID
+ * @returns {array} 削除後のコメント一覧
+ */
+export const removeById = (comments, id) => {
+    const copied = comments.slice();
+    const index = copied.findIndex(comment => comment.id === id);
+    copied.splice(index, 1);
+    return copied;
 }
