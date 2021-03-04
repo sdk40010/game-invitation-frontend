@@ -169,7 +169,7 @@ export function CommentPoster(props) {
     );
 }
 
-// スナックバー用のフック
+// メッセージが変更可能なスナックバー用のフック
 const useSnackbar = () => {
     const snackbar = useOpenState();
     const [message, setMessage] = useState("");
@@ -298,11 +298,11 @@ function Comment(props) {
     // コメントの操作メニュー用
     const menuItems = [
         {
-            label: "編集",
+            content: "編集",
             onClick: commentCollapse.handleOpen
         },
         {
-            label: "削除",
+            content: "削除",
             onClick: dialog.handleOpen
         }
     ];
@@ -333,13 +333,13 @@ function Comment(props) {
     // 返信の投稿
     const handleReplySubmit = async (input) => {
         const success = await onReplySubmit(input);
+        replyCollapse.handleClose();
 
         if (eventEmitter) {
             // ReplyListの返信一覧を開く処理を呼び出す
             eventEmitter.emit("replySubmit");
         }
 
-        replyCollapse.handleClose();
         if (success) {
             snackbar.handleOpen("返信を投稿しました。");
         }

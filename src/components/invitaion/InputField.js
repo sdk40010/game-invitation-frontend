@@ -105,6 +105,9 @@ export function formatTime(time) {
     return format(time.setSeconds(0), "yyyy-MM-dd HH:mm:ss");
 }
 
+const ITEM_HEIGHT = 36;
+const ITEM_PADDING_TOP = 8;
+
 /**
  * 定員選択用のコンポーネント
  */
@@ -121,15 +124,13 @@ export function CapacitySelector(props) {
     });
     
     const seq = [...Array(10)].map((_, i) => ++i);
-    const ITEM_HEIGHT = 36;
-    const ITEM_PADDING_TOP = 8;
+
     const MenuProps = {
-      PaperProps: {
-        style: {
-          maxHeight: ITEM_HEIGHT * 5 + ITEM_PADDING_TOP,
-          width: 250,
+        PaperProps: {
+            style: {
+                maxHeight: ITEM_HEIGHT * 5 + ITEM_PADDING_TOP,
+            },
         },
-      },
     };
 
     return (

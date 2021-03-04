@@ -1,16 +1,20 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 
 import { useAuth } from "../auth/useAuth";
 import useInvitationAPI from "../http/invitationAPI";
 import useCommentAPI from "../http/commentAPI";
 import useReplyAPI from "../http/replyAPI";
+import useParticipationAPI from "../http/participationAPI";
 import useErrors from "../utils/useErros";
 import useLoading from "../utils/useLoading";
+
+import EventEmitter from 'events';
 
 import MainContainer from "../utils/MainContainer";
 import Heading from "../utils/Heading";
 import { CommentPoster, CommentList } from "./Comment";
+import SimpleMenu from "../utils/SimpleMenu";
 
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -23,7 +27,10 @@ import {
     Grid,
     Box,
     Chip,
+    ListItemAvatar,
+    ListItemText
 } from "@material-ui/core";
+import { AvatarGroup } from "@material-ui/lab";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -31,6 +38,12 @@ const useStyles = makeStyles((theme) => ({
         marginTop: 0,
         marginRight: 0
     },
+    groupAvatar: {
+        "&:hover": {
+            transform: "scale(1.1)",
+            zIndex: 100 + " !important"
+        }
+    }
 }));
 
 
@@ -42,8 +55,9 @@ export default function ShowInvitation() {
     const invitationAPI = useInvitationAPI();
     const commentAPI = useCommentAPI();
     const replyAPI = useReplyAPI();
+    const participationAPI = useParticipationAPI();
 
-    const pageError = useErrors(invitationAPI.error, commentAPI.error, replyAPI.error, auth.error);
+    const pageError = useErrors(invitationAPI.error, commentAPI.error, replyAPI.error, participationAPI.error, auth.error);
     const loading = useLoading(invitationAPI.data, commentAPI.data);
 
     const { id } = useParams(); // 募集ID
@@ -71,7 +85,10 @@ export default function ShowInvitation() {
         <MainContainer error={pageError} loading={loading} maxWidth="md">
             <>
                 <Box mb={2}>
-                    <InvitationCard invitation={invitationAPI.data}/>
+                    <InvitationCard
+                        invitation={invitationAPI.data}
+                        participationAPI={participationAPI}
+                    />
                 </Box>
 
                 <Box>
@@ -100,12 +117,26 @@ export default function ShowInvitation() {
 /**
  * 募集詳細カード
  */
-function InvitationCard({invitation}) {
+function InvitationCard({invitation, participationAPI}) {
+    const auth = useAuth();
+
     const classes = useStyles();
 
+    // 募集タイトル
     const title = <Typography variant="h5" component="h1" paragraph>{invitation.title}</Typography>;
     const subHeader = invitation.createdAt;
-    const participationButton = <Button color="primary" variant="contained">参加する</Button>;
+
+    // 参加ボタン
+    const handleParticipate = async () => {
+        const success = await participationAPI.post(invitation.id);
+    }
+    const handleCancel = async () => {
+        const success = await participationAPI.remove(invitation.id);
+    }
+    const participated = invitation.participants.some(participant => auth.user.id === participant.id);
+    const participationButton = participated
+        ? <Button variant="contained">参加済み</Button>
+        : <Button color="primary" variant="contained">参加する</Button>;
 
     // 募集の作成者
     const poster = (
@@ -120,9 +151,11 @@ function InvitationCard({invitation}) {
                     <Typography variant="body1">{invitation.user.name}</Typography>
                 </Grid>
 
-                <Grid item>
-                    <Button color="primary" variant="outlined">フレンド申請</Button>
-                </Grid>
+                {auth.user.id !== invitation.userId && (
+                    <Grid item>
+                        <Button color="primary" variant="outlined">フレンド申請</Button>
+                    </Grid>
+                )}
 
             </Grid>
         </Box>
@@ -170,6 +203,9 @@ function InvitationCard({invitation}) {
 
             <Box mb={2}>
                 <Heading>参加者</Heading>
+                <Box mt={1}>
+                    <CustomAvatarGroup users={invitation.participants} />
+                </Box>
             </Box>
 
         </>
@@ -188,6 +224,63 @@ function InvitationCard({invitation}) {
                 {content}
             </CardContent>
         </Card>
+    );
+
+}
+
+const ITEM_HEIGHT = 52;
+const ITEM_PADDING_TOP = 8;
+
+/**
+ * 参加者のアイコン一覧
+ */
+function CustomAvatarGroup(props) {
+    const { users, max = 4 } = props;
+
+    const classes = useStyles();
+
+    // SimpleMenuに渡すイベントエミッター
+    const eventEmitter = useMemo(() => new EventEmitter(), []);
+
+    const handleClickShowMore = (event) => {
+        eventEmitter.emit("clickShowMore", event);
+    }
+
+    // 参加者一覧用
+    const menuItems = users.map(user => {
+        const content = (
+            <>
+                <ListItemAvatar>
+                    <Avatar alt={user.name} src={user.iconUrl} />
+                </ListItemAvatar>
+                <ListItemText primary={user.name} />
+            </>
+        );
+
+        return {
+            content: content,
+            onClick: () => {},
+            disableTypography: true
+        }
+    });
+
+    return (
+        <>
+            <AvatarGroup classes={{ avatar: classes.groupAvatar }}>
+                {users.slice(0, max).map(participant => (
+                    <Avatar alt={participant.name} src={participant.iconUrl} />
+                ))}
+                <Avatar onClick={handleClickShowMore}>
+                    {`+${users.length > max ? users.length - max : 0}`}
+                </Avatar>
+            </AvatarGroup>
+
+            <SimpleMenu 
+                menuItems={menuItems}
+                PaperProps={{ style: { maxHeight: ITEM_HEIGHT * 5 + ITEM_PADDING_TOP } }}
+                eventProps={{ name: "clickShowMore", emitter: eventEmitter }}
+            />
+        </>
     );
 
 }

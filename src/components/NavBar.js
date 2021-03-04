@@ -40,15 +40,15 @@ export default function NavBar() {
 
     const menuItems = [
         {
-            label: "ログアウト",
+            content: "ログアウト",
             onClick: auth.logout
         },
         {
-            label: "マイページ",
+            content: "マイページ",
             onClick: () => {}
         },
         {
-            label: "設定",
+            content: "設定",
             onClick: () => {}
         }
     ]
