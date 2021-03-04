@@ -13,7 +13,7 @@ import EventEmitter from 'events';
 
 import MainContainer from "../utils/MainContainer";
 import Heading from "../utils/Heading";
-import { CommentPoster, CommentList } from "./Comment";
+import { CommentList } from "./Comment";
 import SimpleMenu from "../utils/SimpleMenu";
 
 import { makeStyles } from "@material-ui/core/styles";
@@ -76,11 +76,6 @@ export default function ShowInvitation() {
         })();
     }, []);
 
-    // コメントの投稿
-    const handleCommentSubmit = async (input) => {
-        await commentAPI.post(input, id);
-    }
-
     return (
         <MainContainer error={pageError} loading={loading} maxWidth="md">
             <>
@@ -97,14 +92,6 @@ export default function ShowInvitation() {
                             title={<Typography variant="h6" component="h2">コメント</Typography>}
                         />
                         <CardContent>
-                            <Box mb={4}>
-                                <CommentPoster
-                                    onCommentSubmit={handleCommentSubmit}
-                                    inputProps={{ name: "comment", label:"コメント", defaultValue: "" }}
-                                    snackbarMessage="コメントを投稿しました。"
-                                />
-                            </Box>
-
                             <CommentList commentAPI={commentAPI} replyAPI={replyAPI} />
                         </CardContent>
                     </Card>
@@ -268,7 +255,7 @@ function CustomAvatarGroup(props) {
         <>
             <AvatarGroup classes={{ avatar: classes.groupAvatar }}>
                 {users.slice(0, max).map(participant => (
-                    <Avatar alt={participant.name} src={participant.iconUrl} />
+                    <Avatar alt={participant.name} src={participant.iconUrl} key={participant.id} />
                 ))}
                 <Avatar onClick={handleClickShowMore}>
                     {`+${users.length > max ? users.length - max : 0}`}

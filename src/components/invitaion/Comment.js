@@ -1,7 +1,8 @@
-import { useState, useEffect, useContext, createContext, useMemo } from "react";
+import { useEffect, useContext, createContext, useMemo } from "react";
+import { useParams } from "react-router-dom";
 
 import { useAuth } from "../auth/useAuth";
-import useOpenState from "../utils/useOpenState";
+import { useOpenState, useSnackbar } from "../utils/useOpenState";
 import useLoading from "../utils/useLoading";
 
 import { useForm, useWatch } from "react-hook-form";
@@ -42,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
     actionText: {
         cursor: "pointer",
         "&:hover": {
-            color: fade(theme.palette.common.black, .72)
+            color: theme.palette.text.primary
         }
     },
     // アイコン用
@@ -52,16 +53,65 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
+// コメント一覧用のコンテキスト
+const commentListContext = createContext();
+
+// コメント一覧コンテキストを利用するためのフック
+const useCommentListContext = () => {
+    return useContext(commentListContext);
+}
+
+/**
+ * コメント一覧
+ */
+export function CommentList({commentAPI, replyAPI}) {
+    const snackbar = useSnackbar();
+
+    const value = { commentAPI, replyAPI, snackbar };
+
+    const { id } = useParams(); // 募集ID
+
+    // コメントの投稿
+    const handleCommentSubmit = async (input) => {
+        const success = await commentAPI.post(input, id);
+        if (success) {
+            snackbar.handleOpen("コメントを投稿しました。");
+        }
+    }
+
+    return (
+        <commentListContext.Provider value={value}>
+            <Box mb={4}>
+                <CommentPoster
+                    onCommentSubmit={handleCommentSubmit}
+                    inputProps={{ name: "comment", label:"コメント", defaultValue: "" }}
+                />
+            </Box>
+
+            {commentAPI.data.map(comment => (
+                <CommentListItem comment={comment} key={comment.id} />
+            ))}
+
+            <Snackbar 
+                anchorOrigin={{ vertical: "bottom", horizontal: "left"}}
+                open={snackbar.open}
+                message={snackbar.message}
+                autoHideDuration={3000}
+                onClose={snackbar.handleClose}
+            />
+        </commentListContext.Provider>
+    );
+}
+
 /**
  * コメント投稿フォーム
  */
-export function CommentPoster(props) {
+function CommentPoster(props) {
     const {
         onCommentSubmit,
         inputProps,
         onCancel = () => {},
         buttonLabel = "投稿",
-        snackbarMessage,
         iconSize
     } = props;
 
@@ -83,15 +133,11 @@ export function CommentPoster(props) {
         collapse.handleClose();
     }
 
-    // 投稿の完了を通知するためのスナックバー用
-    const snackbar = useOpenState();
-
     // コメントの投稿
     const onSubmit = async (input) => {
         await onCommentSubmit(input);
         setValue(inputProps.name, "");
         collapse.handleClose();
-        snackbar.handleOpen();
     }
 
     return (
@@ -155,68 +201,7 @@ export function CommentPoster(props) {
                 </Grid>
 
             </Grid>
-
-            {snackbarMessage && (
-                <Snackbar
-                    anchorOrigin={{ vertical: "bottom", horizontal: "left"}}
-                    open={snackbar.open}
-                    message={snackbarMessage}
-                    autoHideDuration={3000}
-                    onClose={snackbar.handleClose}
-                />
-            )}
         </form>
-    );
-}
-
-// メッセージが変更可能なスナックバー用のフック
-const useSnackbar = () => {
-    const snackbar = useOpenState();
-    const [message, setMessage] = useState("");
-
-    const handleOpen = (message) => {
-        setMessage(message);
-        snackbar.handleOpen();
-    }
-
-    return useMemo(() => ({
-        open: snackbar.open,
-        message,
-        handleOpen,
-        handleClose: snackbar.handleClose
-    }), [snackbar.open]);
-}
-
-// コメント一覧用のコンテキスト
-const commentListContext = createContext();
-
-// コメント一覧コンテキストを利用するためのフック
-const useCommentContext = () => {
-    return useContext(commentListContext);
-}
-
-/**
- * コメント一覧
- */
-export function CommentList({commentAPI, replyAPI}) {
-    const snackbar = useSnackbar();
-
-    const value = { commentAPI, replyAPI, snackbar };
-
-    return (
-        <commentListContext.Provider value={value}>
-            {commentAPI.data.map((comment, i) => (
-                <CommentListItem comment={comment} key={i} />
-            ))}
-
-            <Snackbar 
-                anchorOrigin={{ vertical: "bottom", horizontal: "left"}}
-                open={snackbar.open}
-                message={snackbar.message}
-                autoHideDuration={3000}
-                onClose={snackbar.handleClose}
-            />
-        </commentListContext.Provider>
     );
 }
 
@@ -224,7 +209,7 @@ export function CommentList({commentAPI, replyAPI}) {
  * コメント一覧アイテム
  */
 function CommentListItem({comment}) {
-    const { commentAPI, replyAPI } = useCommentContext();
+    const { commentAPI, replyAPI } = useCommentListContext();
 
     // コメントの更新
     const handleCommentUpdate = async (input) => {
@@ -290,7 +275,7 @@ function Comment(props) {
     const commentCollapse = useOpenState();
 
     // 操作の完了を通知するためのスナックバー用
-    const { snackbar } = useCommentContext();
+    const { snackbar } = useCommentListContext();
 
     // 削除の確認をするダイアログ用
     const dialog = useOpenState();
@@ -436,7 +421,7 @@ function Comment(props) {
  * 返信一覧
  */
 function ReplyList({comment, eventEmitter}) {
-    const { replyAPI } = useCommentContext();
+    const { replyAPI } = useCommentListContext();
 
     const loading = useLoading(replyAPI.data?.get(comment.id));
 
@@ -465,12 +450,11 @@ function ReplyList({comment, eventEmitter}) {
         const handleReplySubmit = () => collapse.handleOpen();
         eventEmitter.on("replySubmit", handleReplySubmit);
 
-        // イベントリスナーの解除
         return () => eventEmitter.off("replySubmit", handleReplySubmit);
     }, []);
 
     return (
-        hasReplies ? (
+        hasReplies && (
             <Box ml={7}>
                 <Box>
                     <ActionText onClick={handleClick}>
@@ -486,18 +470,14 @@ function ReplyList({comment, eventEmitter}) {
                         </Box>
                     ) : (
                         <Box mt={2}>
-                            {replies.map((reply, i) => (
-                                <ReplyListItem reply={reply} key={i} />
+                            {replies.map(reply => (
+                                <ReplyListItem reply={reply} key={reply.id} />
                             ))}
                         </Box>
                     )}
-                    
                 </Collapse>
-                
             </Box>
-        ) : (
-            <></>
-        )
+        ) 
     );
 }
 
@@ -505,7 +485,7 @@ function ReplyList({comment, eventEmitter}) {
  * 返信一覧アイテム
  */
 function ReplyListItem({reply}) {
-    const { commentAPI, replyAPI } = useCommentContext();
+    const { commentAPI, replyAPI } = useCommentListContext();
 
     // 返信の更新
     const handleReplyUpdate = async (input) => {

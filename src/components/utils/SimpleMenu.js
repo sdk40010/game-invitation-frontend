@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
     IconButton,
     Menu,
     MenuItem,
     Typography,
+    Box
 }
 from "@material-ui/core";
 
@@ -13,20 +14,31 @@ from "@material-ui/core";
 export default function SimpleMenu({ icon, menuItems, PaperProps, eventProps }) {
   const [anchorEl, setAnchorEl] = useState(null);
 
-    const handleClick = (event) => {
+    const handleClick = useCallback((event) => {
         setAnchorEl(event.currentTarget);
-    };
+    }, []);
 
     const handleClose = () => {
         setAnchorEl(null);
     };
 
-    if (eventProps) {
-        eventProps.emitter.on(eventProps.name, handleClick);
-    }
+
+    useEffect(() => {
+        // 外部のコンポーネントで指定されたイベントが発生したときの処理を登録
+        if (eventProps) {
+            eventProps.emitter.on(eventProps.name, handleClick);
+        }
+
+        // イベントリスナーの解除
+        return () => {
+            if (eventProps) {
+                eventProps.emitter.off(eventProps.name, handleClick);
+            }
+        }
+    })
 
     return (
-        <div>
+        <Box>
             {icon && (
               <IconButton onClick={handleClick}>{icon}</IconButton>
             )}
@@ -54,6 +66,6 @@ export default function SimpleMenu({ icon, menuItems, PaperProps, eventProps }) 
                     );
                 })}
             </Menu>
-        </div>
+        </Box>
     );
 }

@@ -4,17 +4,25 @@ import { Link } from "react-router-dom";
 import { useAuth } from "./auth/useAuth";
 
 import SimpleMenu from "./utils/SimpleMenu";
-import { makeStyles } from "@material-ui/core/styles";
+import { makeStyles, useTheme } from "@material-ui/core/styles";
 import {
     AppBar,
     Typography,
     Toolbar,
     Button,
     Avatar,
-} from "@material-ui/core"
+    Box,
+    IconButton,
+} from "@material-ui/core";
+import {Brightness2, Brightness7} from "@material-ui/icons";
 
 
 const useStyles = makeStyles((theme) => ({
+    appBar: {
+        backgroundColor: theme.palette.type === "light"
+            ? theme.palette.primary.main
+            : theme.palette.background.default
+    },
     siteName: {
         flexGrow: 1,
     },
@@ -30,11 +38,16 @@ const useStyles = makeStyles((theme) => ({
         "&:hover": {
             backgroundColor: theme.palette.grey[300]
         }
+    },
+    iconButton: {
+        color: theme.palette.common.white
     }
 }));
 
-export default function NavBar() {
+export default function NavBar({eventEmitter}) {
     const auth = useAuth();
+
+    const theme = useTheme();
 
     const classes = useStyles();
 
@@ -53,16 +66,25 @@ export default function NavBar() {
         }
     ]
 
+    const handleClick = () => eventEmitter.emit("toggleTheme");
+
     return (
-        <AppBar>
+        <AppBar className={classes.appBar}>
             <Toolbar>
-                <div className={classes.siteName}>
+                <Box className={classes.siteName}>
                     <Link to="/" className={classes.link}>
                         <Typography variant="h6" component="span">SITE NAME</Typography>
                     </Link>
-                </div>
+                </Box>
 
-                { auth.user ? (
+                <IconButton className={classes.iconButton} onClick={handleClick}>
+                    {theme.palette.type === "light"
+                        ? <Brightness2 />
+                        : <Brightness7 />
+                    }
+                </IconButton>
+
+                {auth.user ? (
                     <>
                         <Link to="/invitations/new" className={classes.link}>
                             <Button variant="contained" className={classes.button}>新規作成</Button>

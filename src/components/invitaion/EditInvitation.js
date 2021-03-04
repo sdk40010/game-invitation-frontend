@@ -7,7 +7,7 @@ import useInvitationAPI from "../http/invitationAPI";
 import useTagAPI from "../http/tagAPI";
 import useErrors from "../utils/useErros";
 import useLoading from "../utils/useLoading";
-import useOpenState from "../utils/useOpenState";
+import { useOpenState } from "../utils/useOpenState";
 
 import MainContainer from "../utils/MainContainer";
 import InvitationForm from "./InvitationForm";
