@@ -13,7 +13,6 @@ import SimpleMenu from "../utils/SimpleMenu";
 import DeleteDialog from "../utils/DeleteDialog";
 
 import { makeStyles } from "@material-ui/core/styles";
-import { fade } from '@material-ui/core/styles/colorManipulator';
 import {
     Typography,
     Button,

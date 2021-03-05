@@ -1,4 +1,3 @@
-import React from "react";
 import { Link } from "react-router-dom";
 
 import { useAuth } from "./auth/useAuth";
@@ -44,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-export default function NavBar({eventEmitter}) {
+export default function NavBar({onToggleTheme}) {
     const auth = useAuth();
 
     const theme = useTheme();
@@ -64,9 +63,7 @@ export default function NavBar({eventEmitter}) {
             content: "設定",
             onClick: () => {}
         }
-    ]
-
-    const handleClick = () => eventEmitter.emit("toggleTheme");
+    ];
 
     return (
         <AppBar className={classes.appBar}>
@@ -77,7 +74,7 @@ export default function NavBar({eventEmitter}) {
                     </Link>
                 </Box>
 
-                <IconButton className={classes.iconButton} onClick={handleClick}>
+                <IconButton className={classes.iconButton} onClick={onToggleTheme}>
                     {theme.palette.type === "light"
                         ? <Brightness2 />
                         : <Brightness7 />
