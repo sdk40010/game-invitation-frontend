@@ -6,7 +6,7 @@
  * @param {string} method - HTTPメソッド
  * @param {Object} bodyData - 送信データ
  * @returns {Object} json - JSONレスポンス
- * @throws {Error} error - エラー
+ * @throws {Error} エラーレスポンス
  */
 export default async function apiCall(path, method, bodyData = {}) {
     const apiServerURL = process.env.REACT_APP_API_SERVER_URL;

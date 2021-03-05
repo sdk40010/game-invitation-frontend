@@ -8,6 +8,7 @@ import useReplyAPI from "../http/replyAPI";
 import useParticipationAPI from "../http/participationAPI";
 import useErrors from "../utils/useErros";
 import useLoading from "../utils/useLoading";
+import { useSnackbar } from "../utils/useOpenState";
 
 import EventEmitter from 'events';
 
@@ -28,7 +29,8 @@ import {
     Box,
     Chip,
     ListItemAvatar,
-    ListItemText
+    ListItemText,
+    Snackbar,
 } from "@material-ui/core";
 import { AvatarGroup } from "@material-ui/lab";
 
@@ -38,6 +40,11 @@ const useStyles = makeStyles((theme) => ({
         marginTop: 0,
         marginRight: 0
     },
+    disabledButton: {
+        backgroundColor: theme.palette.action.disabledBackground + " !important",
+        color: theme.palette.text.secondary + " !important",
+    },
+    
     groupAvatar: {
         "&:hover": {
             transform: "scale(1.1)",
@@ -45,7 +52,6 @@ const useStyles = makeStyles((theme) => ({
         }
     }
 }));
-
 
 /**
  * 募集閲覧ページ
@@ -81,7 +87,7 @@ export default function ShowInvitation() {
             <>
                 <Box mb={2}>
                     <InvitationCard
-                        invitation={invitationAPI.data}
+                        invitationAPI={invitationAPI}
                         participationAPI={participationAPI}
                     />
                 </Box>
@@ -104,26 +110,45 @@ export default function ShowInvitation() {
 /**
  * 募集詳細カード
  */
-function InvitationCard({invitation, participationAPI}) {
+function InvitationCard({invitationAPI, participationAPI}) {
+    const invitation = invitationAPI.data;
+
     const auth = useAuth();
 
     const classes = useStyles();
+
+    const snackbar = useSnackbar();
 
     // 募集タイトル
     const title = <Typography variant="h5" component="h1" paragraph>{invitation.title}</Typography>;
     const subHeader = invitation.createdAt;
 
-    // 参加ボタン
+    // 参加ボタン用
     const handleParticipate = async () => {
-        const success = await participationAPI.post(invitation.id);
+        const success1 = await participationAPI.post(invitation.id);
+        // 参加者一覧を更新するために、募集を再取得する
+        const success2 = await invitationAPI.get(invitation.id);
+        if (success1 && success2) {
+            snackbar.handleOpen("募集に参加しました。");
+        }
     }
     const handleCancel = async () => {
-        const success = await participationAPI.remove(invitation.id);
+        const success1 = await participationAPI.remove(invitation.id);
+        const success2 = await invitationAPI.get(invitation.id);
+        if (success1 && success2) {
+            snackbar.handleOpen("募集への参加を取り消しました。");
+        }
     }
+    const isPoster = auth.user.id === invitation.userId;
     const participated = invitation.participants.some(participant => auth.user.id === participant.id);
-    const participationButton = participated
-        ? <Button variant="contained">参加済み</Button>
-        : <Button color="primary" variant="contained">参加する</Button>;
+    const canParticipate = invitation.capacity > invitation.participants.length;
+
+    // 参加ボタン
+    const participationButton 
+        = isPoster ? <DisabledButton>主催者として参加済み</DisabledButton>
+        : participated ? <Button variant="contained" onClick={handleCancel}>参加済み</Button>
+        : !canParticipate ? <DisabledButton>募集終了</DisabledButton>
+        : <Button color="primary" variant="contained" onClick={handleParticipate}>参加する</Button>;
 
     // 募集の作成者
     const poster = (
@@ -191,7 +216,7 @@ function InvitationCard({invitation, participationAPI}) {
             <Box mb={2}>
                 <Heading>参加者</Heading>
                 <Box mt={1}>
-                    <CustomAvatarGroup users={invitation.participants} />
+                    <CustomAvatarGroup invitation={invitation} />
                 </Box>
             </Box>
 
@@ -200,6 +225,14 @@ function InvitationCard({invitation, participationAPI}) {
 
     return (
         <Card>
+            <Snackbar 
+                anchorOrigin={{ vertical: "bottom", horizontal: "left"}}
+                open={snackbar.open}
+                message={snackbar.message}
+                autoHideDuration={3000}
+                onClose={snackbar.handleClose}
+            />
+
             <CardHeader 
                 title={title}
                 subheader={subHeader}
@@ -215,14 +248,32 @@ function InvitationCard({invitation, participationAPI}) {
 
 }
 
+/**
+ * 操作できないボタン
+ * ボタンラベルの色を調整済み
+ */
+function DisabledButton({children}) {
+    const classes = useStyles();
+
+    return (
+        <Button variant="contained" disabled classes={{ disabled: classes.disabledButton }}>
+            {children}
+        </Button>
+    );
+}
+
+// 参加者一覧用
 const ITEM_HEIGHT = 52;
 const ITEM_PADDING_TOP = 8;
 
 /**
- * 参加者のアイコン一覧
+ * 参加者一覧
  */
 function CustomAvatarGroup(props) {
-    const { users, max = 4 } = props;
+    const { invitation, max = 4 } = props;
+    const participants = invitation.participants;
+
+    const auth = useAuth();
 
     const classes = useStyles();
 
@@ -234,13 +285,19 @@ function CustomAvatarGroup(props) {
     }
 
     // 参加者一覧用
-    const menuItems = users.map(user => {
+    const menuItems = participants.map(participant => {
         const content = (
             <>
                 <ListItemAvatar>
-                    <Avatar alt={user.name} src={user.iconUrl} />
+                    <Avatar alt={participant.name} src={participant.iconUrl} />
                 </ListItemAvatar>
-                <ListItemText primary={user.name} />
+                <ListItemText
+                    primary={participant.name}
+                    secondary={invitation.userId === participant.id
+                        ? `主催者・${participant.participation.createdAt}に参加`
+                        : `${participant.participation.createdAt}に参加`
+                    }
+                />
             </>
         );
 
@@ -254,11 +311,11 @@ function CustomAvatarGroup(props) {
     return (
         <>
             <AvatarGroup classes={{ avatar: classes.groupAvatar }}>
-                {users.slice(0, max).map(participant => (
+                {participants.slice(0, max).map(participant => (
                     <Avatar alt={participant.name} src={participant.iconUrl} key={participant.id} />
                 ))}
                 <Avatar onClick={handleClickShowMore}>
-                    {`+${users.length > max ? users.length - max : 0}`}
+                    {`+${participants.length > max ? participants.length - max : 0}`}
                 </Avatar>
             </AvatarGroup>
 

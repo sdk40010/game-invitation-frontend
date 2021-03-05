@@ -183,9 +183,7 @@ function CommentPoster(props) {
                             in={collapse.open}
                             timeout={0}
                             unmountOnExit
-                            classes={{
-                                wrapperInner: classes.commentPosterButtonWrapper
-                            }}
+                            classes={{ wrapperInner: classes.commentPosterButtonWrapper }}
                         >
                             <Button color="primary" onClick={handleCancelClick}>
                                 キャンセル
