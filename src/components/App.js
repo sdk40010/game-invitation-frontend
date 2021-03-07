@@ -10,6 +10,8 @@ import Top from "./Top";
 import NewInvitation from "./invitaion/NewInvitation"
 import ShowInvitation from "./invitaion/ShowInvitation";
 import EditInvitation from "./invitaion/EditInvitation";
+import UserInvitations from "./user/UserInvitations";
+import UserParticipations from "./user/UserParticipations";
 
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { ThemeProvider } from '@material-ui/core/styles';
@@ -46,6 +48,12 @@ function App() {
                             <EditInvitation />
                         </PrivateRoute>
 
+                        <PrivateRoute exact path="/users/:id">
+                            <UserInvitations />
+                        </PrivateRoute>
+
+                        <PrivateRoute path="/users/:id/participations">
+                        </PrivateRoute>
                     </Switch>
                 </ProvideAuth>
             </Router>

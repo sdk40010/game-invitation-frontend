@@ -41,6 +41,9 @@ const useStyles = makeStyles((theme) => ({
         "&::-webkit-scrollbar" : {  /* Chrome, Safari 対応 */
             display: "none"
         }
+    },
+    subHeaderChip: {
+        color: theme.palette.text.secondary
     }
 }));
 
@@ -68,8 +71,13 @@ export default function Top() {
     return(
         <MainContainer error={pageError} loading={loading} maxWidth="lg">
             <>
-                <InvitationList invitations={invitationAPI.data?.invitations} />
-                <Paginator meta={invitationAPI.data?.meta} />
+                <Box>
+                    <InvitationList invitations={invitationAPI.data?.invitations} />
+                </Box>
+
+                <Box mt={4}>
+                    <Paginator meta={invitationAPI.data?.meta} />
+                </Box>
             </>
         </MainContainer>
     );
@@ -78,7 +86,7 @@ export default function Top() {
 /**
  * 募集一覧
  */
-function InvitationList({ invitations }) {
+export function InvitationList({ invitations }) {
     return (
         <Grid container spacing={2}>
             {invitations.map((invitation, i) => (
@@ -95,7 +103,20 @@ function InvitationListItem({ invitation }) {
     const classes = useStyles();
 
     const title = <Typography variant="body1">{invitation.title}</Typography>
-    const subHeader = invitation.createdAt;
+    const subHeader = (
+        <>
+            {invitation.createdAt}
+            <Chip
+                label={invitation.canParticipateIn ? "募集中" : "募集終了"}
+                size="small"
+                color={invitation.canParticipateIn ? "primary" : "default"}
+                variant="outlined"
+                className={!invitation.canParticipateIn && classes.subHeaderChip}
+                component={Box}
+                ml={1}
+            />
+        </>
+    );
     const poster = <Avatar alt={invitation.user.name} src={invitation.user.iconUrl} />;
 
     const content = (
@@ -115,17 +136,13 @@ function InvitationListItem({ invitation }) {
                     <Grid item>
                         <CustomHeading>時間</CustomHeading>
                     </Grid>
-                    <Grid item>
-                        <Typography variant="body2">
-                            {invitation.startTime}
-                        </Typography>
-                    </Grid>
-                    <Grid item>〜</Grid>
-                    <Grid item>
-                        <Typography variant="body2">
-                            {invitation.endTime}
-                        </Typography>
-                    </Grid>
+                        <Grid item>
+                            <Typography variant="body2">{invitation.startTime}</Typography>
+                        </Grid>
+                        <Grid item>〜</Grid>
+                        <Grid item>
+                            <Typography variant="body2">{invitation.endTime}</Typography>
+                        </Grid>
                 </Grid>
             </Box>
             
@@ -178,24 +195,22 @@ function CustomHeading({children}) {
 /**
  * ページ一覧
  */
-function Paginator({ meta }) {
+export function Paginator({ meta }) {
     return (
-        <Box mt={4}>
-            <Grid container justify="center">
-                <Grid item>
-                    <Pagination
-                        page={meta.currentPage}
-                        count={meta.lastPage}
-                        renderItem={item => (
-                            <PaginationItem
-                                component={Link}
-                                to={item.page === 1 ? '' : `?page=${item.page}`}
-                                {...item}
-                            />
-                        )}
-                    />
-                </Grid>
+        <Grid container justify="center">
+            <Grid item>
+                <Pagination
+                    page={meta.currentPage}
+                    count={meta.lastPage}
+                    renderItem={item => (
+                        <PaginationItem
+                            component={Link}
+                            to={item.page === 1 ? '' : `?page=${item.page}`}
+                            {...item}
+                        />
+                    )}
+                />
             </Grid>
-        </Box>
+        </Grid>
     );
 }

@@ -6,5 +6,5 @@ import { useMemo } from "react";
  */
 export default function useQuery() {
     const queryString = useLocation().search;
-    return useMemo(() => new URLSearchParams(queryString), []);
+    return useMemo(() => new URLSearchParams(queryString), [queryString]);
 }

@@ -1,12 +1,15 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useMemo, forwardRef } from "react";
+import { Link } from 'react-router-dom';
+
+import SimpleLink from "./SimpleLink";
+
 import {
     IconButton,
     Menu,
     MenuItem,
     Typography,
     Box
-}
-from "@material-ui/core";
+} from "@material-ui/core";
 
 /**
  * メニュー
@@ -14,9 +17,9 @@ from "@material-ui/core";
 export default function SimpleMenu({ icon, menuItems, PaperProps, eventProps }) {
   const [anchorEl, setAnchorEl] = useState(null);
 
-    const handleClick = useCallback((event) => {
+    const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
-    }, []);
+    };
 
     const handleClose = () => {
         setAnchorEl(null);
@@ -29,7 +32,6 @@ export default function SimpleMenu({ icon, menuItems, PaperProps, eventProps }) 
             eventProps.emitter.on(eventProps.name, handleClick);
         }
 
-        // イベントリスナーの解除
         return () => {
             if (eventProps) {
                 eventProps.emitter.off(eventProps.name, handleClick);
@@ -50,22 +52,45 @@ export default function SimpleMenu({ icon, menuItems, PaperProps, eventProps }) 
                 PaperProps={PaperProps}
             >
                 {menuItems.map((item, i) => {
-                    const handleClick = () => {
+                    const handleItemClick = () => {
                         handleClose();
                         item.onClick();
                     }
 
                     return (
-                        <MenuItem key={i} onClick={handleClick}>
-                            {item.disableTypography ? (
-                                item.content
-                            ) : (
-                                <Typography component="span" variant="button">{item.content}</Typography>
-                            )}
-                        </MenuItem>
+                        <SimpleMenuItem 
+                            item={item} 
+                            onClick={handleItemClick} 
+                            key={i}
+                        />
                     );
                 })}
             </Menu>
         </Box>
     );
 }
+
+/**
+ * メニューアイテム
+ */
+const SimpleMenuItem = forwardRef((props, ref) => {
+    const {item, onClick } = props;
+    
+    const menuItem = (
+        <MenuItem onClick={onClick} ref={ref} component="div">
+            {item.disableTypography
+                ? item.content
+                : <Typography component="span" variant="button">{item.content}</Typography>
+            }
+        </MenuItem>
+    );
+
+    return (
+        <li>
+            {item.link 
+                ? <SimpleLink to={item.link}>{menuItem}</SimpleLink>
+                : menuItem
+            }
+        </li>
+    );
+});

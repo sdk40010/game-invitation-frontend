@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link as RouterLink } from "react-router-dom";
 
 import { useAuth } from "../auth/useAuth";
 import useInvitationAPI from "../http/invitationAPI";
@@ -50,6 +50,11 @@ const useStyles = makeStyles((theme) => ({
             transform: "scale(1.1)",
             zIndex: 100 + " !important"
         }
+    },
+    // アイコン用
+    large: {
+        width: theme.spacing(7),
+        height: theme.spacing(7)
     }
 }));
 
@@ -140,36 +145,20 @@ function InvitationCard({invitationAPI, participationAPI}) {
         }
     }
     const isPoster = auth.user.id === invitation.userId;
-    const participated = invitation.participants.some(participant => auth.user.id === participant.id);
-    const canParticipate = invitation.capacity > invitation.participants.length;
+    const participatedIn = invitation.participants.some(participant => auth.user.id === participant.id);
+    const canParticipateIn = invitation.canParticipateIn;
 
     // 参加ボタン
     const participationButton 
         = isPoster ? <DisabledButton>主催者として参加済み</DisabledButton>
-        : participated ? <Button variant="contained" onClick={handleCancel}>参加済み</Button>
-        : !canParticipate ? <DisabledButton>募集終了</DisabledButton>
+        : participatedIn ? <Button variant="contained" onClick={handleCancel}>参加済み</Button>
+        : !canParticipateIn ? <DisabledButton>募集終了</DisabledButton>
         : <Button color="primary" variant="contained" onClick={handleParticipate}>参加する</Button>;
 
     // 募集の作成者
     const poster = (
         <Box mb={2}>
-            <Grid container spacing={1} alignItems="center">
-
-                <Grid item>
-                    <Avatar alt={invitation.user.name} src={invitation.user.iconUrl} />
-                </Grid>
-
-                <Grid item xs>
-                    <Typography variant="body1">{invitation.user.name}</Typography>
-                </Grid>
-
-                {auth.user.id !== invitation.userId && (
-                    <Grid item>
-                        <Button color="primary" variant="outlined">フレンド申請</Button>
-                    </Grid>
-                )}
-
-            </Grid>
+            <UserProfile user={invitation.user} />
         </Box>
     );
 
@@ -249,6 +238,35 @@ function InvitationCard({invitationAPI, participationAPI}) {
 }
 
 /**
+ * ユーザープロフィール
+ */
+export function UserProfile({user, iconSize, typographyVariant = "body1"}) {
+    const auth = useAuth();
+
+    const classes = useStyles();
+
+    return (
+        <Grid container spacing={1} alignItems="center">
+
+            <Grid item>
+                <Avatar alt={user.name} src={user.iconUrl} className={classes[iconSize] ?? ""} />
+            </Grid>
+
+            <Grid item xs>
+                <Typography variant={typographyVariant}>{user.name}</Typography>
+            </Grid>
+
+            {auth.user.id !== user.id && (
+                <Grid item>
+                    <Button color="primary" variant="outlined">フレンド申請</Button>
+                </Grid>
+            )}
+
+        </Grid>
+    );
+}
+
+/**
  * 操作できないボタン
  * ボタンラベルの色を調整済み
  */
@@ -304,7 +322,8 @@ function CustomAvatarGroup(props) {
         return {
             content: content,
             onClick: () => {},
-            disableTypography: true
+            disableTypography: true,
+            link: `/users/${participant.id}`
         }
     });
 
@@ -312,7 +331,15 @@ function CustomAvatarGroup(props) {
         <>
             <AvatarGroup classes={{ avatar: classes.groupAvatar }}>
                 {participants.slice(0, max).map(participant => (
-                    <Avatar alt={participant.name} src={participant.iconUrl} key={participant.id} />
+                    <Avatar 
+                        alt={participant.name}
+                        src={participant.iconUrl}
+                        key={participant.id}
+                        component={RouterLink}
+                        to={`/users/${participant.id}`}
+                    />
+
+
                 ))}
                 <Avatar onClick={handleClickShowMore}>
                     {`+${participants.length > max ? participants.length - max : 0}`}

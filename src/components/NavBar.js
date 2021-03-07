@@ -1,8 +1,8 @@
-import { Link } from "react-router-dom";
-
 import { useAuth } from "./auth/useAuth";
 
 import SimpleMenu from "./utils/SimpleMenu";
+import SimpleLink from "./utils/SimpleLink";
+
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import {
     AppBar,
@@ -13,7 +13,7 @@ import {
     Box,
     IconButton,
 } from "@material-ui/core";
-import {Brightness2, Brightness7} from "@material-ui/icons";
+import { Brightness2, Brightness7 } from "@material-ui/icons";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -24,11 +24,6 @@ const useStyles = makeStyles((theme) => ({
     },
     siteName: {
         flexGrow: 1,
-    },
-    link: {
-        textDecoration: "none",
-        color: theme.palette.common.white,
-        display: "inline-block"
     },
     button: {
         backgroundColor: theme.palette.common.white,
@@ -69,9 +64,9 @@ export default function NavBar({onToggleTheme}) {
         <AppBar className={classes.appBar}>
             <Toolbar>
                 <Box className={classes.siteName}>
-                    <Link to="/" className={classes.link}>
+                    <SimpleLink to="/">
                         <Typography variant="h6" component="span">SITE NAME</Typography>
-                    </Link>
+                    </SimpleLink>
                 </Box>
 
                 <IconButton className={classes.iconButton} onClick={onToggleTheme}>
@@ -83,9 +78,9 @@ export default function NavBar({onToggleTheme}) {
 
                 {auth.user ? (
                     <>
-                        <Link to="/invitations/new" className={classes.link}>
+                        <SimpleLink to="/invitations/new">
                             <Button variant="contained" className={classes.button}>新規作成</Button>
-                        </Link>
+                        </SimpleLink>
 
                         <SimpleMenu
                             icon={<Avatar alt={auth.user.name} src={auth.user.iconUrl} />}
@@ -93,9 +88,9 @@ export default function NavBar({onToggleTheme}) {
                         />
                     </>
                 ) : (
-                    <Link to="/login" className={classes.link}>
+                    <SimpleLink to="/login">
                         <Button variant="contained" className={classes.button}>ログイン</Button>
-                    </Link>
+                    </SimpleLink>
                 )}
 
             </Toolbar>
