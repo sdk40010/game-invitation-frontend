@@ -53,6 +53,7 @@ function App() {
                         </PrivateRoute>
 
                         <PrivateRoute path="/users/:id/participations">
+                            <UserParticipations />
                         </PrivateRoute>
                     </Switch>
                 </ProvideAuth>

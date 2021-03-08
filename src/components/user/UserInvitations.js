@@ -29,10 +29,10 @@ export default function UserInvitations() {
 
     useScrollToTop();
 
-    // ユーザーが投稿した募集一覧を取得する
+    // ユーザーの投稿履歴を取得する
     useEffect(() => {
         (async () => {
-            await userAPI.getInvitations(query);
+            await userAPI.getPosted(query);
         })();
     }, [query]);
 
@@ -43,11 +43,11 @@ export default function UserInvitations() {
             </Box>
             
             <Box>
-                <InvitationList invitations={userAPI.data?.invitationsPosted.invitations} />
+                <InvitationList invitations={userAPI.data?.posted.invitations} />
             </Box>
             
             <Box mt={4}>
-                <Paginator meta={userAPI.data?.invitationsPosted.meta} />
+                <Paginator meta={userAPI.data?.posted.meta} />
             </Box>
             
         </MainContainer>

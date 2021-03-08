@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { useParams, Link as RouterLink } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 
 import { useAuth } from "../auth/useAuth";
 import useInvitationAPI from "../http/invitationAPI";
@@ -335,7 +335,7 @@ function CustomAvatarGroup(props) {
                         alt={participant.name}
                         src={participant.iconUrl}
                         key={participant.id}
-                        component={RouterLink}
+                        component={Link}
                         to={`/users/${participant.id}`}
                     />
 

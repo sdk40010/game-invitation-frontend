@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import { useAuth } from "./auth/useAuth";
 import useInvitationAPI from "./http/invitationAPI";
@@ -111,7 +111,7 @@ function InvitationListItem({ invitation }) {
                 size="small"
                 color={invitation.canParticipateIn ? "primary" : "default"}
                 variant="outlined"
-                className={!invitation.canParticipateIn && classes.subHeaderChip}
+                className={!invitation.canParticipateIn ? classes.subHeaderChip : ""}
                 component={Box}
                 ml={1}
             />
@@ -196,6 +196,8 @@ function CustomHeading({children}) {
  * ページ一覧
  */
 export function Paginator({ meta }) {
+    const path = useLocation().pathname;
+
     return (
         <Grid container justify="center">
             <Grid item>
@@ -205,7 +207,7 @@ export function Paginator({ meta }) {
                     renderItem={item => (
                         <PaginationItem
                             component={Link}
-                            to={item.page === 1 ? '' : `?page=${item.page}`}
+                            to={`${path}${item.page ===1 ? "" : `?page=${item.page}`}`}
                             {...item}
                         />
                     )}

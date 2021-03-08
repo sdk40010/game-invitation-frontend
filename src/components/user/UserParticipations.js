@@ -28,25 +28,26 @@ export default function UserParticipations() {
 
     useScrollToTop();
 
-    // ユーザーが参加した募集一覧を取得する
+    // ユーザーの参加履歴を取得する
     useEffect(() => {
         (async () => {
-            
+            console.log("participation");
+            userAPI.getParticipated(query);
         })();
-    }, []);
+    }, [query]);
 
     return (
         <MainContainer error={pageError} loading={loading}>
             <Box mb={2}>
-                <Header initialTab={0} user={userAPI.data} />
+                <Header initialTab={1} user={userAPI.data} />
             </Box>
             
             <Box>
-                <InvitationList invitations={userAPI.data?.invitationsParticipated.invitations} />
+                <InvitationList invitations={userAPI.data?.participatedIn.invitations} />
             </Box>
             
             <Box mt={4}>
-                <Paginator meta={userAPI.data?.invitationsParticipated.meta} />
+                <Paginator meta={userAPI.data?.participatedIn.meta} />
             </Box>
         </MainContainer>
     );
