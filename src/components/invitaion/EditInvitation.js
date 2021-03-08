@@ -104,7 +104,7 @@ export default function EditInvitation() {
         input.endTime = formatTime(endTime);
 
         // 編集前のタグ一覧を送信情報に追加する
-        input.tagsBeforeEdit = invitationAPI.data.tags;
+        input.tagsBeforeUpdate = invitationAPI.data.tags;
 
         const success = await invitationAPI.update(id, input);
         setSubmitSuccess(success);

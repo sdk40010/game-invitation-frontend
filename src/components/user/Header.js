@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 
 import { UserProfile } from "../invitaion/ShowInvitation";
+import SimpleLink from "../utils/SimpleLink";
 
 import {
     Tabs,
@@ -27,9 +27,9 @@ export default function Header({initialTab, user}) {
             </Box>
 
             <Tabs value={value} onChange={handleChange} textColor="primary" indicatorColor="primary">
-                <Tab label="投稿" component={Link} to={`/users/${user.id}`} />
-                <Tab label="参加" component={Link} to={`/users/${user.id}/participations`}/>
-                <Tab label="フレンド" component={Link} to={`/users/${user.id}/frends`}/>
+                <Tab label="投稿" component={SimpleLink} to={`/users/${user.id}`} />
+                <Tab label="参加" component={SimpleLink} to={`/users/${user.id}/participations`}/>
+                <Tab label="フレンド" component={SimpleLink} to={`/users/${user.id}/frends`}/>
             </Tabs>
         </Paper>
     )

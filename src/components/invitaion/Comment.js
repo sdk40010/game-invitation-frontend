@@ -1,5 +1,5 @@
 import { useEffect, useContext, createContext, useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 import { useAuth } from "../auth/useAuth";
 import { useOpenState, useSnackbar } from "../utils/useOpenState";
@@ -336,13 +336,13 @@ function Comment(props) {
                 <Grid container spacing={1} wrap="nowrap">
 
                     <Grid item>
-                        <Avatar
-                            alt={comment.user.name}
-                            src={comment.user.iconUrl}
-                            className={classes[iconSize] ?? ""}
-                            component={Link}
-                            to={`/users/${comment.user.id}`}
-                        />
+                        <SimpleLink to={`/users/${comment.user.id}`} display="inline-block">
+                            <Avatar
+                                alt={comment.user.name}
+                                src={comment.user.iconUrl}
+                                className={classes[iconSize] ?? ""}
+                            />
+                        </SimpleLink>
                     </Grid>
 
                     <Grid item xs zeroMinWidth>
@@ -351,7 +351,7 @@ function Comment(props) {
                             <Box mb={.25}>
                                 <Grid container spacing={1}>
                                     <Grid item>
-                                        <SimpleLink to={`/users/${comment.user.id}`}>
+                                        <SimpleLink to={`/users/${comment.user.id}`} display="inline-block">
                                             <Typography variant="body2">{comment.user.name}</Typography>
                                         </SimpleLink>
                                     </Grid>

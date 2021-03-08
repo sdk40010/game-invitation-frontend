@@ -6,18 +6,21 @@ const useStyles = makeStyles((theme) => ({
     link: {
         textDecoration: "none",
         color: "inherit",
-        display: "inline-block"
     },
 }));
 
 /**
  * 装飾なしのリンク
  */
-export default function SimpleLink({children, display, ...rest}) {
+export default function SimpleLink({children, className, display, ...rest}) {
     const classes = useStyles();
 
     return (
-        <Link {...rest} className={classes.link} style={display ? { display } : {}}>
+        <Link 
+            className={[classes.link, className ?? ""].join(" ")}
+            style={display ? { display } : {}}
+            {...rest}
+        >
             {children}
         </Link>
     );

@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 import { useAuth } from "../auth/useAuth";
 import useInvitationAPI from "../http/invitationAPI";
@@ -145,7 +145,7 @@ function InvitationCard({invitationAPI, participationAPI}) {
             snackbar.handleOpen("募集への参加を取り消しました。");
         }
     }
-    const isPoster = auth.user.id === invitation.userId;
+    const isPoster = invitation.isPoster;
     const participatedIn = invitation.participants.some(participant => auth.user.id === participant.id);
     const canParticipateIn = invitation.canParticipateIn;
 
@@ -250,17 +250,17 @@ export function UserProfile({user, iconSize, typographyVariant = "body1"}) {
         <Grid container spacing={1} alignItems="center">
 
             <Grid item>
-                <Avatar
-                    alt={user.name}
-                    src={user.iconUrl}
-                    className={classes[iconSize] ?? ""}
-                    component={Link}
-                    to={`/users/${user.id}`}
-                />
+                <SimpleLink to={`/users/${user.id}`} display="inline-block">
+                    <Avatar
+                        alt={user.name}
+                        src={user.iconUrl}
+                        className={classes[iconSize] ?? ""}
+                    />
+                </SimpleLink>
             </Grid>
 
             <Grid item xs>
-                <SimpleLink to={`/users/${user.id}`}>
+                <SimpleLink to={`/users/${user.id}`} display="inline-block">
                     <Typography variant={typographyVariant}>{user.name}</Typography>
                 </SimpleLink>
             </Grid>
@@ -300,15 +300,13 @@ function CustomAvatarGroup(props) {
     const { invitation, max = 4 } = props;
     const participants = invitation.participants;
 
-    const auth = useAuth();
-
     const classes = useStyles();
 
     // SimpleMenuに渡すイベントエミッター
     const eventEmitter = useMemo(() => new EventEmitter(), []);
-
+    const eventName = "clickShowMore";
     const handleClickShowMore = (event) => {
-        eventEmitter.emit("clickShowMore", event);
+        eventEmitter.emit(eventName, event);
     }
 
     // 参加者一覧用
@@ -344,7 +342,7 @@ function CustomAvatarGroup(props) {
                         alt={participant.name}
                         src={participant.iconUrl}
                         key={participant.id}
-                        component={Link}
+                        component={SimpleLink}
                         to={`/users/${participant.id}`}
                     />
 
@@ -358,7 +356,7 @@ function CustomAvatarGroup(props) {
             <SimpleMenu 
                 menuItems={menuItems}
                 PaperProps={{ style: { maxHeight: ITEM_HEIGHT * 5 + ITEM_PADDING_TOP } }}
-                eventProps={{ name: "clickShowMore", emitter: eventEmitter }}
+                eventProps={{ name: eventName, emitter: eventEmitter }}
             />
         </>
     );

@@ -1,5 +1,3 @@
-import { Link } from "react-router-dom";
-
 import { useAuth } from "./auth/useAuth";
 
 import SimpleMenu from "./utils/SimpleMenu";
@@ -66,7 +64,7 @@ export default function NavBar({onToggleTheme}) {
         <AppBar className={classes.appBar}>
             <Toolbar>
                 <Box className={classes.siteName}>
-                    <SimpleLink to="/">
+                    <SimpleLink to="/" display="inline-block">
                         <Typography variant="h6" component="span">SITE NAME</Typography>
                     </SimpleLink>
                 </Box>

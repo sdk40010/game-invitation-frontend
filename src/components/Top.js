@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 import { useAuth } from "./auth/useAuth";
 import useInvitationAPI from "./http/invitationAPI";
@@ -10,6 +10,8 @@ import useScrollToTop from "./utils/useScrollToTop";
 
 import MainContainer from "./utils/MainContainer";
 import Heading from "./utils/Heading";
+import SimpleMenu from "./utils/SimpleMenu";
+import SimpleLink from "./utils/SimpleLink";
 
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -24,8 +26,14 @@ import {
     Chip,
 } from "@material-ui/core";
 import { Pagination, PaginationItem }from "@material-ui/lab";
+import { MoreVert } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
+    card: {
+        "&:hover": {
+            backgroundColor: theme.palette.background.default
+        }
+    },
     cardContent: {
         paddingTop: 0
     },
@@ -35,6 +43,11 @@ const useStyles = makeStyles((theme) => ({
         "scrollbar-width": "none",    /* Firefox 対応 */
         "&::-webkit-scrollbar" : {  /* Chrome, Safari 対応 */
             display: "none"
+        }
+    },
+    subHeader: {
+        "& > :not(:first-child)": {
+            marginLeft: theme.spacing(1)
         }
     },
     subHeaderChip: {
@@ -98,21 +111,33 @@ function InvitationListItem({ invitation }) {
     const classes = useStyles();
 
     const title = <Typography variant="body1">{invitation.title}</Typography>
+
     const subHeader = (
         <>
-            {invitation.createdAt}
+            <span>{invitation.createdAt}</span>
             <Chip
                 label={invitation.canParticipateIn ? "募集中" : "募集終了"}
                 size="small"
                 color={invitation.canParticipateIn ? "primary" : "default"}
                 variant="outlined"
                 className={!invitation.canParticipateIn ? classes.subHeaderChip : ""}
-                component={Box}
-                ml={1}
             />
         </>
     );
-    const poster = <Avatar alt={invitation.user.name} src={invitation.user.iconUrl} />;
+    const poster = (
+        <SimpleLink to={`/users/${invitation.userId}`} display="inline-block">
+            <Avatar alt={invitation.user.name} src={invitation.user.iconUrl} />
+        </SimpleLink>
+    );
+
+    const menuItems = [
+        {
+            content: "編集",
+            onClick: () => {},
+            link: `/invitations/${invitation.id}/edit`
+        }
+    ];
+    const action = <SimpleMenu icon={<MoreVert />} menuItems={menuItems} />;
 
     const content = (
         <>
@@ -158,14 +183,21 @@ function InvitationListItem({ invitation }) {
 
     return (
         <Grid item xs={12} sm={6} md={4}>
-            <CardActionArea component={Link} to={`/invitations/${invitation.id}`}>
+            <CardActionArea disableTouchRipple>
                 <Card>
                     <CardHeader 
                         title={title}
                         subheader={subHeader}
                         avatar={poster}
+                        action={invitation.isPoster ? action : <></>}
+                        classes={{ subheader: classes.subHeader }}
                     />
-                    <CardContent className={classes.cardContent}>
+                    <CardContent
+                        className={classes.cardContent}
+                        component={SimpleLink}
+                        to={`/invitations/${invitation.id}`}
+                        display="block"
+                    >
                         {content}
                     </CardContent>
                 </Card>
@@ -199,7 +231,7 @@ export function Paginator({ meta }) {
                     count={meta.lastPage}
                     renderItem={item => (
                         <PaginationItem
-                            component={Link}
+                            component={SimpleLink}
                             to={`${path}${item.page ===1 ? "" : `?page=${item.page}`}`}
                             {...item}
                         />
