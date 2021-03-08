@@ -16,6 +16,7 @@ import MainContainer from "../utils/MainContainer";
 import Heading from "../utils/Heading";
 import { CommentList } from "./Comment";
 import SimpleMenu from "../utils/SimpleMenu";
+import SimpleLink from "../utils/SimpleLink";
 
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -249,11 +250,19 @@ export function UserProfile({user, iconSize, typographyVariant = "body1"}) {
         <Grid container spacing={1} alignItems="center">
 
             <Grid item>
-                <Avatar alt={user.name} src={user.iconUrl} className={classes[iconSize] ?? ""} />
+                <Avatar
+                    alt={user.name}
+                    src={user.iconUrl}
+                    className={classes[iconSize] ?? ""}
+                    component={Link}
+                    to={`/users/${user.id}`}
+                />
             </Grid>
 
             <Grid item xs>
-                <Typography variant={typographyVariant}>{user.name}</Typography>
+                <SimpleLink to={`/users/${user.id}`}>
+                    <Typography variant={typographyVariant}>{user.name}</Typography>
+                </SimpleLink>
             </Grid>
 
             {auth.user.id !== user.id && (

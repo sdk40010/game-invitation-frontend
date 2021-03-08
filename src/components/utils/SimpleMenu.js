@@ -1,5 +1,4 @@
-import { useState, useEffect, useMemo, forwardRef } from "react";
-import { Link } from 'react-router-dom';
+import { useState, useEffect, forwardRef } from "react";
 
 import SimpleLink from "./SimpleLink";
 
@@ -88,7 +87,7 @@ const SimpleMenuItem = forwardRef((props, ref) => {
     return (
         <li>
             {item.link 
-                ? <SimpleLink to={item.link}>{menuItem}</SimpleLink>
+                ? <SimpleLink to={item.link} display="block">{menuItem}</SimpleLink>
                 : menuItem
             }
         </li>

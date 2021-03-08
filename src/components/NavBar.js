@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 import { useAuth } from "./auth/useAuth";
 
 import SimpleMenu from "./utils/SimpleMenu";

@@ -31,7 +31,6 @@ export default function UserParticipations() {
     // ユーザーの参加履歴を取得する
     useEffect(() => {
         (async () => {
-            console.log("participation");
             userAPI.getParticipated(query);
         })();
     }, [query]);

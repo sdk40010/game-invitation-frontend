@@ -26,11 +26,6 @@ import {
 import { Pagination, PaginationItem }from "@material-ui/lab";
 
 const useStyles = makeStyles((theme) => ({
-    link: {
-        display: "block",
-        textDecoration: "none",
-        color: "inherit"
-    },
     cardContent: {
         paddingTop: 0
     },
@@ -163,20 +158,18 @@ function InvitationListItem({ invitation }) {
 
     return (
         <Grid item xs={12} sm={6} md={4}>
-            <Link to={`/invitations/${invitation.id}`} className={classes.link}>
-                <CardActionArea>
-                    <Card>
-                        <CardHeader 
-                            title={title}
-                            subheader={subHeader}
-                            avatar={poster}
-                        />
-                        <CardContent className={classes.cardContent}>
-                            {content}
-                        </CardContent>
-                    </Card>
-                </CardActionArea>
-            </Link>
+            <CardActionArea component={Link} to={`/invitations/${invitation.id}`}>
+                <Card>
+                    <CardHeader 
+                        title={title}
+                        subheader={subHeader}
+                        avatar={poster}
+                    />
+                    <CardContent className={classes.cardContent}>
+                        {content}
+                    </CardContent>
+                </Card>
+            </CardActionArea>
         </Grid>
     );
 }

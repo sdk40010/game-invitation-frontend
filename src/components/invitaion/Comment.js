@@ -1,5 +1,5 @@
 import { useEffect, useContext, createContext, useMemo } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 
 import { useAuth } from "../auth/useAuth";
 import { useOpenState, useSnackbar } from "../utils/useOpenState";
@@ -10,6 +10,7 @@ import { useForm, useWatch } from "react-hook-form";
 import EventEmitter from 'events';
 
 import SimpleMenu from "../utils/SimpleMenu";
+import SimpleLink from "../utils/SimpleLink";
 import DeleteDialog from "../utils/DeleteDialog";
 
 import { makeStyles } from "@material-ui/core/styles";
@@ -335,7 +336,13 @@ function Comment(props) {
                 <Grid container spacing={1} wrap="nowrap">
 
                     <Grid item>
-                        <Avatar　alt={comment.user.name}　src={comment.user.iconUrl} className={classes[iconSize] ?? ""} />
+                        <Avatar
+                            alt={comment.user.name}
+                            src={comment.user.iconUrl}
+                            className={classes[iconSize] ?? ""}
+                            component={Link}
+                            to={`/users/${comment.user.id}`}
+                        />
                     </Grid>
 
                     <Grid item xs zeroMinWidth>
@@ -344,7 +351,9 @@ function Comment(props) {
                             <Box mb={.25}>
                                 <Grid container spacing={1}>
                                     <Grid item>
-                                        <Typography variant="body2">{comment.user.name}</Typography>
+                                        <SimpleLink to={`/users/${comment.user.id}`}>
+                                            <Typography variant="body2">{comment.user.name}</Typography>
+                                        </SimpleLink>
                                     </Grid>
                                     <Grid item>
                                         <Typography variant="body2" color="textSecondary">{comment.createdAt}</Typography>
