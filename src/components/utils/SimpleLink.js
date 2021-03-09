@@ -1,27 +1,34 @@
+import { forwardRef } from "react";
 import { Link } from "react-router-dom";
+import { styled } from '@material-ui/core/styles';
 
 import { makeStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles((theme) => ({
-    link: {
+    link: props => ({
         textDecoration: "none",
         color: "inherit",
-    },
+        display: props.display
+    }),
 }));
 
 /**
  * 装飾なしのリンク
  */
-export default function SimpleLink({children, className, display, ...rest}) {
-    const classes = useStyles();
+function SimpleLink(props) {
+    const {children, className, display, forwardedRef, ...rest} = props;
+
+    const classes = useStyles({ display: display ?? "inline"});
 
     return (
         <Link 
             className={[classes.link, className ?? ""].join(" ")}
-            style={display ? { display } : {}}
+            ref={forwardedRef}
             {...rest}
         >
             {children}
         </Link>
     );
 }
+
+export default forwardRef((props, ref) => <SimpleLink {...props} forwardedRef={ref} />);

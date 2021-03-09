@@ -186,14 +186,29 @@ function InvitationCard({invitationAPI, participationAPI}) {
             )}
 
             <Box mb={2}>
+                <Heading>開始時刻</Heading>
+                <Grid container spacing={1}>
+                    <Grid item>
+                        <Typography variant="body1">{invitation.startIn}</Typography>
+                    </Grid>
+                    <Grid item>
+                        <Typography variant="body1" color="textSecondary">
+                            {`( ${invitation.startTime} )`}
+                        </Typography>
+                    </Grid>
+                </Grid>
+            </Box>
+
+            <Box mb={2}>
                 <Heading>時間</Heading>
                 <Grid container spacing={1}>
                     <Grid item>
-                        <Typography variant="body1">{invitation.startTime}</Typography>
+                        <Typography variant="body1">{invitation.interval}</Typography>
                     </Grid>
-                    <Grid item>〜</Grid>
                     <Grid item>
-                        <Typography variant="body1">{invitation.endTime}</Typography>
+                        <Typography variant="body1" color="textSecondary">
+                            {`( ${invitation.startTime} 〜 ${invitation.endTime} )`}
+                        </Typography>
                     </Grid>
                 </Grid>
             </Box>
@@ -250,7 +265,7 @@ export function UserProfile({user, iconSize, typographyVariant = "body1"}) {
         <Grid container spacing={1} alignItems="center">
 
             <Grid item>
-                <SimpleLink to={`/users/${user.id}`} display="inline-block">
+                <SimpleLink to={`/users/${user.id}`} display="block">
                     <Avatar
                         alt={user.name}
                         src={user.iconUrl}
@@ -260,9 +275,18 @@ export function UserProfile({user, iconSize, typographyVariant = "body1"}) {
             </Grid>
 
             <Grid item xs>
-                <SimpleLink to={`/users/${user.id}`} display="inline-block">
-                    <Typography variant={typographyVariant}>{user.name}</Typography>
-                </SimpleLink>
+                <Box mt={-.5}>
+                    <SimpleLink to={`/users/${user.id}`} display="inline-block">
+                        <Typography variant={typographyVariant}>{user.name}</Typography>
+                    </SimpleLink>
+                    <Typography variant="body2" color="textSecondary">
+                        {[
+                            `投稿 ${user.invitationsPostedCount}`,
+                            `参加 ${user.invitationsParticipatedInCount}`
+                        ].join(" ")
+                        }
+                    </Typography>
+                </Box>
             </Grid>
 
             {auth.user.id !== user.id && (

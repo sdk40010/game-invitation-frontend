@@ -1,4 +1,5 @@
 import { useState, useEffect, forwardRef } from "react";
+import { Link } from "react-router-dom";
 
 import SimpleLink from "./SimpleLink";
 
@@ -13,17 +14,26 @@ import {
 /**
  * メニュー
  */
-export default function SimpleMenu({ icon, menuItems, PaperProps, eventProps }) {
-  const [anchorEl, setAnchorEl] = useState(null);
+export default function SimpleMenu(props) {
+    const { icon, iconSize, enableStopPropagation, menuItems, PaperProps, eventProps } = props;
+
+    const [anchorEl, setAnchorEl] = useState(null);
 
     const handleClick = (event) => {
+        stopPropagation(event);
         setAnchorEl(event.currentTarget);
     };
 
-    const handleClose = () => {
+    const handleClose = (event) => {
+        stopPropagation(event);
         setAnchorEl(null);
     };
 
+    const stopPropagation = (event) => {
+        if (enableStopPropagation) {
+            event.stopPropagation();
+        }
+    }
 
     useEffect(() => {
         // 外部のコンポーネントで指定されたイベントが発生したときの処理を登録
@@ -41,7 +51,9 @@ export default function SimpleMenu({ icon, menuItems, PaperProps, eventProps }) 
     return (
         <Box>
             {icon && (
-              <IconButton onClick={handleClick}>{icon}</IconButton>
+                <IconButton onClick={handleClick} size={iconSize ?? "medium"} component="span">
+                    {icon}
+                </IconButton>
             )}
             <Menu
                 anchorEl={anchorEl}
@@ -51,9 +63,11 @@ export default function SimpleMenu({ icon, menuItems, PaperProps, eventProps }) 
                 PaperProps={PaperProps}
             >
                 {menuItems.map((item, i) => {
-                    const handleItemClick = () => {
-                        handleClose();
-                        item.onClick();
+                    const handleItemClick = (event) => {
+                        handleClose(event);
+                        if (item.onClick) {
+                            item.onClick(event);
+                        }
                     }
 
                     return (
@@ -73,10 +87,11 @@ export default function SimpleMenu({ icon, menuItems, PaperProps, eventProps }) 
  * メニューアイテム
  */
 const SimpleMenuItem = forwardRef((props, ref) => {
-    const {item, onClick } = props;
-    
+    const {item, ...rest} = props;
+
+    const component = item.link ? SimpleLink : "li";
     const menuItem = (
-        <MenuItem onClick={onClick} ref={ref} component="div">
+        <MenuItem {...rest} ref={ref} component={component} to={item.link}>
             {item.disableTypography
                 ? item.content
                 : <Typography component="span" variant="button">{item.content}</Typography>
@@ -84,12 +99,7 @@ const SimpleMenuItem = forwardRef((props, ref) => {
         </MenuItem>
     );
 
-    return (
-        <li>
-            {item.link 
-                ? <SimpleLink to={item.link} display="block">{menuItem}</SimpleLink>
-                : menuItem
-            }
-        </li>
-    );
+    return item.link 
+        ? <li>{menuItem}</li> 
+        : menuItem;
 });

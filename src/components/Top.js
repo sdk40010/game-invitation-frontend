@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useHistory } from "react-router-dom";
 
 import { useAuth } from "./auth/useAuth";
 import useInvitationAPI from "./http/invitationAPI";
@@ -29,9 +29,13 @@ import { Pagination, PaginationItem }from "@material-ui/lab";
 import { MoreVert } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
-    card: {
-        "&:hover": {
-            backgroundColor: theme.palette.background.default
+    list: {
+        // 募集一覧のアイテムの高さをそろえるための設定
+        "& > * > *": {
+            height: "100%",
+        },
+        "& > * > * > *": {
+            height: "100%",
         }
     },
     cardContent: {
@@ -52,7 +56,7 @@ const useStyles = makeStyles((theme) => ({
     },
     subHeaderChip: {
         color: theme.palette.text.secondary
-    }
+    },
 }));
 
 /**
@@ -95,10 +99,12 @@ export default function Top() {
  * 募集一覧
  */
 export function InvitationList({ invitations }) {
+    const classes = useStyles();
+
     return (
-        <Grid container spacing={2}>
-            {invitations.map((invitation, i) => (
-                <InvitationListItem invitation={invitation} key={i} />
+        <Grid container spacing={2} className={classes.list}>
+            {invitations.map(invitation => (
+                <InvitationListItem invitation={invitation} key={invitation.id} />
             ))}
         </Grid>
     );
@@ -133,18 +139,24 @@ function InvitationListItem({ invitation }) {
     const menuItems = [
         {
             content: "編集",
-            onClick: () => {},
             link: `/invitations/${invitation.id}/edit`
         }
     ];
-    const action = <SimpleMenu icon={<MoreVert />} menuItems={menuItems} />;
+    const action = (
+        <SimpleMenu
+            icon={<MoreVert />}
+            iconSize="small"
+            enableStopPropagation={true}
+            menuItems={menuItems}
+        />
+    );
 
     const content = (
         <>
             <Box mb={1}>
                 <Grid container spacing={1} wrap="nowrap" className={classes.tagContainer}>
-                    {invitation.tags.map((tag, i) => (
-                        <Grid item key={i}>
+                    {invitation.tags.map(tag => (
+                        <Grid item key={tag.id}>
                             <Chip label={tag.name} size="small" />
                         </Grid>
                     ))}
@@ -152,37 +164,61 @@ function InvitationListItem({ invitation }) {
             </Box>
 
             <Box>
-                <Grid container spacing={1} alignItems="center">
-                    <Grid item>
-                        <CustomHeading>時間</CustomHeading>
-                    </Grid>
-                        <Grid item>
-                            <Typography variant="body2">{invitation.startTime}</Typography>
-                        </Grid>
-                        <Grid item>〜</Grid>
-                        <Grid item>
-                            <Typography variant="body2">{invitation.endTime}</Typography>
-                        </Grid>
-                </Grid>
+                <NestedGrid 
+                    items={[
+                        (<>
+                            <Grid item>
+                                <CustomHeading>開始時刻</CustomHeading>
+                            </Grid>
+                            <Grid item>
+                                <Typography variant="body2">{invitation.startIn}</Typography>
+                            </Grid>
+                        </>),
+                        (<>
+                            <Grid item>
+                                <CustomHeading>時間</CustomHeading>
+                            </Grid>
+                            <Grid item>
+                                <Typography variant="body2">{invitation.interval}</Typography>
+                            </Grid>
+                        </>),
+                    ]}
+                />
             </Box>
             
             <Box>
-                <Grid container spacing={1} alignItems="center">
-                    <Grid item>
-                        <CustomHeading>定員</CustomHeading>
-                    </Grid>
-                    <Grid item>
-                        <Typography variant="body2">
-                           {invitation.capacity}人
-                        </Typography>
-                    </Grid>
-                </Grid>
+                <NestedGrid 
+                    items={[
+                        (<>
+                            <Grid item>
+                                <CustomHeading>定員</CustomHeading>
+                            </Grid>
+                            <Grid item>
+                                <Typography variant="body2">{invitation.capacity}人</Typography>
+                            </Grid>
+                        </>),
+                        (<>
+                            <Grid item>
+                                <CustomHeading>参加</CustomHeading>
+                            </Grid>
+                            <Grid item>
+                                <Typography variant="body2">{invitation.participantsCount}人</Typography>
+                            </Grid>
+                        </>)
+                    ]}
+                />
             </Box>
         </>
-    )
+    );
+
+    // Card内でLinkを使えるように、Card全体をクリックしたときはhistoryを使って遷移させる
+    const history = useHistory();
+    const handleClick = () => {
+        history.push(`/invitations/${invitation.id}`);
+    };
 
     return (
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid item xs={12} sm={4} md={3} onClick={handleClick}>
             <CardActionArea disableTouchRipple>
                 <Card>
                     <CardHeader 
@@ -215,6 +251,28 @@ function CustomHeading({children}) {
             {children}
         </Heading>
     )
+}
+
+/**
+ * 募集詳細用の入れ子グリッド
+ */
+function NestedGrid({items}) {
+    return (
+        <Grid container spacing={1} alignItems="center">
+            {items.map((item, i) => (
+                <Grid
+                    container
+                    item
+                    spacing={1}
+                    alignItems="center"
+                    xs={12 / items.length}
+                    key={i}
+                >
+                    {item}
+                </Grid>
+            ))}
+        </Grid>
+    );
 }
 
 /**
