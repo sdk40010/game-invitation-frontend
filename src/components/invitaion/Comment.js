@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
     commentContent: {
         overflowWrap: "break-word"
     },
-    commentPosterButtonWrapper: {
+    commentPosterButtonsWrapper: {
         "& > *:not(:last-child)": {
             marginRight: theme.spacing(1)
         }
@@ -184,7 +184,7 @@ function CommentPoster(props) {
                             in={collapse.open}
                             timeout={0}
                             unmountOnExit
-                            classes={{ wrapperInner: classes.commentPosterButtonWrapper }}
+                            classes={{ wrapperInner: classes.commentPosterButtonsWrapper }}
                         >
                             <Button color="primary" onClick={handleCancelClick}>
                                 キャンセル

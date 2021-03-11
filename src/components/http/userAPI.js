@@ -8,7 +8,7 @@ export default function useUserAPI(userId) {
     /**
      * ユーザーの投稿履歴を取得する
      * 
-     * @param {URLSearchParams} query - クエリー
+     * @param {URLSearchParams} query - クエリパラメータ
      * @returns {Object} ユーザーの投稿履歴（ページング用のメタ情報付）
      */
     const getPosted = async (query) => {

@@ -1,14 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import DateFnsUtils from  '@date-io/date-fns';
 import format from "date-fns/format";
 import ja from "date-fns/locale/ja";
 import {　MuiPickersUtilsProvider,　KeyboardDateTimePicker } from '@material-ui/pickers';
 import { useController } from "react-hook-form";
 import {
-    FormControl,
-    FormHelperText,
-    Select,
-    InputLabel,
     MenuItem,
     TextField,
     Checkbox,
@@ -21,61 +17,51 @@ import { CheckBoxOutlineBlankOutlined, CheckBox } from "@material-ui/icons";
  * 日付・時間選択用のコンポーネント
  */
 export function DateTimePicker(props) {
-    const { name, label, control, watch, errors, before, after } = props;
+
+    const { name, label, size, required, equalOrBefore, equalOrAfter, onChange, control, watch, errors } = props;
     const { field } = useController({
         name,
         control,
         rules: {
-            required: true,
+            required : { value: required, message: `${label}は必須です。` },
             validate: {
-                before: time => {
-                    if (after && watch(after.name)) {
-                        // 秒単位の比較を防ぐために、秒数以下を切り捨てるフォーマットをかけてから比較する
-                        const d1 = new Date(formatTime(time));
-                        const d2 = new Date(formatTime(watch(after.name)));
-                        return d1.getTime() < d2.getTime();
-                    } else {
+                validDate: time => {
+                    if (!time) {
                         return true;
                     }
+                    return !isNaN(time.getTime()) || "有効な時刻を指定してください。";
                 },
-                after: time => {
-                    if (before && watch(before.name)) {
-                        const d1 = new Date(formatTime(time));
-                        const d2 = new Date(formatTime(watch(before.name)));
-                        return d1.getTime() > d2.getTime();
-                    } else {
-                        return true;
-                    }
-                }
+                equalOrbefore: time => equalOrBefore ? equalOrBefore(time) : true,
+                equalOrAfter: time => equalOrAfter ? equalOrAfter(time) : true
             }
         },
     });
-    
-    const helperText
-        = errors[name]?.type === "required" ? `${label}は必須です。`
-        : errors[name]?.type === "before" ? `${after.label}より前の時刻を指定してください。`
-        : errors[name]?.type === "after" ? `${before.label}より後の時刻を指定してください。`
-        : "";
+
+    const handleChange = (time) => {
+        field.onChange(time);
+        onChange(time);
+    }
 
     return (
         <MuiPickersUtilsProvider utils={CustomDateFnsUtils}　locale={ja}>
-                <KeyboardDateTimePicker
-                    name={name}
-                    value={watch(name)}
-                    inputVariant="outlined"
-                    label={label}
-                    format="yyyy/MM/dd HH:mm"
-                    ampm={false}
-                    okLabel="決定"
-                    cancelLabel="キャンセル"
-                    autoOk={true}
-                    minDate={new Date()}
-                    onChange={field.onChange}
-                    error={errors[name] && true}
-                    helperText={errors[name] && helperText}
-                    style={{ width: "100%"}}
-                />
-            </MuiPickersUtilsProvider>
+            <KeyboardDateTimePicker
+                name={name}
+                value={watch(name)}
+                inputVariant="outlined"
+                label={label}
+                format="yyyy/MM/dd HH:mm"
+                ampm={false}
+                okLabel="決定"
+                cancelLabel="キャンセル"
+                autoOk={true}
+                minDate={new Date()}
+                onChange={handleChange}
+                error={errors[name] && true}
+                helperText={errors[name] && errors[name].message}
+                fullWidth
+                size={size ?? "medium"}
+            />
+        </MuiPickersUtilsProvider>
     );
 }
 
@@ -99,10 +85,11 @@ class CustomDateFnsUtils extends DateFnsUtils {
 /**
  * Date型の値をyyyy-MM-dd HH:mm:ss形式の文字列に変換する
  * 秒数は切り捨てて0にする
+ * 
  * @param {Date} time 
  */
 export function formatTime(time) {
-    return format(time.setSeconds(0), "yyyy-MM-dd HH:mm:ss");
+    return format(time.setSeconds(0), "yyyy-MM-dd HH:mm:ss"); 
 }
 
 const ITEM_HEIGHT = 36;
@@ -112,46 +99,55 @@ const ITEM_PADDING_TOP = 8;
  * 定員選択用のコンポーネント
  */
 export function CapacitySelector(props) {
-    const { name, label, control, watch, errors } = props;
+    const { name, label, size, required, equalOrLess, equalOrMore, onChange, control, watch, errors } = props;
     const { field } = useController({
         name,
         control,
         rules: {
-            required: { value: true, message: "定員は必須です。"　},
-            min: { value: 1, message: "定員には1以上の数値を指定してください。"},
-            max: { value: 10, message: "定員には10以下の数値を指定してください。"}
+            required: { value: required, message: `${label}は必須です。` },
+            min: { value: 1, message: `${label}には1以上の数値を指定してください。` },
+            max: { value: 10, message: `${label}には10以下の数値を指定してください。` },
+            validate: {
+                equalOrLess: capacity => equalOrLess ? equalOrLess(capacity) : true,
+                equalOrMore: capacity => equalOrMore ? equalOrMore(capacity) : true
+            }
         },
     });
+
+    const handleChange = (event) => {
+        field.onChange(event);
+        onChange(event.target.value);
+    }
     
     const seq = [...Array(10)].map((_, i) => ++i);
 
-    const MenuProps = {
-        PaperProps: {
-            style: {
-                maxHeight: ITEM_HEIGHT * 5 + ITEM_PADDING_TOP,
+    const SelectProps = {
+        MenuProps: {
+            PaperProps: {
+                style: {
+                    maxHeight: ITEM_HEIGHT * 5 + ITEM_PADDING_TOP,
+                },
             },
-        },
-    };
+        }
+    }
 
     return (
-        <FormControl
+        <TextField
+            name={name}
+            label={label}
+            value={watch(name)}
+            select
             variant="outlined"
             fullWidth
-            error={errors[name] && true}
+            SelectProps={SelectProps}
+            size={size ?? "medium"}
+            onChange={handleChange}
+            error={Boolean(errors[name])}
+            helperText={errors[name] && errors[name].message}
         >
-            <InputLabel id="label">{label}</InputLabel>
-            <Select
-                labelId="label"
-                name={name}
-                value={watch(name)}
-                MenuProps={MenuProps}
-                onChange={field.onChange}
-            >
-                {seq.map(i => <MenuItem key={i} value={i}>{i+"人"}</MenuItem>)}
-            </Select>
-            {errors[name] && <FormHelperText>{errors[name].message}</FormHelperText>}
-        </FormControl>
-    )
+            {seq.map(i => <MenuItem key={i} value={i}>{i+"人"}</MenuItem>)}
+        </TextField>
+    );
 }
 
 /**
@@ -162,33 +158,31 @@ const checkedIcon = <CheckBox fontSize="small" />;
 const filter = createFilterOptions();
 
 export function TagSelector(props) {
-    const { name, label, watch, control, errors, tagOptions } = props;
+    const { name, label, tagOptions, size, watch, control, errors} = props;
     const { field } = useController({
         name,
         control,
         rules: {
             validate: {
-                limit: tags => tags.length <= 10
+                limit: tags => tags.length <= 10 || "10個以下のタグを指定してください。"
             }
         },
     });
-
-    const helperText = errors[name]?.type === "limit"
-        ?　"10個以下のタグを指定してください。"
-        :　"";
 
     // 選択肢の初期化
     const [options, setOptions] = useState([]);
     useEffect(() => {
         setOptions(tagOptions);
-    }, [tagOptions])
-    
+    }, [tagOptions]);
+
+
     return (
         <Autocomplete
             multiple
             options={options}
             disableCloseOnSelect
             value={watch(name)}
+            ChipProps={size ? { size }: {}}
             getOptionLabel={option => option.name}
             getOptionSelected={(option, value) => {
                 if (!option.id || !value.id) {
@@ -213,9 +207,10 @@ export function TagSelector(props) {
                     name={name}
                     label={label}
                     variant="outlined"
+                    size={size ?? "medium"}
                     placeholder="検索"
                     error={errors[name] && true}
-                    helperText={errors[name] && helperText}
+                    helperText={errors[name] && errors[name].message}
                 />
             )}
             filterOptions={(options, params) => {

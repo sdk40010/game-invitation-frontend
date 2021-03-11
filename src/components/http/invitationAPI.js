@@ -9,15 +9,33 @@ export default function useInvitationAPI() {
     const [error, setError] = useState(null);
 
     /**
-     * クエリーに基づいて募集一覧を取得する
+     * 募集一覧を取得する
      * 
-     * @param {URLSearchParams} query - クエリー
+     * @param {URLSearchParams} query - クエリパラメータ
      * @returns {Object} 募集一覧（ページング用のメタ情報付）
      */
     const getAll = async (query) => {
         try {
             const queryString = query.toString() ? `?${query.toString()}` : "";
             const invitations = await apiCall(`/api/v1/invitations${queryString}`, "GET");
+            setData(invitations);
+            return invitations;
+        } catch (err) {
+            setError(err);
+            return {};
+        }
+    }
+
+    /**
+     * クエリパラメータに基づいて募集を検索する
+     * 
+     * @param {URLSearchParams} query - クエリパラメータ
+     * @returns {Object} 募集一覧（ページング用のメタ情報付）
+     */
+    const search = async (query) => {
+        try {
+            const queryString = query.toString() ? `?${query.toString()}` : "";
+            const invitations = await apiCall(`/api/v1/invitations/search${queryString}`, "GET");
             setData(invitations);
             return invitations;
         } catch (err) {
@@ -97,6 +115,7 @@ export default function useInvitationAPI() {
         data,
         error,
         getAll,
+        search,
         get,
         post,
         update,
