@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
  * 複数のAPIリソースの読み込み状況をまとめるためのフック
  * @param  {array} resources 
  */
-export default function useLoading(...resources) {
+export default function useLoading(resources) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {

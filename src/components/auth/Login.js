@@ -1,7 +1,11 @@
 import React from "react";
 import { Redirect, useLocation } from "react-router-dom";
+
 import { useAuth } from "./useAuth";
+
 import MainContainer from "../utils/MainContainer";
+
+import { makeStyles } from "@material-ui/core/styles";
 import { 
     Card,
     CardHeader,
@@ -9,7 +13,7 @@ import {
     Button,
     Typography
 } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -27,18 +31,19 @@ export default function Login() {
 
     if (auth.user) {
         return <Redirect to={from} />;
-    } else {
-        return (
-            <MainContainer error={auth.error} maxWidth="xs">
-                <Card className={classes.root}>
-                    <CardHeader 
-                        title={<Typography variant="h6" component="h1">ログイン</Typography>}
-                    />
-                    <CardContent>
-                        <Button variant="outlined" color="primary" onClick={() => auth.login()}>Gooleでログイン</Button>
-                    </CardContent>
-                </Card>
-            </MainContainer>
-        );
     }
+
+    return (
+        <MainContainer maxWidth="xs">
+            <Card className={classes.root}>
+                <CardHeader 
+                    title={<Typography variant="h6" component="h1">ログイン</Typography>}
+                />
+                <CardContent>
+                    <Button variant="outlined" color="primary" onClick={() => auth.login()}>Gooleでログイン</Button>
+                </CardContent>
+            </Card>
+        </MainContainer>
+    );
+    
 }

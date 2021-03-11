@@ -429,7 +429,7 @@ function Comment(props) {
 function ReplyList({comment, eventEmitter}) {
     const { replyAPI } = useCommentListContext();
 
-    const loading = useLoading(replyAPI.data?.get(comment.id));
+    const loading = useLoading([replyAPI.data?.get(comment.id)]);
 
     // 返信一覧用
     const collapse = useOpenState();

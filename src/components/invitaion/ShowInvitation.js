@@ -6,8 +6,6 @@ import useInvitationAPI from "../http/invitationAPI";
 import useCommentAPI from "../http/commentAPI";
 import useReplyAPI from "../http/replyAPI";
 import useParticipationAPI from "../http/participationAPI";
-import useErrors from "../utils/useErros";
-import useLoading from "../utils/useLoading";
 import { useSnackbar } from "../utils/useOpenState";
 
 import EventEmitter from 'events';
@@ -63,14 +61,14 @@ const useStyles = makeStyles((theme) => ({
  * 募集閲覧ページ
  */
 export default function ShowInvitation() {
-    const auth = useAuth();
     const invitationAPI = useInvitationAPI();
     const commentAPI = useCommentAPI();
     const replyAPI = useReplyAPI();
     const participationAPI = useParticipationAPI();
 
-    const pageError = useErrors(invitationAPI.error, commentAPI.error, replyAPI.error, participationAPI.error, auth.error);
-    const loading = useLoading(invitationAPI.data, commentAPI.data);
+
+    const errors = [invitationAPI.error, commentAPI.error, replyAPI.error, participationAPI.error];
+    const resources = [invitationAPI.data, commentAPI.data];
 
     const { id } = useParams(); // 募集ID
 
@@ -89,7 +87,7 @@ export default function ShowInvitation() {
     }, []);
 
     return (
-        <MainContainer error={pageError} loading={loading} maxWidth="md">
+        <MainContainer errors={errors} resources={resources} maxWidth="md">
             <>
                 <Box mb={2}>
                     <InvitationCard

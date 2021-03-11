@@ -5,17 +5,15 @@ import { useAuth } from "../auth/useAuth";
 import usePermission from "../utils/usePermission";
 import useInvitationAPI from "../http/invitationAPI";
 import useTagAPI from "../http/tagAPI";
-import useErrors from "../utils/useErros";
-import useLoading from "../utils/useLoading";
 import { useOpenState } from "../utils/useOpenState";
 
 import MainContainer from "../utils/MainContainer";
 import InvitationForm from "./InvitationForm";
 import DeleteDialog from "../utils/DeleteDialog";
+import { formatTime } from "./InputField";
 
 import { makeStyles } from "@material-ui/core/styles";
 import { fade } from '@material-ui/core/styles/colorManipulator';
-import { formatTime } from "./InputField";
 import {
     Typography,
     Card,
@@ -55,17 +53,11 @@ export default function EditInvitation() {
         invitationAPI.data
     );
 
-    const pageError = useErrors(
-        auth.error,
-        invitationAPI.error,
-        tagAPI.error,
-        permission.error,
-    );
-
     // 編集フォームの初期値
     const [defaultValues, setDefaultValues] = useState(null);
 
-    const loading = useLoading(invitationAPI.data, tagAPI.data, defaultValues);
+    const errors = [invitationAPI.error, tagAPI.error, permission.error];
+    const resources = [invitationAPI.data, tagAPI.data, defaultValues];
 
     const { id } = useParams(); // 募集ID
 
@@ -120,50 +112,49 @@ export default function EditInvitation() {
         setDeleteSuccess(success);
     }
 
-    // 描画処理
     if (sumbitSuccess) {
         return <Redirect to={`/invitations/${id}`}/>;
     } else if (deleteSuccess) {
         return <Redirect to="/"/>
-    } else {
-        return (
-            <MainContainer error={pageError} loading={loading} maxWidth="sm">
-                <>
-                    <Card>
-                        <CardHeader 
-                            title={<Typography variant="h6" component='h1'>募集の編集</Typography>}
-                        />
-                        <CardContent>
-                            <InvitationForm 
-                                onSubmit={handleSubmit}
-                                defaultValues={defaultValues}
-                                tagOptions={tagAPI.data}
-                                buttonLabel="更新"
-                            />
-                        </CardContent>
-                    </Card>
-
-                    <Box mt={4}>
-                        <Grid container justify="center">
-                            <Grid item>
-                                <Button variant="outlined"
-                                    className={classes.deleteButton}
-                                    onClick={dialog.handleOpen}
-                                >
-                                    削除
-                                </Button>
-
-                                <DeleteDialog 
-                                    open={dialog.open}
-                                    itemName="募集"
-                                    onClose={dialog.handleClose}
-                                    onDelete={handleDelete}
-                                />
-                            </Grid>
-                        </Grid>
-                    </Box>
-                </>
-            </MainContainer>
-        );
     }
+    return (
+        <MainContainer errors={errors} resources={resources} maxWidth="sm">
+            <>
+                <Card>
+                    <CardHeader 
+                        title={<Typography variant="h6" component='h1'>募集の編集</Typography>}
+                    />
+                    <CardContent>
+                        <InvitationForm 
+                            onSubmit={handleSubmit}
+                            defaultValues={defaultValues}
+                            tagOptions={tagAPI.data}
+                            buttonLabel="更新"
+                        />
+                    </CardContent>
+                </Card>
+
+            <Box mt={4}>
+                <Grid container justify="center">
+                    <Grid item>
+                            <Button variant="outlined"
+                                className={classes.deleteButton}
+                                onClick={dialog.handleOpen}
+                            >
+                                削除
+                            </Button>
+
+                            <DeleteDialog 
+                                open={dialog.open}
+                                itemName="募集"
+                                onClose={dialog.handleClose}
+                                onDelete={handleDelete}
+                            />
+                        </Grid>
+                    </Grid>
+                </Box>
+            </>
+        </MainContainer>
+    );
+    
 }

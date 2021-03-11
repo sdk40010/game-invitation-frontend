@@ -1,10 +1,7 @@
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 
-import { useAuth } from "../auth/useAuth";
 import useUserAPI from "../http/userAPI";
-import useErrors from "../utils/useErros";
-import useLoading from "../utils/useLoading";
 import useQuery from "../utils/useQuery";
 import useScrollToTop from "../utils/useScrollToTop";
 import { useSnackbar } from "../utils/useOpenState";
@@ -18,11 +15,10 @@ import { Box } from "@material-ui/core";
 export default function UserParticipations() {
     const { id } = useParams(); // ユーザーID
 
-    const auth = useAuth();
     const userAPI = useUserAPI(id);
 
-    const pageError = useErrors(userAPI.error, auth.error);
-    const loading = useLoading(userAPI.data);
+    const errors = [userAPI.error];
+    const resources = [userAPI.data];
 
     const query = useQuery();
 
@@ -36,7 +32,7 @@ export default function UserParticipations() {
     }, [query]);
 
     return (
-        <MainContainer error={pageError} loading={loading}>
+        <MainContainer errors={errors} resources={resources} maxWidth="lg">
             <Box mb={2}>
                 <Header initialTab={1} user={userAPI.data} />
             </Box>

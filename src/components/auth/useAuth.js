@@ -21,8 +21,8 @@ const authContext = createContext();
 /**
  * 認証オブジェクトを提供するコンテキストプロバイダー
  */
-export function ProvideAuth({ children }) {
-    const auth = useProvideAuth();
+export function AuthProvider({ children }) {
+    const auth = useAuthProvider();
     return <authContext.Provider value={auth}>{children}</authContext.Provider>
 }
 
@@ -36,7 +36,7 @@ export const useAuth = () => {
 /**
  * コンテキストプロバイダーに認証オブジェクトを渡すためのフック
  */
-function useProvideAuth() {
+function useAuthProvider() {
     const [user, setUser] = useState(null);
     const [error, setError] = useState(null);
     const location = useLocation();

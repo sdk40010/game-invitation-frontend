@@ -17,8 +17,19 @@ import { CheckBoxOutlineBlankOutlined, CheckBox } from "@material-ui/icons";
  * 日付・時間選択用のコンポーネント
  */
 export function DateTimePicker(props) {
+    const {
+        name,
+        label,
+        size = "medium",
+        required = false,
+        equalOrBefore = () => {},
+        equalOrAfter = () => {},
+        onChange = () => {},
+        control,
+        watch,
+        errors
+    } = props;
 
-    const { name, label, size, required, equalOrBefore, equalOrAfter, onChange, control, watch, errors } = props;
     const { field } = useController({
         name,
         control,
@@ -31,8 +42,8 @@ export function DateTimePicker(props) {
                     }
                     return !isNaN(time.getTime()) || "有効な時刻を指定してください。";
                 },
-                equalOrbefore: time => equalOrBefore ? equalOrBefore(time) : true,
-                equalOrAfter: time => equalOrAfter ? equalOrAfter(time) : true
+                equalOrbefore: time => equalOrBefore(time) ?? true,
+                equalOrAfter: time => equalOrAfter(time) ?? true
             }
         },
     });
@@ -59,7 +70,7 @@ export function DateTimePicker(props) {
                 error={errors[name] && true}
                 helperText={errors[name] && errors[name].message}
                 fullWidth
-                size={size ?? "medium"}
+                size={size}
             />
         </MuiPickersUtilsProvider>
     );
@@ -99,7 +110,19 @@ const ITEM_PADDING_TOP = 8;
  * 定員選択用のコンポーネント
  */
 export function CapacitySelector(props) {
-    const { name, label, size, required, equalOrLess, equalOrMore, onChange, control, watch, errors } = props;
+    const {
+        name,
+        label,
+        size = "medium",
+        required = false,
+        equalOrLess = () => {},
+        equalOrMore = () => {},
+        onChange = () => {},
+        control,
+        watch,
+        errors 
+    } = props;
+
     const { field } = useController({
         name,
         control,
@@ -108,8 +131,8 @@ export function CapacitySelector(props) {
             min: { value: 1, message: `${label}には1以上の数値を指定してください。` },
             max: { value: 10, message: `${label}には10以下の数値を指定してください。` },
             validate: {
-                equalOrLess: capacity => equalOrLess ? equalOrLess(capacity) : true,
-                equalOrMore: capacity => equalOrMore ? equalOrMore(capacity) : true
+                equalOrLess: capacity => equalOrLess(capacity) ?? true,
+                equalOrMore: capacity => equalOrMore(capacity) ?? true
             }
         },
     });

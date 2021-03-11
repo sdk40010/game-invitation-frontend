@@ -1,14 +1,19 @@
-import CenteredCircularProgress from "../utils/CenteredCircularProgress";
+import { useState, useEffect } from "react";
 
+import { useAuth } from "../auth/useAuth";
+import useLoading from "../utils/useLoading";
+ 
+import { makeStyles } from "@material-ui/core/styles";
 import {
     Container,
     Box,
     Card,
     CardHeader,
     CardContent,
-    Typography
+    Typography,
+    CircularProgress
 } from "@material-ui/core"
-import { makeStyles } from "@material-ui/core/styles";
+
 
 const useStyles = makeStyles((theme) => ({
     main: {
@@ -19,20 +24,48 @@ const useStyles = makeStyles((theme) => ({
         marginTop: theme.spacing(4),
         paddingLeft: 0,
         paddingRight: 0,
+    },
+    proggresWrapper: {
+        display: "flex",
+        justifyContent: "center"
     }
 }));
 
 /**
  * mainタグを表すコンポーネント
  * 
- * @param {Error} props.error - ページ内で発生したエラー
- * @param {boolean} props.loading - APIリソースの読み込み状況
- * @param {string} props.maxWidth - mainタグの横幅の最大値を示す文字列
+ * @param {Error[]} props.errors - ページ内で発生する可能性があるエラーの配列
+ * @param {boolean} props.resources - 初回の描画時に読み込むAPIリソース
+ * @param {string} props.maxWidth - 横幅の最大値を示す文字列
  */
 export default function MainContainer(props) {
-    const {children, error, loading, maxWidth, ...rest} = props;
+    const {
+        children,
+        errors = [],
+        resources = [],
+        maxWidth = "md",
+        ...rest
+    } = props;
+
+    const auth = useAuth();
 
     const classes = useStyles();
+
+    // ページ内で発生したエラー
+    const [error, setError] = useState(null);
+
+    errors.push(auth.error); // どのページでも発生しうる認証エラーを追加する
+    useEffect(() => {
+        for (let i = 0; i < errors.length; i++) {
+            if (errors[i]) {
+                setError(errors[i]);
+                break;
+            }
+        }
+    }, [errors]);
+
+    // APIリソースの読み込み状況
+    const loading = useLoading(resources);
 
     return (
         <Container
@@ -55,7 +88,9 @@ export default function MainContainer(props) {
                     </Card>
                 ) : 
                 loading ? (
-                    <CenteredCircularProgress />
+                    <div className={classes.proggresWrapper}>
+                        <CircularProgress color="secondary" />
+                    </div>
                 ) : (
                     children
                 )}

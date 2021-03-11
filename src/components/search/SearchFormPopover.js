@@ -65,6 +65,7 @@ export default function SearchFormPopover() {
         setAnchorEl(null);
     };
 
+    // 検索クエリの送信
     const handleSubmit = async (inputs) => {
         const query = convertToQuery(inputs);
         history.push(`/search?${query.toString()}`);
@@ -152,7 +153,7 @@ function SearchForm(props) {
         errors,
         setValue,
         reset, 
-        formState: { dirtyFields } // 最新の状態を取得するために、描画の前に個別に状態を読み込んでおく (https://github.com/react-hook-form/react-hook-form/issues/1146)
+        formState: { dirtyFields }
     } = useForm({defaultValues});
     const formProps = { watch, control, errors };
 

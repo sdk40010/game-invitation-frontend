@@ -1,10 +1,7 @@
 import { useEffect } from "react";
 import { useLocation, useHistory } from "react-router-dom";
 
-import { useAuth } from "./auth/useAuth";
 import useInvitationAPI from "./http/invitationAPI";
-import useErrors from "./utils/useErros";
-import useLoading from "./utils/useLoading";
 import useQuery from "./utils/useQuery";
 import useScrollToTop from "./utils/useScrollToTop";
 
@@ -63,11 +60,10 @@ const useStyles = makeStyles((theme) => ({
  * トップページ(募集一覧ページ）
  */
 export default function Top() {
-    const auth = useAuth();
     const invitationAPI = useInvitationAPI();
 
-    const pageError = useErrors(auth.error, invitationAPI.error);
-    const loading = useLoading(invitationAPI.data);
+    const errors = [invitationAPI.error];
+    const resources=[invitationAPI.data];
 
     const query = useQuery();
 
@@ -81,7 +77,7 @@ export default function Top() {
     }, [query]);
 
     return(
-        <MainContainer error={pageError} loading={loading} maxWidth="lg">
+        <MainContainer errors={errors} resources={resources} maxWidth="lg">
             <>
                 <Box>
                     <InvitationList invitations={invitationAPI.data?.invitations} />
