@@ -1,8 +1,9 @@
-import { AuthProvider } from "./auth/useAuth";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
 import useToggleTheme from "./utils/useToggleTheme";
 
+import { AuthProvider } from "./auth/useAuth";
+import { SearchFormProvider } from "./search/useSearchForm";
 import NavBar from "./NavBar";
 import PrivateRoute from "./auth/PrivateRoute";
 import Login from "./auth/Login";
@@ -17,55 +18,60 @@ import UserParticipations from "./user/UserParticipations";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { ThemeProvider } from '@material-ui/core/styles';
 
-function App() {
+export default function App() {
     const { theme, handleToggleTheme } = useToggleTheme();
 
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
+            
             <Router>
                 <AuthProvider>
-                    <NavBar onToggleTheme={handleToggleTheme} />
-
-                    <Switch>
-
-                        <Route exact path="/">
-                            <Top />
-                        </Route>
-
-                        <Route path="/search">
-                            <SearchResult />
-                        </Route>
-
-                        <Route path="/login">
-                            <Login />
-                        </Route>
-
-                        <PrivateRoute path="/invitations/new">
-                            <NewInvitation />
-                        </PrivateRoute>
-
-                        <PrivateRoute exact path="/invitations/:id">
-                            <ShowInvitation />
-                        </PrivateRoute>
-
-                        <PrivateRoute path="/invitations/:id/edit">
-                            <EditInvitation />
-                        </PrivateRoute>
-
-                        <PrivateRoute exact path="/users/:id">
-                            <UserInvitations />
-                        </PrivateRoute>
-
-                        <PrivateRoute path="/users/:id/participations">
-                            <UserParticipations />
-                        </PrivateRoute>
-
-                    </Switch>
+                    <SearchFormProvider>
+                        <NavBar onToggleTheme={handleToggleTheme} />
+                        <AppSwitch />
+                    </SearchFormProvider>
                 </AuthProvider>
             </Router>
         </ThemeProvider>
     );
 }
 
-export default App;
+function AppSwitch() {
+    return (
+        <Switch>
+            <Route exact path="/">
+                <Top />
+            </Route>
+
+            <Route path="/search">
+                <SearchResult />
+            </Route>
+
+            <Route path="/login">
+                <Login />
+            </Route>
+
+            <PrivateRoute path="/invitations/new">
+                <NewInvitation />
+            </PrivateRoute>
+
+            <PrivateRoute exact path="/invitations/:id">
+                <ShowInvitation />
+            </PrivateRoute>
+
+            <PrivateRoute path="/invitations/:id/edit">
+                <EditInvitation />
+            </PrivateRoute>
+
+            <PrivateRoute exact path="/users/:id">
+                <UserInvitations />
+            </PrivateRoute>
+
+            <PrivateRoute path="/users/:id/participations">
+                <UserParticipations />
+            </PrivateRoute>
+        </Switch>
+    );
+}
+

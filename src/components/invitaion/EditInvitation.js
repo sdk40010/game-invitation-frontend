@@ -117,6 +117,7 @@ export default function EditInvitation() {
     } else if (deleteSuccess) {
         return <Redirect to="/"/>
     }
+
     return (
         <MainContainer errors={errors} resources={resources} maxWidth="sm">
             <>

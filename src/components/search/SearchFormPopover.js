@@ -1,10 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useHistory } from "react-router-dom";
 
 import { useForm } from "react-hook-form";
 
-import useInvitationAPI from "../http/invitationAPI";
-import useTagAPI from "../http/tagAPI";
+import { useSearchForm } from "./useSearchForm";
 
 import { DateTimePicker, CapacitySelector, TagSelector, formatTime } from "../invitaion/InputField";
 import { createEqualOrBefore, createEqualOrAfter } from "../invitaion/InvitationForm";
@@ -43,30 +42,19 @@ const useStyles = makeStyles((theme) => ({
 export default function SearchFormPopover() {
     const history = useHistory();
 
-    const invitationAPI = useInvitationAPI();
-    const tagAPI = useTagAPI();
-
     const classes = useStyles();
 
-    // タグ一覧の取得
-    useEffect(() => {
-        (async () => {
-            await tagAPI.getAll()
-        })();
-    }, []);
-
     const [anchorEl, setAnchorEl] = useState(null);
-
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
     }
-
     const handleClose = () => {
         setAnchorEl(null);
     };
 
-    // 検索クエリの送信
-    const handleSubmit = async (inputs) => {
+    // 検索ボタンのクリックハンドラー
+    const handleSearch = async (inputs) => {
+        handleClose();
         const query = convertToQuery(inputs);
         history.push(`/search?${query.toString()}`);
     }
@@ -88,10 +76,7 @@ export default function SearchFormPopover() {
                 PaperProps={{ className: classes.paper }}
             >
                 <Box p={2}>
-                    <SearchForm
-                        onSubmit={handleSubmit}
-                        tagOptions={tagAPI.data}
-                    />
+                    <SearchForm onSearch={handleSearch} />
                 </Box>
             </Popover>
         </>
@@ -105,27 +90,48 @@ export default function SearchFormPopover() {
  * @returns {URLSearchParams} クエリパラメータ
  */
 const convertToQuery = (inputs) => {
-    const params = {};
     delete inputs.notEmpty;
+    const params = {};
 
     Object.entries(inputs).forEach(([key, value]) => {
-        const formatted
-            = Array.isArray(value) ? value.map(v => v.name).join(" ")
-            : typeOf(value) === "Date" ? formatTime(value)
-            : value;
-        params[key] = formatted;
+        if (!value) {
+            return;
+        }　else if (Array.isArray(value) && value.length === 0) {
+            return;
+        }
+        // URLを短くするためにクエリパラメータの変数名は省略形にする
+        params[abbreviations[key]] = toString(key, value);
     });
     return new URLSearchParams(params);
 }
 
+// クエリパラメータ用の省略形一覧
+const abbreviations = {
+    tags: "tags",
+    title: "title",
+    minStartTime: "minst",
+    maxStartTime: "maxst",
+    minCapacity: "minc",
+    maxCapacity: "maxc",
+}
+
 /**
- * 値の型を判定する
+ * キーの名前に基づいて値を文字列に変換する
  * 
- * @param {any} value 型の判定対象
- * @returns {string} 型の名前
+ * @param {string} key 
+ * @param {any} value 
+ * @returns 
  */
-const typeOf = (value) => {
-    return Object.prototype.toString.call(value).slice(8, -1);
+const toString = (key, value) => {
+    switch (key) {
+        case "tags":
+            return value.map(tag => tag.name).join(" ")
+        case "minStartTime":
+        case "maxStartTime":
+            return formatTime(value)
+        default:
+            return value.toString()
+    }
 }
 
 const defaultValues = {
@@ -141,7 +147,9 @@ const defaultValues = {
  * 検索フォーム
  */
 function SearchForm(props) {
-    const { onSubmit, tagOptions } = props;
+    const { onSearch } = props;
+
+    const searchForm = useSearchForm();
 
     const classes = useStyles();
 
@@ -152,9 +160,10 @@ function SearchForm(props) {
         control,
         errors,
         setValue,
+        getValues,
         reset, 
         formState: { dirtyFields }
-    } = useForm({defaultValues});
+    } = useForm({ defaultValues: searchForm.inputs ?? defaultValues });
     const formProps = { watch, control, errors };
 
     const hiddenInputRules = {
@@ -181,16 +190,18 @@ function SearchForm(props) {
         }
     }
 
-    const handleMinStartTimeChange = createHandleChange(maxStartTimeProps);
-    const handleMaxStartTimeChange = createHandleChange(minStartTimeProps);
+    const onSearchWithSaving = (inputs) => {
+        onSearch(inputs);
+        searchForm.save(getValues());　// 検索ボタンをクリックしたとき入力値を保存する
+    }
 
-    const handleMinCapacityChange = createHandleChange(maxCapacityProps);
-    const handleMaxCapacityChange = createHandleChange(minCapacityProps);
-
-    const handleReset = () => reset();
+    const handleReset = () => {
+        reset(defaultValues);
+        searchForm.reset();
+    };
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSearchWithSaving)}>
             <input name="notEmpty" hidden ref={register(hiddenInputRules)} />
 
             <Box mb={3}>
@@ -201,7 +212,7 @@ function SearchForm(props) {
                 <TagSelector 
                     name="tags"
                     label="タグ"
-                    tagOptions={tagOptions}
+                    tagOptions={searchForm.tags}
                     size="small"
                     {...formProps}
                 />
@@ -234,7 +245,7 @@ function SearchForm(props) {
                                     watch(maxStartTimeProps.name),
                                     maxStartTimeProps.label
                                 )}
-                                onChange={handleMinStartTimeChange}
+                                onChange={createHandleChange(maxStartTimeProps)}
                                 {...formProps}
                             />
                         </Grid>
@@ -252,7 +263,7 @@ function SearchForm(props) {
                                     watch(minStartTimeProps.name),
                                     minStartTimeProps.label
                                 )}
-                                onChange={handleMaxStartTimeChange}
+                                onChange={createHandleChange(minStartTimeProps)}
                                 {...formProps}
                             />
                         </Grid>
@@ -273,7 +284,7 @@ function SearchForm(props) {
                                     }
                                     return true;
                                 }}
-                                onChange={handleMinCapacityChange}
+                                onChange={createHandleChange(maxCapacityProps)}
                                 {...formProps}
                             />
                         </Grid>
@@ -294,7 +305,7 @@ function SearchForm(props) {
                                     }
                                     return true;
                                 }}
-                                onChange={handleMaxCapacityChange}
+                                onChange={createHandleChange(minCapacityProps)}
                                 {...formProps}
                             />
                         </Grid>

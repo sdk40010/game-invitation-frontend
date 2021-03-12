@@ -4,9 +4,6 @@ import "firebase/auth";
 import apiCall from "../http/http";
 import { useLocation } from "react-router-dom";
 
-/**
- * firebaseの初期化
- */
 firebase.initializeApp({
     apiKey: process.env.REACT_APP_API_KEY,
     authDomain: process.env.REACT_APP_AUTH_DOMAIN,
@@ -99,7 +96,7 @@ function useAuthProvider() {
         loginCheck();
     }, []);
 
-    // 認証に関するエラーが他のページに影響を与えないように、ページ遷移するたびにエラーを消去する
+    // 認証エラーが他のページに影響を与えないように、ページ遷移するたびにエラーを消去する
     useEffect(() => {
         if (error) {
             setError(null);

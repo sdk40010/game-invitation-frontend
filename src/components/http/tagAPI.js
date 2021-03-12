@@ -20,9 +20,17 @@ export default function useTagAPI() {
         }
     }
 
+    /**
+     * エラーを初期値に戻す
+     */
+    const resetError = () => {
+        setError(null);
+    }
+
     return {
         data,
         error,
         getAll,
+        resetError,
     };
 }

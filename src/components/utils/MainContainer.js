@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 
 import { useAuth } from "../auth/useAuth";
+import { useSearchForm } from "../search/useSearchForm";
 import useLoading from "../utils/useLoading";
  
 import { makeStyles } from "@material-ui/core/styles";
@@ -48,21 +49,27 @@ export default function MainContainer(props) {
     } = props;
 
     const auth = useAuth();
+    const searchForm = useSearchForm();
 
     const classes = useStyles();
 
     // ページ内で発生したエラー
     const [error, setError] = useState(null);
 
-    errors.push(auth.error); // どのページでも発生しうる認証エラーを追加する
+    // どのページでも発生しうる認証エラーと検索フォームエラーを追加する
+    errors.push(auth.error, searchForm.error); 
+
     useEffect(() => {
         for (let i = 0; i < errors.length; i++) {
             if (errors[i]) {
                 setError(errors[i]);
                 break;
+            } else if (i === errors.length - 1) {
+                setError(null);
             }
         }
-    }, [errors]);
+    }, [errors, searchForm.error]);
+
 
     // APIリソースの読み込み状況
     const loading = useLoading(resources);

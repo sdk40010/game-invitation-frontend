@@ -54,6 +54,11 @@ const useStyles = makeStyles((theme) => ({
     subHeaderChip: {
         color: theme.palette.text.secondary
     },
+    // アイコン用
+    sm: {
+        width: theme.spacing(4),
+        height: theme.spacing(4),
+    },
 }));
 
 /**
@@ -128,7 +133,11 @@ function InvitationListItem({ invitation }) {
     );
     const poster = (
         <SimpleLink to={`/users/${invitation.userId}`} display="inline-block">
-            <Avatar alt={invitation.user.name} src={invitation.user.iconUrl} />
+            <Avatar
+                alt={invitation.user.name}
+                src={invitation.user.iconUrl}
+                className={classes.sm}
+            />
         </SimpleLink>
     );
 
