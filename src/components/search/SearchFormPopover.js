@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useHistory } from "react-router-dom";
 
-import { useForm } from "react-hook-form";
+import { useForm, useController } from "react-hook-form";
 
 import { useSearchForm } from "./useSearchForm";
 
@@ -19,6 +19,7 @@ import {
     Button,
 } from "@material-ui/core";
 import { Search } from "@material-ui/icons";
+import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -86,26 +87,26 @@ export default function SearchFormPopover() {
 /**
  * フォームの入力値をクエリパラメータに変換する
  * 
- * @param {Object} inputs フォームの入力値
+ * @param {Object} inputs フォームの全input
  * @returns {URLSearchParams} クエリパラメータ
  */
 const convertToQuery = (inputs) => {
     delete inputs.notEmpty;
     const params = {};
 
-    Object.entries(inputs).forEach(([key, value]) => {
+    Object.entries(inputs).forEach(([name, value]) => {
         if (!value) {
             return;
         }　else if (Array.isArray(value) && value.length === 0) {
             return;
         }
         // URLを短くするためにクエリパラメータの変数名は省略形にする
-        params[abbreviations[key]] = toString(key, value);
+        params[abbreviations[name]] = toString(name, value);
     });
     return new URLSearchParams(params);
 }
 
-// クエリパラメータ用の省略形一覧
+// クエリパラメータの変数名一覧（元の形 -> 省略形）
 const abbreviations = {
     tags: "tags",
     title: "title",
@@ -116,14 +117,14 @@ const abbreviations = {
 }
 
 /**
- * キーの名前に基づいて値を文字列に変換する
+ *  inputの値を文字列に変換する
  * 
- * @param {string} key 
- * @param {any} value 
+ * @param {string} name - inputの名前
+ * @param {any} value - inputの値
  * @returns 
  */
-const toString = (key, value) => {
-    switch (key) {
+const toString = (name, value) => {
+    switch (name) {
         case "tags":
             return value.map(tag => tag.name).join(" ")
         case "minStartTime":
@@ -209,13 +210,25 @@ function SearchForm(props) {
                     検索対象
                 </Typography>
 
-                <TagSelector 
-                    name="tags"
-                    label="タグ"
-                    tagOptions={searchForm.tags}
-                    size="small"
-                    {...formProps}
-                />
+                <Grid container spacing={1} alignItems="center" wrap="nowrap">
+                    <Grid item xs>
+                        <TagSelector 
+                            name="tags"
+                            label="タグ"
+                            tagOptions={searchForm.tags}
+                            size="small"
+                            {...formProps}
+                        />
+                    </Grid>
+
+                    <Grid item>
+                        {/* <OperatorSelector
+                            name="tags.operator"
+                            {...formProps}
+                        /> */}
+                    </Grid>
+                </Grid>
+                
             </Box>
 
             <Box mb={2}>
@@ -325,6 +338,23 @@ function SearchForm(props) {
 
         </form>
     )
+}
+
+function OperatorSelector(props) {
+    const { name, watch, control } = props;
+    const { field } = useController({ name, control });
+
+    return (
+        <ToggleButtonGroup
+            exclusive
+            size="small"
+            value={watch(name)}
+            onChange={field.onChange}
+        >
+            <ToggleButton value="or">OR</ToggleButton>
+            <ToggleButton value="and">AND</ToggleButton>
+        </ToggleButtonGroup>
+    );
 }
 
 

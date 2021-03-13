@@ -35,6 +35,9 @@ const useStyles = makeStyles((theme) => ({
             height: "100%",
         }
     },
+    noItemMessage: {
+        textAlign: "center"
+    },
     cardContent: {
         paddingTop: 0
     },
@@ -83,15 +86,13 @@ export default function Top() {
 
     return(
         <MainContainer errors={errors} resources={resources} maxWidth="lg">
-            <>
-                <Box>
-                    <InvitationList invitations={invitationAPI.data?.invitations} />
-                </Box>
+            <Box mb={4}>
+                <InvitationList invitations={invitationAPI.data?.invitations} />
+            </Box>
 
-                <Box mt={4}>
-                    <Paginator meta={invitationAPI.data?.meta} />
-                </Box>
-            </>
+            <Box>
+                <Paginator meta={invitationAPI.data?.meta} />
+            </Box>
         </MainContainer>
     );
 }
@@ -286,6 +287,10 @@ function NestedGrid({items}) {
 export function Paginator({ meta }) {
     const path = useLocation().pathname;
 
+    if (meta.total === 0) {
+        return <></>;
+    } 
+
     return (
         <Grid container justify="center">
             <Grid item>
@@ -295,11 +300,28 @@ export function Paginator({ meta }) {
                     renderItem={item => (
                         <PaginationItem
                             component={SimpleLink}
-                            to={`${path}${item.page ===1 ? "" : `?page=${item.page}`}`}
+                            to={`${path}${item.page === 1 ? "" : `?page=${item.page}`}`}
                             {...item}
                         />
                     )}
                 />
+            </Grid>
+        </Grid>
+    );
+}
+
+/**
+ * 
+ */
+export function NoItemMessage({children}) {
+    const classes = useStyles();
+
+    return (
+        <Grid container justify="center">
+            <Grid item>
+                <Box mt={30} className={classes.noItemMessage}>
+                    {children}
+                </Box>
             </Grid>
         </Grid>
     );
