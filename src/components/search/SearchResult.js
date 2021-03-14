@@ -37,7 +37,7 @@ export default function SearchResult() {
                         一致する検索結果はありませんでした
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                        別の検索対象や検索条件をお試しください
+                        別の検索条件をお試しください
                     </Typography>
                 </NoItemMessage>
             ) : (

@@ -108,12 +108,12 @@ const convertToQuery = (inputs) => {
 
 // クエリパラメータの変数名一覧（元の形 -> 省略形）
 const abbreviations = {
-    tags: "tags",
     title: "title",
     minStartTime: "minst",
     maxStartTime: "maxst",
     minCapacity: "minc",
     maxCapacity: "maxc",
+    tags: "tags",
 }
 
 /**
@@ -125,11 +125,11 @@ const abbreviations = {
  */
 const toString = (name, value) => {
     switch (name) {
-        case "tags":
-            return value.map(tag => tag.name).join(" ")
         case "minStartTime":
         case "maxStartTime":
             return formatTime(value)
+        case "tags":
+            return value.map(tag => tag.name).join(" ")
         default:
             return value.toString()
     }
@@ -206,35 +206,7 @@ function SearchForm(props) {
             <input name="notEmpty" hidden ref={register(hiddenInputRules)} />
 
             <Box mb={3}>
-                <Typography variant="body2" paragraph>
-                    検索対象
-                </Typography>
-
-                <Grid container spacing={1} alignItems="center" wrap="nowrap">
-                    <Grid item xs>
-                        <TagSelector 
-                            name="tags"
-                            label="タグ"
-                            tagOptions={searchForm.tags}
-                            size="small"
-                            {...formProps}
-                        />
-                    </Grid>
-
-                    <Grid item>
-                        {/* <OperatorSelector
-                            name="tags.operator"
-                            {...formProps}
-                        /> */}
-                    </Grid>
-                </Grid>
-                
-            </Box>
-
-            <Box mb={2}>
-                <Typography variant="body2" paragraph>
-                    検索条件
-                </Typography>
+                <Typography variant="body2" paragraph>検索条件</Typography>
 
                 <Box mb={3}>
                     <TextField
@@ -283,7 +255,7 @@ function SearchForm(props) {
                     </Grid>
                 </Box>
 
-                <Box>
+                <Box mb={3}>
                     <Grid container spacing={1} alignItems="center">
                         <Grid item xs>
                             <CapacitySelector 
@@ -322,6 +294,27 @@ function SearchForm(props) {
                                 {...formProps}
                             />
                         </Grid>
+                    </Grid>
+                </Box>
+
+                <Box>
+                    <Grid container spacing={1} alignItems="center" wrap="nowrap">
+                        <Grid item xs>
+                            <TagSelector 
+                                name="tags"
+                                label="タグ"
+                                tagOptions={searchForm.tags}
+                                size="small"
+                                {...formProps}
+                            />
+                        </Grid>
+
+                        {/* <Grid item>
+                            <OperatorSelector
+                                name="tags.operator"
+                                {...formProps}
+                            />
+                        </Grid> */}
                     </Grid>
                 </Box>
                     
