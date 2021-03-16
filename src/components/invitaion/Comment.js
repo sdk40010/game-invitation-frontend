@@ -75,7 +75,7 @@ export function CommentList({commentAPI, replyAPI}) {
     const handleCommentSubmit = async (input) => {
         const success = await commentAPI.post(input, id);
         if (success) {
-            snackbar.handleOpen("コメントを投稿しました。");
+            snackbar.handleOpen("コメントを投稿しました");
         }
     }
 
@@ -296,7 +296,7 @@ function Comment(props) {
         commentCollapse.handleClose();
 
         if (success) {
-            snackbar.handleOpen(`${inputProps.label}を更新しました。`);
+            snackbar.handleOpen(`${inputProps.label}を更新しました`);
         }
     }
 
@@ -306,7 +306,7 @@ function Comment(props) {
         dialog.handleClose();
 
         if (success) {
-            snackbar.handleOpen(`${inputProps.label}を削除しました。`);
+            snackbar.handleOpen(`${inputProps.label}を削除しました`);
         }
     }
 
@@ -324,7 +324,7 @@ function Comment(props) {
         }
 
         if (success) {
-            snackbar.handleOpen("返信を投稿しました。");
+            snackbar.handleOpen("返信を投稿しました");
         }
     }
 

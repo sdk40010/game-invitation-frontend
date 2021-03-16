@@ -39,8 +39,10 @@ const useStyles = makeStyles((theme) => ({
  * 募集編集ページ
  */
 export default function EditInvitation() {
+    const { id } = useParams(); // 募集ID
+
     const auth = useAuth();
-    const invitationAPI = useInvitationAPI();
+    const invitationAPI = useInvitationAPI(id);
     const tagAPI = useTagAPI();
     const permission = usePermission(
         () => {
@@ -59,8 +61,6 @@ export default function EditInvitation() {
     const errors = [invitationAPI.error, tagAPI.error, permission.error];
     const resources = [invitationAPI.data, tagAPI.data, defaultValues];
 
-    const { id } = useParams(); // 募集ID
-
     const [sumbitSuccess, setSubmitSuccess] = useState(false);
     const [deleteSuccess, setDeleteSuccess] = useState(false);
 
@@ -69,7 +69,7 @@ export default function EditInvitation() {
     // 募集の取得
     useEffect(() => {
         (async () => {
-            const invitation = await invitationAPI.get(id);
+            const invitation = await invitationAPI.get();
             setDefaultValues({
                 title: invitation.title,
                 description: invitation.description,
@@ -98,7 +98,7 @@ export default function EditInvitation() {
         // 編集前のタグ一覧を送信情報に追加する
         input.tagsBeforeUpdate = invitationAPI.data.tags;
 
-        const success = await invitationAPI.update(id, input);
+        const success = await invitationAPI.update(input);
         setSubmitSuccess(success);
     };
 
@@ -108,7 +108,7 @@ export default function EditInvitation() {
     // 募集の削除
     const handleDelete = async () => {
         dialog.handleClose();
-        const success = await invitationAPI.remove(id);
+        const success = await invitationAPI.remove();
         setDeleteSuccess(success);
     }
 

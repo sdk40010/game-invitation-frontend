@@ -9,6 +9,7 @@ import MainContainer from "./utils/MainContainer";
 import Heading from "./utils/Heading";
 import SimpleMenu from "./utils/SimpleMenu";
 import SimpleLink from "./utils/SimpleLink";
+import CustomChip from "./utils/CustomChip";
 
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -48,14 +49,6 @@ const useStyles = makeStyles((theme) => ({
         "&::-webkit-scrollbar" : {  /* Chrome, Safari 対応 */
             display: "none"
         }
-    },
-    subHeader: {
-        "& > :not(:first-child)": {
-            marginLeft: theme.spacing(1)
-        }
-    },
-    subHeaderChip: {
-        color: theme.palette.text.secondary
     },
     // アイコン用
     sm: {
@@ -123,12 +116,13 @@ function InvitationListItem({ invitation }) {
     const subHeader = (
         <>
             <span>{invitation.createdAt}</span>
-            <Chip
+            <CustomChip
                 label={invitation.canParticipateIn ? "募集中" : "募集終了"}
                 size="small"
                 color={invitation.canParticipateIn ? "primary" : "default"}
                 variant="outlined"
-                className={!invitation.canParticipateIn ? classes.subHeaderChip : ""}
+                textSecondary={!invitation.canParticipateIn}
+                ml={1}
             />
         </>
     );

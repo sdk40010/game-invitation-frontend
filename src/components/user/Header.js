@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from "react"
 
 import { UserProfile } from "../invitaion/ShowInvitation";
 import SimpleLink from "../utils/SimpleLink";
@@ -13,9 +13,17 @@ import {
 /**
  * ヘッダー
  */
-export default function Header({initialTab, user}) {
+export default function Header(props) {
+    const {
+        initialTab = 0,
+        user,
+        onFollow,
+        onUnFollow
+    } = props;
+
     const [value, setValue] = useState(initialTab);
 
+    // タブの変更
     const handleChange = (event, newValue) => {
         setValue(newValue);
       };
@@ -23,13 +31,20 @@ export default function Header({initialTab, user}) {
     return (
         <Paper square>
             <Box p={2}>
-                <UserProfile user={user} iconSize="large" typographyVariant="h5" />
+                <UserProfile
+                    user={user}
+                    iconSize="large"
+                    typographyVariant="h5"
+                    onFollow={onFollow}
+                    onUnFollow={onUnFollow}
+                />
             </Box>
 
             <Tabs value={value} onChange={handleChange} textColor="primary" indicatorColor="primary">
                 <Tab label="投稿" component={SimpleLink} to={`/users/${user.id}`} />
                 <Tab label="参加" component={SimpleLink} to={`/users/${user.id}/participations`}/>
-                <Tab label="フレンド" component={SimpleLink} to={`/users/${user.id}/frends`}/>
+                <Tab label="フォロー" component={SimpleLink} to={`/users/${user.id}/followings`}/>
+                <Tab label="フォロワー" component={SimpleLink} to={`/users/${user.id}/followers`}/>
             </Tabs>
         </Paper>
     )

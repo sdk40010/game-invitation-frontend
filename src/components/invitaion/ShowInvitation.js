@@ -6,6 +6,7 @@ import useInvitationAPI from "../http/invitationAPI";
 import useCommentAPI from "../http/commentAPI";
 import useReplyAPI from "../http/replyAPI";
 import useParticipationAPI from "../http/participationAPI";
+import useFollowingAPI from "../http/followingAPI";
 import { useSnackbar } from "../utils/useOpenState";
 
 import EventEmitter from 'events';
@@ -15,6 +16,7 @@ import Heading from "../utils/Heading";
 import { CommentList } from "./Comment";
 import SimpleMenu from "../utils/SimpleMenu";
 import SimpleLink from "../utils/SimpleLink";
+import CustomChip from "../utils/CustomChip";
 
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -61,28 +63,28 @@ const useStyles = makeStyles((theme) => ({
  * 募集閲覧ページ
  */
 export default function ShowInvitation() {
-    const invitationAPI = useInvitationAPI();
+    const { id } = useParams(); // 募集ID
+
+    const invitationAPI = useInvitationAPI(id);
     const commentAPI = useCommentAPI();
     const replyAPI = useReplyAPI();
     const participationAPI = useParticipationAPI();
+    const followingAPI = useFollowingAPI();
 
-
-    const errors = [invitationAPI.error, commentAPI.error, replyAPI.error, participationAPI.error];
+    const errors = [
+        invitationAPI.error,
+        commentAPI.error,
+        replyAPI.error,
+        participationAPI.error,
+        followingAPI.error,
+    ];
     const resources = [invitationAPI.data, commentAPI.data];
 
-    const { id } = useParams(); // 募集ID
-
-    // 募集の取得
+    
     useEffect(() => {
         (async () => {
-            await invitationAPI.get(id);
-        })();
-    }, []);
-
-    // コメント一覧の取得
-    useEffect(() => {
-        (async () => {
-            await commentAPI.getAll(id);
+            await invitationAPI.get();　// 募集の取得
+            await commentAPI.getAll(id);　// コメント一覧の取得
         })();
     }, []);
 
@@ -93,6 +95,7 @@ export default function ShowInvitation() {
                     <InvitationCard
                         invitationAPI={invitationAPI}
                         participationAPI={participationAPI}
+                        followingAPI={followingAPI}
                     />
                 </Box>
 
@@ -114,7 +117,7 @@ export default function ShowInvitation() {
 /**
  * 募集詳細カード
  */
-function InvitationCard({invitationAPI, participationAPI}) {
+function InvitationCard({invitationAPI, participationAPI, followingAPI}) {
     const invitation = invitationAPI.data;
 
     const auth = useAuth();
@@ -127,20 +130,22 @@ function InvitationCard({invitationAPI, participationAPI}) {
     const title = <Typography variant="h5" component="h1" paragraph>{invitation.title}</Typography>;
     const subHeader = invitation.createdAt;
 
-    // 参加ボタン用
+    // 募集への参加
     const handleParticipate = async () => {
         const success1 = await participationAPI.post(invitation.id);
         // 参加者一覧を更新するために、募集を再取得する
-        const success2 = await invitationAPI.get(invitation.id);
+        const success2 = await invitationAPI.get();
         if (success1 && success2) {
-            snackbar.handleOpen("募集に参加しました。");
+            snackbar.handleOpen("募集に参加しました");
         }
     }
+
+    // 参加の取り消し
     const handleCancel = async () => {
         const success1 = await participationAPI.remove(invitation.id);
-        const success2 = await invitationAPI.get(invitation.id);
+        const success2 = await invitationAPI.get();
         if (success1 && success2) {
-            snackbar.handleOpen("募集への参加を取り消しました。");
+            snackbar.handleOpen("募集への参加を取り消しました");
         }
     }
     const isPoster = invitation.isPoster;
@@ -154,10 +159,29 @@ function InvitationCard({invitationAPI, participationAPI}) {
         : !canParticipateIn ? <DisabledButton>募集終了</DisabledButton>
         : <Button color="primary" variant="contained" onClick={handleParticipate}>参加する</Button>;
 
+    // フォロー
+    const handleFollow = async () => {
+        const success1 = await followingAPI.post(invitation.user.id);
+        // ユーザープロフィールを更新するために、募集をを再取得する
+        const success2 = await invitationAPI.get();
+        return Boolean(success1 && success2);
+    }
+
+    // フォロー取り消し
+    const handleUnFollow = async () => {
+        const success1 = await followingAPI.remove(invitation.user.id);
+        const success2 = await invitationAPI.get();
+        return Boolean(success1 && success2);
+    }
+
     // 募集の作成者
     const poster = (
         <Box mb={2}>
-            <UserProfile user={invitation.user} />
+            <UserProfile
+                user={invitation.user}
+                onFollow={handleFollow}
+                onUnFollow={handleUnFollow}
+            />
         </Box>
     );
 
@@ -222,7 +246,6 @@ function InvitationCard({invitationAPI, participationAPI}) {
                     <CustomAvatarGroup invitation={invitation} />
                 </Box>
             </Box>
-
         </>
     );
 
@@ -248,16 +271,41 @@ function InvitationCard({invitationAPI, participationAPI}) {
             </CardContent>
         </Card>
     );
-
 }
 
 /**
  * ユーザープロフィール
  */
-export function UserProfile({user, iconSize, typographyVariant = "body1"}) {
+export function UserProfile(props) {
+    const {
+        user,
+        iconSize,
+        typographyVariant = "body1",
+        onFollow,
+        onUnFollow
+    } = props;
+
     const auth = useAuth();
 
     const classes = useStyles();
+
+    const snackbar = useSnackbar();
+
+    // フォロー
+    const handleFollow = async () => {
+        const success = await onFollow();
+        if (success) {
+            snackbar.handleOpen(`${user.name}をフォローしました`);
+        }
+    }
+
+    // フォロー取り消し
+    const handleUnfollow = async () => {
+        const success = await onUnFollow();
+        if (success) {
+            snackbar.handleOpen(`${user.name}のフォローを取り消しました`);
+        }
+    }
 
     return (
         <Grid container spacing={1} alignItems="center">
@@ -274,22 +322,49 @@ export function UserProfile({user, iconSize, typographyVariant = "body1"}) {
 
             <Grid item xs>
                 <Box mt={-.5}>
-                    <SimpleLink to={`/users/${user.id}`} display="inline-block">
-                        <Typography variant={typographyVariant}>{user.name}</Typography>
-                    </SimpleLink>
+                    <Grid container alignItems="center">
+                        <Grid item>
+                            <SimpleLink to={`/users/${user.id}`} display="inline-block">
+                                <Typography variant={typographyVariant}>{user.name}</Typography>
+                            </SimpleLink>
+                        </Grid>
+                        <Grid>
+                            {Boolean(user.isFollower) && 
+                                <CustomChip
+                                    variant="outlined"
+                                    size="small"
+                                    label="フォローされています"
+                                    textSecondary={true}
+                                    ml={1}
+                                />
+                            }
+                        </Grid>
+                    </Grid>
+
                     <Typography variant="body2" color="textSecondary">
                         {[
                             `投稿 ${user.invitationsPostedCount}`,
-                            `参加 ${user.invitationsParticipatedInCount}`
-                        ].join(" ")
-                        }
+                            `参加 ${user.invitationsParticipatedInCount}`,
+                            `フォロー ${user.followingsCount}`,
+                            `フォロワー ${user.followersCount}`
+                        ].join("　")}
                     </Typography>
                 </Box>
             </Grid>
 
             {auth.user.id !== user.id && (
                 <Grid item>
-                    <Button color="primary" variant="outlined">フレンド申請</Button>
+                    {user.isFollowing 
+                        ? <Button color="primary" variant="outlined" onClick={handleUnfollow}>フォロー中</Button>
+                        : <Button variant="outlined" onClick={handleFollow}>フォロー</Button>
+                    }
+                    <Snackbar 
+                        anchorOrigin={{ vertical: "bottom", horizontal: "left"}}
+                        open={snackbar.open}
+                        message={snackbar.message}
+                        autoHideDuration={3000}
+                        onClose={snackbar.handleClose}
+                    />
                 </Grid>
             )}
 
@@ -312,7 +387,7 @@ function DisabledButton({children}) {
 }
 
 // 参加者一覧用
-const ITEM_HEIGHT = 52;
+const ITEM_HEIGHT = 68;
 const ITEM_PADDING_TOP = 8;
 
 /**
@@ -377,7 +452,7 @@ function CustomAvatarGroup(props) {
 
             <SimpleMenu 
                 menuItems={menuItems}
-                PaperProps={{ style: { maxHeight: ITEM_HEIGHT * 5 + ITEM_PADDING_TOP } }}
+                PaperProps={{ style: { maxHeight: ITEM_HEIGHT * 4 + ITEM_PADDING_TOP } }}
                 eventProps={{ name: eventName, emitter: eventEmitter }}
             />
         </>

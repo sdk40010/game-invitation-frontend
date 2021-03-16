@@ -11,7 +11,7 @@ export default function useParticipationAPI() {
      * 募集に参加する
      * 
      * @param {number} id - 募集ID
-     * @returns {boolean} 参加の保存が成功したかどうか
+     * @returns {boolean} 募集への参加が成功したかどうか
      */
     const post = async (id) => {
         try {

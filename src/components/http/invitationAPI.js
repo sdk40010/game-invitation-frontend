@@ -4,7 +4,7 @@ import apiCall from "../http/http";
 /**
  * 募集に関するAPI用のフック
  */
-export default function useInvitationAPI() {
+export default function useInvitationAPI(invitationId = null) {
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
 
@@ -47,12 +47,11 @@ export default function useInvitationAPI() {
     /**
      * 募集を取得する
      * 
-     * @param {number} id - 募集ID
      * @returns {Object} 募集
      */
-    const get = async (id) => {
+    const get = async () => {
         try {
-            const invitation = await apiCall(`/api/v1/invitations/${id}`, "GET");
+            const invitation = await apiCall(`/api/v1/invitations/${invitationId}`, "GET");
             setData(invitation);
             return invitation;
         } catch (err) {
@@ -81,13 +80,12 @@ export default function useInvitationAPI() {
     /**
      * 募集を更新する
      * 
-     * @param {number} id - 募集ID
      * @param {Object} input - フォームの入力値
      * @returns {boolean} 更新が成功したかどうか
      */
-    const update = async (id, input) => {
+    const update = async (input) => {
         try {
-            await apiCall(`/api/v1/invitations/${id}`, "PUT", input);
+            await apiCall(`/api/v1/invitations/${invitationId}`, "PUT", input);
             return true;
         } catch (err) {
             setError(err);
@@ -98,12 +96,11 @@ export default function useInvitationAPI() {
     /**
      * 募集を削除する
      * 
-     * @param {number} id - 募集ID
      * @returns {boolean} 削除が成功したかどうか
      */
-    const remove = async (id) => {
+    const remove = async () => {
         try {
-            await apiCall(`/api/v1/invitations/${id}`, "DELETE");
+            await apiCall(`/api/v1/invitations/${invitationId}`, "DELETE");
             return true;
         } catch (err) {
             setError(err);

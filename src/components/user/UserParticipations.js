@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 
 import useUserAPI from "../http/userAPI";
+import useFollowingAPI from "../http/followingAPI";
 import useQuery from "../utils/useQuery";
 import useScrollToTop from "../utils/useScrollToTop";
 import { useSnackbar } from "../utils/useOpenState";
@@ -16,8 +17,9 @@ export default function UserParticipations() {
     const { id } = useParams(); // ユーザーID
 
     const userAPI = useUserAPI(id);
+    const followingAPI = useFollowingAPI();
 
-    const errors = [userAPI.error];
+    const errors = [userAPI.error, followingAPI.error];
     const resources = [userAPI.data];
 
     const query = useQuery();
@@ -31,10 +33,30 @@ export default function UserParticipations() {
         })();
     }, [query]);
 
+     // フォロー
+     const handleFollow = async () => {
+        const success1 = await followingAPI.post(userAPI.data.id);
+        // ユーザープロフィールを更新するために、募集をを再取得する
+        const success2 = await userAPI.getParticipated(query);
+        return Boolean(success1 && success2);
+    }
+
+    // フォロー取り消し
+    const handleUnFollow = async () => {
+        const success1 = await followingAPI.remove(userAPI.data.id);
+        const success2 = await userAPI.getParticipated(query);
+        return Boolean(success1 && success2);
+    }
+
     return (
         <MainContainer errors={errors} resources={resources} maxWidth="lg">
             <Box mb={2}>
-                <Header initialTab={1} user={userAPI.data} />
+                <Header
+                    initialTab={1}
+                    user={userAPI.data}
+                    onFollow={handleFollow}
+                    onUnFollow={handleUnFollow}
+                />
             </Box>
             
             <Box>
