@@ -126,8 +126,16 @@ function InvitationListItem({ invitation }) {
             />
         </>
     );
+
+    const handlePosterClick = (event) => {
+        event.stopPropagation();
+    }
     const poster = (
-        <SimpleLink to={`/users/${invitation.userId}`} display="inline-block">
+        <SimpleLink
+            to={`/users/${invitation.userId}`}
+            display="inline-block"
+            onClick={handlePosterClick}
+        >
             <Avatar
                 alt={invitation.user.name}
                 src={invitation.user.iconUrl}
@@ -281,7 +289,7 @@ function NestedGrid({items}) {
 export function Paginator({ meta }) {
     const path = useLocation().pathname;
 
-    if (meta.total === 0) {
+    if (meta.lastPage === 1) {
         return <></>;
     } 
 

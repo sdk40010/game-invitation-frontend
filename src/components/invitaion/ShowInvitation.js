@@ -168,7 +168,7 @@ function InvitationCard({invitationAPI, participationAPI, followingAPI}) {
     }
 
     // フォロー取り消し
-    const handleUnFollow = async () => {
+    const handleUnfollow = async () => {
         const success1 = await followingAPI.remove(invitation.user.id);
         const success2 = await invitationAPI.get();
         return Boolean(success1 && success2);
@@ -180,7 +180,7 @@ function InvitationCard({invitationAPI, participationAPI, followingAPI}) {
             <UserProfile
                 user={invitation.user}
                 onFollow={handleFollow}
-                onUnFollow={handleUnFollow}
+                onUnfollow={handleUnfollow}
             />
         </Box>
     );
@@ -282,7 +282,7 @@ export function UserProfile(props) {
         iconSize,
         typographyVariant = "body1",
         onFollow,
-        onUnFollow
+        onUnfollow
     } = props;
 
     const auth = useAuth();
@@ -294,6 +294,7 @@ export function UserProfile(props) {
     // フォロー
     const handleFollow = async () => {
         const success = await onFollow();
+        console.log(success);
         if (success) {
             snackbar.handleOpen(`${user.name}をフォローしました`);
         }
@@ -301,7 +302,7 @@ export function UserProfile(props) {
 
     // フォロー取り消し
     const handleUnfollow = async () => {
-        const success = await onUnFollow();
+        const success = await onUnfollow();
         if (success) {
             snackbar.handleOpen(`${user.name}のフォローを取り消しました`);
         }

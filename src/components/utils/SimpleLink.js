@@ -16,9 +16,15 @@ const useStyles = makeStyles((theme) => ({
  * 装飾なしのリンク
  */
 function SimpleLink(props) {
-    const {children, className, display, forwardedRef, ...rest} = props;
+    const {
+        children,
+        className,
+        display = null,
+        forwardedRef,
+        ...rest
+    } = props;
 
-    const classes = useStyles({ display: display ?? "inline"});
+    const classes = useStyles({ display: display});
 
     return (
         <Link 

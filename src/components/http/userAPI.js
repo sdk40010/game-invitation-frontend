@@ -6,16 +6,38 @@ export default function useUserAPI(userId) {
     const [error, setError] = useState(null);
 
     /**
+     * ユーザーを取得する
+     * 
+     * @returns {Object} ユーザー
+     */
+    const get = async () => {
+        try {
+            const user = await apiCall(`/api/v1/users/${userId}`, "GET");
+            setData(prevData => ({
+                ...prevData,
+                user
+            }));
+            return user;
+        } catch (err) {
+            setError(err);
+            return {};
+        }
+    }
+
+    /**
      * ユーザーの投稿履歴を取得する
      * 
      * @param {URLSearchParams} query - クエリパラメータ
      * @returns {Object} ユーザーの投稿履歴（ページング用のメタ情報付）
      */
-    const getPosted = async (query) => {
+    const getAllPosted = async (query) => {
         try {
             const queryString = query.toString() ? `?${query.toString()}` : "";
-            const invitations = await apiCall(`/api/v1/users/${userId}${queryString}`, "GET");
-            setData(invitations);
+            const invitations = await apiCall(`/api/v1/users/${userId}/invitations${queryString}`, "GET");
+            setData(prevData => ({
+                ...prevData,
+                pagination: invitations
+            }));
             return invitations;
         } catch (err) {
             setError(err);
@@ -26,15 +48,60 @@ export default function useUserAPI(userId) {
     /**
      * ユーザーの参加履歴を取得する
      * 
-     * @param {*} query 
+     * @param {URLSearchParams} query 
      * @returns {Object} ユーザーの参加履歴（ページング用のメタ情報付）
      */
-    const getParticipated = async (query) => {
+    const getAllParticipatedIn = async(query) => {
         try {
             const queryString = query.toString() ? `?${query.toString()}` : "";
             const invitations = await apiCall(`/api/v1/users/${userId}/participations${queryString}`, "GET");
-            setData(invitations);
+            setData(prevData => ({
+                ...prevData,
+                pagination: invitations
+            }));
             return invitations;
+        } catch (err) {
+            setError(err);
+            return {};
+        }
+    }
+
+    /**
+     * ユーザーのフォロー一覧を取得する
+     * 
+     * @param {URLSearchParams} query - クエリパラメータ
+     * @returns {array} フォロー一覧
+     */
+    const getFollowings = async (query) => {
+        try {
+            const queryString = query.toString() ? `?${query.toString()}` : "";
+            const followings = await apiCall(`/api/v1/users/${userId}/followings${queryString}`, "GET");
+            setData(prevData => ({
+                ...prevData,
+                pagination: followings
+            }));
+            return followings;
+        } catch (err) {
+            setError(err);
+            return [];
+        }
+    }
+
+    /**
+     * ユーザーのフォロワー一覧を取得する
+     * 
+     * @param {URLSearchParams} query - クエリパラメータ
+     * @returns {array} フォロワー一覧
+     */
+    const getFollowers = async (query) => {
+        try {
+            const queryString = query.toString() ? `?${query.toString()}` : "";
+            const followers = await apiCall(`/api/v1/users/${userId}/followers${queryString}`, "GET");
+            setData(prevData => ({
+                ...prevData,
+                pagination: followers
+            }));
+            return followers;
         } catch (err) {
             setError(err);
             return [];
@@ -44,7 +111,10 @@ export default function useUserAPI(userId) {
     return {
         data,
         error,
-        getPosted,
-        getParticipated,
+        get,
+        getAllPosted,
+        getAllParticipatedIn,
+        getFollowings,
+        getFollowers,
     };
 }

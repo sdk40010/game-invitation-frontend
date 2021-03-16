@@ -20,20 +20,18 @@ export default function SimpleMenu(props) {
     const [anchorEl, setAnchorEl] = useState(null);
 
     const handleClick = (event) => {
-        stopPropagation(event);
+        if (enableStopPropagation) {
+            event.stopPropagation();
+        }
         setAnchorEl(event.currentTarget);
     };
 
     const handleClose = (event) => {
-        stopPropagation(event);
-        setAnchorEl(null);
-    };
-
-    const stopPropagation = (event) => {
         if (enableStopPropagation) {
             event.stopPropagation();
         }
-    }
+        setAnchorEl(null);
+    };
 
     useEffect(() => {
         // 外部のコンポーネントで指定されたイベントが発生したときの処理を登録

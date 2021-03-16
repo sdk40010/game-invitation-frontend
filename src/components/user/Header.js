@@ -17,8 +17,8 @@ export default function Header(props) {
     const {
         initialTab = 0,
         user,
-        onFollow,
-        onUnFollow
+        followingAPI,
+        userAPI
     } = props;
 
     const [value, setValue] = useState(initialTab);
@@ -26,7 +26,22 @@ export default function Header(props) {
     // タブの変更
     const handleChange = (event, newValue) => {
         setValue(newValue);
-      };
+    };
+
+    // フォロー
+    const handleFollow = async () => {
+        const success1 = await followingAPI.post(userAPI.data.user.id);
+        // ユーザープロフィールを更新するために、ユーザーをを再取得する
+        const success2 = await userAPI.get();
+        return Boolean(success1 && success2);
+    }
+
+    // フォロー取り消し
+    const handleUnfollow = async () => {
+        const success1 = await followingAPI.remove(userAPI.data.user.id);
+        const success2 = await userAPI.get();
+        return Boolean(success1 && success2);
+    }
 
     return (
         <Paper square>
@@ -35,8 +50,8 @@ export default function Header(props) {
                     user={user}
                     iconSize="large"
                     typographyVariant="h5"
-                    onFollow={onFollow}
-                    onUnFollow={onUnFollow}
+                    onFollow={handleFollow}
+                    onUnfollow={handleUnfollow}
                 />
             </Box>
 

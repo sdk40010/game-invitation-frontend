@@ -48,7 +48,7 @@ export default function NavBar({onToggleTheme}) {
         },
         {
             content: "マイページ",
-            onClick: () => {}
+            link: `/users/${auth.user.id}`
         },
         {
             content: "設定",

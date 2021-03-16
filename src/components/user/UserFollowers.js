@@ -7,12 +7,15 @@ import useQuery from "../utils/useQuery";
 import useScrollToTop from "../utils/useScrollToTop";
 
 import MainContainer from "../utils/MainContainer";
-import { InvitationList, Paginator } from "../Top";
+import { Paginator } from "../Top";
 import Header from "./Header";
+import { UserList } from "./UserFollowings";
 
-import { Box } from "@material-ui/core";
+import {
+    Box,
+} from "@material-ui/core";
 
-export default function UserInvitations() {
+export default function UserFollowers() {
     const { id } = useParams(); // ユーザーID
 
     const userAPI = useUserAPI(id);
@@ -27,34 +30,41 @@ export default function UserInvitations() {
 
     // ユーザーを取得する
     useEffect(() => {
-        userAPI.get();
+        (async () => {
+            userAPI.get();
+        })();
     }, []);
 
-    // ユーザーの投稿履歴を取得する
+    // ユーザーのフォロー一覧を取得する
     useEffect(() => {
         (async () => {
-            await userAPI.getAllPosted(query);
+            userAPI.getFollowers(query);
         })();
     }, [query]);
+
 
     return (
         <MainContainer errors={errors} resources={resources} maxWidth="lg">
             <Box mb={2}>
                 <Header
+                    initialTab={3}
                     user={userAPI.data?.user}
                     followingAPI={followingAPI}
                     userAPI={userAPI}
                 />
             </Box>
-            
+
             <Box mb={4}>
-                <InvitationList invitations={userAPI.data?.pagination?.invitations} />
+                <UserList 
+                    users={userAPI.data?.pagination?.followers}
+                    followingAPI={followingAPI}
+                    userAPI={userAPI}
+                />
             </Box>
-            
+
             <Box>
                 <Paginator meta={userAPI.data?.pagination?.meta} />
             </Box>
         </MainContainer>
-    )
+    );
 }
-
