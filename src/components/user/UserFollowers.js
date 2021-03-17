@@ -5,6 +5,7 @@ import useUserAPI from "../http/userAPI";
 import useFollowingAPI from "../http/followingAPI";
 import useQuery from "../utils/useQuery";
 import useScrollToTop from "../utils/useScrollToTop";
+import { useSnackbar } from "../utils/useOpenState";
 
 import MainContainer from "../utils/MainContainer";
 import { Paginator } from "../Top";
@@ -13,6 +14,7 @@ import { UserList } from "./UserFollowings";
 
 import {
     Box,
+    Snackbar,
 } from "@material-ui/core";
 
 export default function UserFollowers() {
@@ -23,6 +25,8 @@ export default function UserFollowers() {
 
     const errors = [userAPI.error, followingAPI.error];
     const resources = [userAPI.data?.user, userAPI.data?.pagination];
+
+    const snackbar = useSnackbar();
 
     const query = useQuery();
 
@@ -42,6 +46,12 @@ export default function UserFollowers() {
         })();
     }, [query]);
 
+    // フォロワー一覧の更新
+    const handleFollowerListUpdate = async () => {
+        const success = await userAPI.getFollowers(query);
+        return Boolean(success);
+    }
+
 
     return (
         <MainContainer errors={errors} resources={resources} maxWidth="lg">
@@ -49,22 +59,34 @@ export default function UserFollowers() {
                 <Header
                     initialTab={3}
                     user={userAPI.data?.user}
+                    snackbar={snackbar}
                     followingAPI={followingAPI}
                     userAPI={userAPI}
+                    onUserListUpdate={handleFollowerListUpdate}
                 />
             </Box>
 
             <Box mb={4}>
                 <UserList 
                     users={userAPI.data?.pagination?.followers}
+                    snackbar={snackbar}
                     followingAPI={followingAPI}
                     userAPI={userAPI}
+                    onUserListUpdate={handleFollowerListUpdate}
                 />
             </Box>
 
             <Box>
                 <Paginator meta={userAPI.data?.pagination?.meta} />
             </Box>
+
+            <Snackbar 
+                anchorOrigin={{ vertical: "bottom", horizontal: "left"}}
+                open={snackbar.open}
+                message={snackbar.message}
+                autoHideDuration={3000}
+                onClose={snackbar.handleClose}
+            />
         </MainContainer>
     );
 }

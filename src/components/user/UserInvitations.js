@@ -5,12 +5,16 @@ import useUserAPI from "../http/userAPI";
 import useFollowingAPI from "../http/followingAPI";
 import useQuery from "../utils/useQuery";
 import useScrollToTop from "../utils/useScrollToTop";
+import { useSnackbar } from "../utils/useOpenState";
 
 import MainContainer from "../utils/MainContainer";
 import { InvitationList, Paginator } from "../Top";
 import Header from "./Header";
 
-import { Box } from "@material-ui/core";
+import {
+    Box,
+    Snackbar,
+} from "@material-ui/core";
 
 export default function UserInvitations() {
     const { id } = useParams(); // ユーザーID
@@ -20,6 +24,8 @@ export default function UserInvitations() {
 
     const errors = [userAPI.error, followingAPI.error];
     const resources = [userAPI.data?.user, userAPI.data?.pagination];
+
+    const snackbar = useSnackbar();
 
     const query = useQuery();
 
@@ -42,6 +48,7 @@ export default function UserInvitations() {
             <Box mb={2}>
                 <Header
                     user={userAPI.data?.user}
+                    snackbar={snackbar}
                     followingAPI={followingAPI}
                     userAPI={userAPI}
                 />
@@ -54,6 +61,14 @@ export default function UserInvitations() {
             <Box>
                 <Paginator meta={userAPI.data?.pagination?.meta} />
             </Box>
+
+            <Snackbar 
+                anchorOrigin={{ vertical: "bottom", horizontal: "left"}}
+                open={snackbar.open}
+                message={snackbar.message}
+                autoHideDuration={3000}
+                onClose={snackbar.handleClose}
+            />
         </MainContainer>
     )
 }

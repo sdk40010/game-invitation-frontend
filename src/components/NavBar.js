@@ -41,20 +41,22 @@ export default function NavBar({onToggleTheme}) {
 
     const classes = useStyles();
 
-    const menuItems = [
-        {
-            content: "ログアウト",
-            onClick: auth.logout
-        },
-        {
-            content: "マイページ",
-            link: `/users/${auth.user.id}`
-        },
-        {
-            content: "設定",
-            onClick: () => {}
-        }
-    ];
+    const menuItems = auth.user 
+        ? [
+            {
+                content: "ログアウト",
+                onClick: auth.logout
+            },
+            {
+                content: "マイページ",
+                link: `/users/${auth.user.id}`
+            },
+            {
+                content: "設定",
+                onClick: () => {}
+            }
+        ] 
+        : [];
 
     return (
         <AppBar className={classes.appBar}>

@@ -127,11 +127,11 @@ const toString = (name, value) => {
     switch (name) {
         case "minStartTime":
         case "maxStartTime":
-            return formatTime(value)
+            return formatTime(value);
         case "tags":
-            return value.map(tag => tag.name).join(" ")
+            return value.map(tag => tag.name).join(" ");
         default:
-            return value.toString()
+            return value.toString();
     }
 }
 

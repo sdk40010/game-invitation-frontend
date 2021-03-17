@@ -17,6 +17,7 @@ import { CommentList } from "./Comment";
 import SimpleMenu from "../utils/SimpleMenu";
 import SimpleLink from "../utils/SimpleLink";
 import CustomChip from "../utils/CustomChip";
+import UserProfile from "./UserProfile"
 
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -181,6 +182,7 @@ function InvitationCard({invitationAPI, participationAPI, followingAPI}) {
                 user={invitation.user}
                 onFollow={handleFollow}
                 onUnfollow={handleUnfollow}
+                snackbar={snackbar}
             />
         </Box>
     );
@@ -270,106 +272,6 @@ function InvitationCard({invitationAPI, participationAPI, followingAPI}) {
                 {content}
             </CardContent>
         </Card>
-    );
-}
-
-/**
- * ユーザープロフィール
- */
-export function UserProfile(props) {
-    const {
-        user,
-        iconSize,
-        typographyVariant = "body1",
-        onFollow,
-        onUnfollow
-    } = props;
-
-    const auth = useAuth();
-
-    const classes = useStyles();
-
-    const snackbar = useSnackbar();
-
-    // フォロー
-    const handleFollow = async () => {
-        const success = await onFollow();
-        console.log(success);
-        if (success) {
-            snackbar.handleOpen(`${user.name}をフォローしました`);
-        }
-    }
-
-    // フォロー取り消し
-    const handleUnfollow = async () => {
-        const success = await onUnfollow();
-        if (success) {
-            snackbar.handleOpen(`${user.name}のフォローを取り消しました`);
-        }
-    }
-
-    return (
-        <Grid container spacing={1} alignItems="center">
-
-            <Grid item>
-                <SimpleLink to={`/users/${user.id}`} display="block">
-                    <Avatar
-                        alt={user.name}
-                        src={user.iconUrl}
-                        className={classes[iconSize] ?? ""}
-                    />
-                </SimpleLink>
-            </Grid>
-
-            <Grid item xs>
-                <Box mt={-.5}>
-                    <Grid container alignItems="center">
-                        <Grid item>
-                            <SimpleLink to={`/users/${user.id}`} display="inline-block">
-                                <Typography variant={typographyVariant}>{user.name}</Typography>
-                            </SimpleLink>
-                        </Grid>
-                        <Grid>
-                            {Boolean(user.isFollower) && 
-                                <CustomChip
-                                    variant="outlined"
-                                    size="small"
-                                    label="フォローされています"
-                                    textSecondary={true}
-                                    ml={1}
-                                />
-                            }
-                        </Grid>
-                    </Grid>
-
-                    <Typography variant="body2" color="textSecondary">
-                        {[
-                            `投稿 ${user.invitationsPostedCount}`,
-                            `参加 ${user.invitationsParticipatedInCount}`,
-                            `フォロー ${user.followingsCount}`,
-                            `フォロワー ${user.followersCount}`
-                        ].join("　")}
-                    </Typography>
-                </Box>
-            </Grid>
-
-            {auth.user.id !== user.id && (
-                <Grid item>
-                    {user.isFollowing 
-                        ? <Button color="primary" variant="outlined" onClick={handleUnfollow}>フォロー中</Button>
-                        : <Button variant="outlined" onClick={handleFollow}>フォロー</Button>
-                    }
-                    <Snackbar 
-                        anchorOrigin={{ vertical: "bottom", horizontal: "left"}}
-                        open={snackbar.open}
-                        message={snackbar.message}
-                        autoHideDuration={3000}
-                        onClose={snackbar.handleClose}
-                    />
-                </Grid>
-            )}
-
-        </Grid>
     );
 }
 

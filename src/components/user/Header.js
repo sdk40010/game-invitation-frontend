@@ -1,6 +1,6 @@
 import { useState } from "react"
 
-import { UserProfile } from "../invitaion/ShowInvitation";
+import UserProfile from "../invitaion/UserProfile";
 import SimpleLink from "../utils/SimpleLink";
 
 import {
@@ -17,8 +17,10 @@ export default function Header(props) {
     const {
         initialTab = 0,
         user,
+        snackbar,
         followingAPI,
-        userAPI
+        userAPI,
+        onUserListUpdate = () => true,
     } = props;
 
     const [value, setValue] = useState(initialTab);
@@ -31,16 +33,18 @@ export default function Header(props) {
     // フォロー
     const handleFollow = async () => {
         const success1 = await followingAPI.post(userAPI.data.user.id);
-        // ユーザープロフィールを更新するために、ユーザーをを再取得する
+        // ユーザープロフィールとユーザー一覧を更新するために、リソースを再取得する
         const success2 = await userAPI.get();
-        return Boolean(success1 && success2);
+        const success3 = await onUserListUpdate();
+        return Boolean(success1 && success2 && success3);
     }
 
     // フォロー取り消し
     const handleUnfollow = async () => {
         const success1 = await followingAPI.remove(userAPI.data.user.id);
         const success2 = await userAPI.get();
-        return Boolean(success1 && success2);
+        const success3 = await onUserListUpdate();
+        return Boolean(success1 && success2 && success3);
     }
 
     return (
@@ -48,8 +52,9 @@ export default function Header(props) {
             <Box p={2}>
                 <UserProfile
                     user={user}
-                    iconSize="large"
+                    iconSize="xl"
                     typographyVariant="h5"
+                    snackbar={snackbar}
                     onFollow={handleFollow}
                     onUnfollow={handleUnfollow}
                 />

@@ -317,12 +317,10 @@ function Comment(props) {
     const handleReplySubmit = async (input) => {
         const success = await onReplySubmit(input);
         replyCollapse.handleClose();
-
         if (eventEmitter) {
             // ReplyListの返信一覧を開く処理を呼び出す
             eventEmitter.emit("replySubmit");
         }
-
         if (success) {
             snackbar.handleOpen("返信を投稿しました");
         }
