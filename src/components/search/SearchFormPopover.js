@@ -242,125 +242,127 @@ function SearchForm(props) {
         reset(defaultValues);
         searchForm.reset();
     };
-
+    
     return (
         <form onSubmit={handleSubmit(onSearchWithSaving)}>
             <input name="notEmpty" hidden ref={register(hiddenInputRules)} />
 
+            <Typography variant="body2" paragraph>検索条件</Typography>
+
             <Box mb={3}>
-                <Typography variant="body2" paragraph>検索条件</Typography>
-
-                <Box mb={3}>
-                    <TextField
-                        name="title"
-                        label="タイトル"
-                        variant="outlined"
-                        fullWidth
-                        size="small"
-                        inputRef={register}
-                    />
-                </Box>
-
-                <Box mb={3}>
-                    <Grid container spacing={1} alignItems="center">
-                        <Grid item xs>
-                            <DateTimePicker 
-                                name={minStartTimeProps.name}
-                                label={minStartTimeProps.label}
-                                size="small"
-                                equalOrBefore={createEqualOrBefore(
-                                    watch(maxStartTimeProps.name),
-                                    maxStartTimeProps.label
-                                )}
-                                onChange={createHandleChange(maxStartTimeProps)}
-                                {...formProps}
-                            />
-                        </Grid>
-                        
-                        <Grid item >
-                            <Typography variant="body1" component="span">〜</Typography>
-                        </Grid>
-                    
-                        <Grid item xs>
-                            <DateTimePicker 
-                                name={maxStartTimeProps.name}
-                                label={maxStartTimeProps.label}
-                                size="small"
-                                equalOrAfter={createEqualOrAfter(
-                                    watch(minStartTimeProps.name),
-                                    minStartTimeProps.label
-                                )}
-                                onChange={createHandleChange(minStartTimeProps)}
-                                {...formProps}
-                            />
-                        </Grid>
-                    </Grid>
-                </Box>
-
-                <Box mb={3}>
-                    <Grid container spacing={1} alignItems="center">
-                        <Grid item xs>
-                            <CapacitySelector 
-                                name={minCapacityProps.name}
-                                label={minCapacityProps.label}
-                                size="small"
-                                equalOrLess={(min) => {
-                                    const max = watch(maxCapacityProps.name);
-                                    if (max) {
-                                        return min <= max || `${maxCapacityProps.label}以下の人数を指定してください。`;
-                                    }
-                                    return true;
-                                }}
-                                onChange={createHandleChange(maxCapacityProps)}
-                                {...formProps}
-                            />
-                        </Grid>
-                        
-                        <Grid item>
-                            <Typography variant="body1" component="span">〜</Typography>
-                        </Grid>
-                        
-                        <Grid item xs>
-                            <CapacitySelector 
-                                name={maxCapacityProps.name}
-                                label={maxCapacityProps.label}
-                                size="small"
-                                equalOrMore={(max) => {
-                                    const min = watch(minCapacityProps.name);
-                                    if (min) {
-                                        return max >= min || `${minCapacityProps.label}以上の人数を指定してください。`;
-                                    }
-                                    return true;
-                                }}
-                                onChange={createHandleChange(minCapacityProps)}
-                                {...formProps}
-                            />
-                        </Grid>
-                    </Grid>
-                </Box>
-
-                <Box>
-                    <Grid container spacing={1} alignItems="center" wrap="nowrap">
-                        <Grid item xs>
-                            <TagSelector 
-                                name="tags"
-                                label="タグ"
-                                tagOptions={searchForm.tags}
-                                size="small"
-                                {...formProps}
-                            />
-                        </Grid>
-
-                        {/* <Grid item>
-                            <OperatorSelector
-                                name="tags.operator"
-                                {...formProps}
-                            />
-                        </Grid> */}
-                    </Grid>
-                </Box>
-                    
+                <TextField
+                    name="title"
+                    label="タイトル"
+                    variant="outlined"
+                    fullWidth
+                    size="small"
+                    inputRef={register}
+                />
             </Box>
+
+            <Box mb={3}>
+                <Grid container>
+                    <Grid item xs>
+                        <DateTimePicker 
+                            name={minStartTimeProps.name}
+                            label={minStartTimeProps.label}
+                            size="small"
+                            equalOrBefore={createEqualOrBefore(
+                                watch(maxStartTimeProps.name),
+                                maxStartTimeProps.label
+                            )}
+                            onChange={createHandleChange(maxStartTimeProps)}
+                            {...formProps}
+                        />
+                    </Grid>
+                    
+                    <Grid item>
+                        <Box p={1}>
+                            <Typography variant="body1" component="span">〜</Typography>
+                        </Box>
+                    </Grid>
+                
+                    <Grid item xs>
+                        <DateTimePicker 
+                            name={maxStartTimeProps.name}
+                            label={maxStartTimeProps.label}
+                            size="small"
+                            equalOrAfter={createEqualOrAfter(
+                                watch(minStartTimeProps.name),
+                                minStartTimeProps.label
+                            )}
+                            onChange={createHandleChange(minStartTimeProps)}
+                            {...formProps}
+                        />
+                    </Grid>
+                </Grid>
+            </Box>
+
+            <Box mb={3}>
+                <Grid container>
+                    <Grid item xs>
+                        <CapacitySelector 
+                            name={minCapacityProps.name}
+                            label={minCapacityProps.label}
+                            size="small"
+                            equalOrLess={(min) => {
+                                const max = watch(maxCapacityProps.name);
+                                if (max) {
+                                    return min <= max || `${maxCapacityProps.label}以下の人数を指定してください。`;
+                                }
+                                return true;
+                            }}
+                            onChange={createHandleChange(maxCapacityProps)}
+                            {...formProps}
+                        />
+                    </Grid>
+                    
+                    <Grid item>
+                        <Box p={1}>
+                            <Typography variant="body1" component="span">〜</Typography>
+                        </Box>
+                    </Grid>
+                    
+                    <Grid item xs>
+                        <CapacitySelector 
+                            name={maxCapacityProps.name}
+                            label={maxCapacityProps.label}
+                            size="small"
+                            equalOrMore={(max) => {
+                                const min = watch(minCapacityProps.name);
+                                if (min) {
+                                    return max >= min || `${minCapacityProps.label}以上の人数を指定してください。`;
+                                }
+                                return true;
+                            }}
+                            onChange={createHandleChange(minCapacityProps)}
+                            {...formProps}
+                        />
+                    </Grid>
+                </Grid>
+            </Box>
+
+            <Box mb={3}>
+                <Grid container spacing={1} alignItems="center" wrap="nowrap">
+                    <Grid item xs>
+                        <TagSelector 
+                            name="tags"
+                            label="タグ"
+                            tagOptions={searchForm.tags}
+                            size="small"
+                            {...formProps}
+                        />
+                    </Grid>
+
+                    {/* <Grid item>
+                        <OperatorSelector
+                            name="tags.operator"
+                            {...formProps}
+                        />
+                    </Grid> */}
+                </Grid>
+            </Box>
+                    
 
             <Box>
                 <Grid container justify="flex-end">

@@ -1,11 +1,22 @@
 import { useForm } from "react-hook-form";
 
 import { DateTimePicker, CapacitySelector, TagSelector } from "./InputField";
+
+import { makeStyles } from "@material-ui/core/styles"
 import {
     TextField,
     Button,
     Grid,
+    Box,
 } from "@material-ui/core";
+
+const useStyles = makeStyles((theme) => ({
+    startTimePicker: {
+        [theme.breakpoints.up('sm')]: {
+            marginRight: theme.spacing(2)
+        }
+    }
+}));
 
 /**
  * 募集投稿フォーム
@@ -19,6 +30,8 @@ export default function InvitationForm(props) {
         fieldOptions = {}
     } = props;
 
+    const classes = useStyles();
+
     const { register, handleSubmit, watch, control, errors } = useForm({ defaultValues });
     const formProps = { watch, control, errors };
 
@@ -27,85 +40,91 @@ export default function InvitationForm(props) {
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
-            <Grid container spacing={2}>
+            <Box mb={3}>
+                <TextField
+                    name="title"
+                    variant="outlined"
+                    fullWidth
+                    label="タイトル"
+                    inputRef={register({
+                        required: { value: true, message: "タイトルは必須です。"　},
+                        maxLength:{ value: 255, message: "タイトルには255文字までの文字列を指定してください。"　}
+                    })}
+                    error={Boolean(errors.title)}
+                    helperText={errors.title && errors.title.message}
+                />
+            </Box>
 
-                <Grid item xs={12}>
-                    <TextField
-                        name="title"
-                        variant="outlined"
-                        fullWidth
-                        label="タイトル"
-                        inputRef={register({
-                            required: { value: true, message: "タイトルは必須です。"　},
-                            maxLength:{ value: 255, message: "タイトルには255文字までの文字列を指定してください。"　}
-                        })}
-                        error={Boolean(errors.title)}
-                        helperText={errors.title && errors.title.message}
-                    />
-                </Grid>
+            <Box mb={3}>
+                <TextField
+                    name="description"
+                    variant="outlined"
+                    fullWidth
+                    label="説明"
+                    inputRef={register}
+                    multiline
+                />
+            </Box>
 
-                <Grid item xs={12}>
-                    <TextField
-                        name="description"
-                        variant="outlined"
-                        fullWidth
-                        label="説明"
-                        inputRef={register}
-                        multiline
-                    />
+            
+            <Grid container>
+                <Grid item xs={12} sm={6}>
+                    <Box mb={3} className={classes.startTimePicker}>
+                        <DateTimePicker 
+                            name={startTimeProps.name}
+                            label={startTimeProps.label}
+                            required
+                            equalOrBefore={createEqualOrBefore(
+                                watch(endTimeProps.name),
+                                endTimeProps.label
+                            )}
+                            {...formProps}
+                        />
+                    </Box>
                 </Grid>
 
                 <Grid item xs={12} sm={6}>
-                    <DateTimePicker 
-                        name={startTimeProps.name}
-                        label={startTimeProps.label}
-                        required
-                        equalOrBefore={createEqualOrBefore(
-                            watch(endTimeProps.name),
-                            endTimeProps.label
-                        )}
-                        {...formProps}
-                    />
+                    <Box mb={3}>
+                        <DateTimePicker 
+                            name={endTimeProps.name}
+                            label={endTimeProps.label}
+                            required
+                            equalOrAfter={createEqualOrAfter(
+                                watch(startTimeProps.name),
+                                startTimeProps.label
+                            )}
+                            {...formProps}
+                        />
+                    </Box>
                 </Grid>
-
-                <Grid item xs={12} sm={6}>
-                    <DateTimePicker 
-                        name={endTimeProps.name}
-                        label={endTimeProps.label}
-                        required
-                        equalOrAfter={createEqualOrAfter(
-                            watch(startTimeProps.name),
-                            startTimeProps.label
-                        )}
-                        {...formProps}
-                    />
-                </Grid>
-
-                <Grid item xs={6}>
-                    <CapacitySelector
-                        name="capacity"
-                        label="定員"
-                        min={fieldOptions.capacityMin}
-                        required
-                        {...formProps}
-                    />
-                </Grid>
-
-                <Grid item xs={12}>
-                    <TagSelector 
-                        name="tags"
-                        label="タグ"
-                        tagOptions={tagOptions}
-                        {...formProps}
-                        
-                    />
-                </Grid>
-
-                <Grid item xs={12}>
-                    <Button variant="contained" color="primary" type="submit">{buttonLabel}</Button>
-                </Grid>
-
             </Grid>
+
+            <Box mb={3}>
+                <CapacitySelector
+                    name="capacity"
+                    label="定員"
+                    min={fieldOptions.capacityMin}
+                    required
+                    {...formProps}
+                />
+            </Box>
+
+            <Box mb={3}>
+                <TagSelector 
+                    name="tags"
+                    label="タグ"
+                    tagOptions={tagOptions}
+                    {...formProps}
+                />
+            </Box>
+
+            <Box>
+                <Grid container justify="flex-end">
+                    <Grid item>
+                        <Button variant="contained" color="primary" type="submit">{buttonLabel}</Button>
+                    </Grid>
+                </Grid>
+            </Box>
         </form>
     );
 }
