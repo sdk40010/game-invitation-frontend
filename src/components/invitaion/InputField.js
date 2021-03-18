@@ -114,6 +114,8 @@ export function CapacitySelector(props) {
         name,
         label,
         size = "medium",
+        min = 1,
+        max = 10,
         required = false,
         equalOrLess = () => {},
         equalOrMore = () => {},
@@ -128,8 +130,8 @@ export function CapacitySelector(props) {
         control,
         rules: {
             required: { value: required, message: `${label}は必須です。` },
-            min: { value: 1, message: `${label}には1以上の数値を指定してください。` },
-            max: { value: 10, message: `${label}には10以下の数値を指定してください。` },
+            min: { value: min, message: `${label}には${min}人以上の人数を指定してください。` },
+            max: { value: max, message: `${label}には${max}以下の人数を指定してください。` },
             validate: {
                 equalOrLess: capacity => equalOrLess(capacity) ?? true,
                 equalOrMore: capacity => equalOrMore(capacity) ?? true
@@ -142,7 +144,7 @@ export function CapacitySelector(props) {
         onChange(event.target.value);
     }
     
-    const seq = [...Array(10)].map((_, i) => ++i);
+    const seq = [...Array(max - min + 1)].map((_, i) => i + min);
 
     const SelectProps = {
         MenuProps: {
@@ -163,7 +165,7 @@ export function CapacitySelector(props) {
             variant="outlined"
             fullWidth
             SelectProps={SelectProps}
-            size={size ?? "medium"}
+            size={size}
             onChange={handleChange}
             error={Boolean(errors[name])}
             helperText={errors[name] && errors[name].message}
@@ -181,7 +183,15 @@ const checkedIcon = <CheckBox fontSize="small" />;
 const filter = createFilterOptions();
 
 export function TagSelector(props) {
-    const { name, label, tagOptions, size, watch, control, errors} = props;
+    const {
+        name,
+        label,
+        tagOptions,
+        size = "medium",
+        watch,
+        control,
+        errors
+    } = props;
     const { field } = useController({
         name,
         control,
@@ -230,7 +240,7 @@ export function TagSelector(props) {
                     name={name}
                     label={label}
                     variant="outlined"
-                    size={size ?? "medium"}
+                    size={size}
                     placeholder="検索"
                     error={errors[name] && true}
                     helperText={errors[name] && errors[name].message}

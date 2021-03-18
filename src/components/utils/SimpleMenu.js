@@ -14,7 +14,14 @@ import {
  * メニュー
  */
 export default function SimpleMenu(props) {
-    const { icon, iconSize, enableStopPropagation, menuItems, PaperProps, eventProps } = props;
+    const {
+        icon,
+        enableStopPropagation,
+        menuItems,
+        IconButtonProps,
+        PaperProps,
+        eventProps
+    } = props;
 
     const [anchorEl, setAnchorEl] = useState(null);
 
@@ -48,7 +55,7 @@ export default function SimpleMenu(props) {
     return (
         <>
             {icon && (
-                <IconButton onClick={handleClick} size={iconSize ?? "medium"} component="span">
+                <IconButton onClick={handleClick} component="span" {...IconButtonProps}>
                     {icon}
                 </IconButton>
             )}

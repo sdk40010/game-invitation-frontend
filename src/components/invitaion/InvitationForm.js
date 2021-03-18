@@ -11,7 +11,13 @@ import {
  * 募集投稿フォーム
  */
 export default function InvitationForm(props) {
-    const { onSubmit, defaultValues, tagOptions, buttonLabel } = props;
+    const {
+        onSubmit,
+        defaultValues,
+        tagOptions,
+        buttonLabel,
+        fieldOptions = {}
+    } = props;
 
     const { register, handleSubmit, watch, control, errors } = useForm({ defaultValues });
     const formProps = { watch, control, errors };
@@ -79,6 +85,7 @@ export default function InvitationForm(props) {
                     <CapacitySelector
                         name="capacity"
                         label="定員"
+                        min={fieldOptions.capacityMin}
                         required
                         {...formProps}
                     />

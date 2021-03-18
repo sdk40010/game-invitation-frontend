@@ -39,6 +39,12 @@ const useStyles = makeStyles((theme) => ({
     noItemMessage: {
         textAlign: "center"
     },
+    cardHeaderContent: {
+        minWidth: 0
+    },
+    smallIconButton: {
+        padding: 0
+    },
     cardContent: {
         paddingTop: 0
     },
@@ -111,7 +117,7 @@ export function InvitationList({ invitations }) {
 function InvitationListItem({ invitation }) {
     const classes = useStyles();
 
-    const title = <Typography variant="body1">{invitation.title}</Typography>
+    const title = <Typography variant="body1" noWrap>{invitation.title}</Typography>
 
     const subHeader = (
         <>
@@ -150,10 +156,14 @@ function InvitationListItem({ invitation }) {
             link: `/invitations/${invitation.id}/edit`
         }
     ];
+    const IconButtonProps = {
+        size: "small",
+        classes: { sizeSmall: classes.smallIconButton }
+    }
     const action = (
         <SimpleMenu
             icon={<MoreVert />}
-            iconSize="small"
+            IconButtonProps={IconButtonProps}
             enableStopPropagation={true}
             menuItems={menuItems}
         />
@@ -221,12 +231,16 @@ function InvitationListItem({ invitation }) {
 
     // Card内でLinkを使えるように、Card全体をクリックしたときはhistoryを使って遷移させる
     const history = useHistory();
-    const handleClick = () => {
+    const handleCardClick = () => {
         history.push(`/invitations/${invitation.id}`);
     };
 
+    const handleContentClick = (event) => {
+        event.stopPropagation();
+    }
+
     return (
-        <Grid item xs={12} sm={4} md={3} onClick={handleClick}>
+        <Grid item xs={12} sm={4} md={3} onClick={handleCardClick}>
             <CardActionArea disableTouchRipple>
                 <Card>
                     <CardHeader 
@@ -234,13 +248,14 @@ function InvitationListItem({ invitation }) {
                         subheader={subHeader}
                         avatar={poster}
                         action={invitation.isPoster ? action : <></>}
-                        classes={{ subheader: classes.subHeader }}
+                        classes={{ content: classes.cardHeaderContent }}
                     />
                     <CardContent
                         className={classes.cardContent}
                         component={SimpleLink}
                         to={`/invitations/${invitation.id}`}
                         display="block"
+                        onClick={handleContentClick}
                     >
                         {content}
                     </CardContent>

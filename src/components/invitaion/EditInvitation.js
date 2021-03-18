@@ -95,9 +95,6 @@ export default function EditInvitation() {
         input.startTime = formatTime(startTime);
         input.endTime = formatTime(endTime);
 
-        // 編集前のタグ一覧を送信情報に追加する
-        input.tagsBeforeUpdate = invitationAPI.data.tags;
-
         const success = await invitationAPI.update(input);
         setSubmitSuccess(success);
     };
@@ -131,6 +128,7 @@ export default function EditInvitation() {
                             defaultValues={defaultValues}
                             tagOptions={tagAPI.data}
                             buttonLabel="更新"
+                            fieldOptions={{ capacityMin: invitationAPI.data?.participantsCount }}
                         />
                     </CardContent>
                 </Card>
