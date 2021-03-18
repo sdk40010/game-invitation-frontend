@@ -49,7 +49,6 @@ const useStyles = makeStyles((theme) => ({
         const success = await onFollow();
         if (success) {
             snackbar.handleOpen(`${user.name}をフォローしました`);
-            console.log("open");
         }
     }
 
@@ -59,7 +58,6 @@ const useStyles = makeStyles((theme) => ({
         const success = await onUnfollow();
         if (success) {
             snackbar.handleOpen(`${user.name}のフォローを取り消しました`);
-            console.log("open");
         }
     }
 

@@ -12,7 +12,6 @@ import {
     Grid,
     Button,
     Avatar,
-    Box,
     IconButton,
 } from "@material-ui/core";
 import { Brightness2, Brightness7 } from "@material-ui/icons";
@@ -41,37 +40,29 @@ export default function NavBar({onToggleTheme}) {
 
     const classes = useStyles();
 
-    const menuItems = auth.user 
-        ? [
+    const menuItems = [
             {
                 content: "ログアウト",
                 onClick: auth.logout
             },
             {
                 content: "マイページ",
-                link: `/users/${auth.user.id}`
+                link: `/users/${auth.user?.id}`
             },
-            {
-                content: "設定",
-                onClick: () => {}
-            }
-        ] 
-        : [];
+        ];
 
     return (
         <AppBar className={classes.appBar}>
             <Toolbar>
-                <Grid container alignItems="center">
+                <Grid container alignItems="center" justify="space-between" wrap="nowrap">
 
                     <Grid item>
-                        <Box mr={12}>
-                            <SimpleLink to="/" display="inline-block">
-                                <Typography variant="h6" component="span">SITE NAME</Typography>
-                            </SimpleLink>
-                        </Box>
+                        <SimpleLink to="/" display="inline-block">
+                            <Typography variant="h6" component="span">SITE NAME</Typography>
+                        </SimpleLink>
                     </Grid>
 
-                    <Grid item xs>
+                    <Grid item xs={6}>
                         <SearchFormPopover />
                     </Grid>
 
@@ -82,31 +73,24 @@ export default function NavBar({onToggleTheme}) {
                                 : <Brightness7 />
                             }
                         </IconButton>
-                    </Grid>
-                        
 
-                    {auth.user ? (
-                        <>
-                            <Grid item>
+                        {auth.user ? (
+                            <>
                                 <SimpleLink to="/invitations/new">
                                     <Button variant="contained" className={classes.button}>新規作成</Button>
                                 </SimpleLink>
-                            </Grid>
 
-                            <Grid item>
                                 <SimpleMenu
                                     icon={<Avatar alt={auth.user.name} src={auth.user.iconUrl} />}
                                     menuItems={menuItems}
                                 />
-                            </Grid>
-                        </>
-                    ) : (
-                        <Grid item>
+                            </>
+                        ) : (
                             <SimpleLink to="/login">
                                 <Button variant="contained" className={classes.button}>ログイン</Button>
                             </SimpleLink>
-                        </Grid>
-                    )}
+                        )}
+                    </Grid>
 
                 </Grid>
             </Toolbar>

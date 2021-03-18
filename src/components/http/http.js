@@ -8,36 +8,6 @@
  * @returns {Object} json - JSONレスポンス
  * @throws {Error} エラーレスポンス
  */
-// export default async function apiCall(path, method, bodyData = {}) {
-//     const apiServerURL = process.env.REACT_APP_API_SERVER_URL;
-//     const xsrfToken = document
-//         .cookie
-//         .split("; ")
-//         .find(row => row.startsWith("XSRF-TOKEN"))
-//         ?.split("=")[1]
-//         || "";
-
-//     const res = await fetch(apiServerURL + path, { 
-//         method: method,
-//         mode: "cors",
-//         credentials: "include",
-//         headers: {
-//             "Content-Type": "application/json",
-//             "X-Requested-With": "XMLHttpRequest",
-//             "X-XSRF-TOKEN": decodeURIComponent(xsrfToken),
-//         },
-//         body: method === "GET" ? null : JSON.stringify(bodyData)
-//     }).catch(err => {
-//         throw err;
-//     });
-
-//     if (res.ok) {
-//         return await res.json();
-//     } else {
-//         handleError(res);
-//     }
-// }
-
 export default async function apiCall(path, method, body = null) {
     const apiServerURL = process.env.REACT_APP_API_SERVER_URL;
     const xsrfToken = document

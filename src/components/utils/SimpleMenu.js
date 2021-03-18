@@ -1,5 +1,4 @@
 import { useState, useEffect, forwardRef } from "react";
-import { Link } from "react-router-dom";
 
 import SimpleLink from "./SimpleLink";
 
@@ -47,7 +46,7 @@ export default function SimpleMenu(props) {
     })
 
     return (
-        <Box>
+        <>
             {icon && (
                 <IconButton onClick={handleClick} size={iconSize ?? "medium"} component="span">
                     {icon}
@@ -77,7 +76,7 @@ export default function SimpleMenu(props) {
                     );
                 })}
             </Menu>
-        </Box>
+        </>
     );
 }
 

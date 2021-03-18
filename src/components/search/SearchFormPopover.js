@@ -8,15 +8,15 @@ import { useSearchForm } from "./useSearchForm";
 import { DateTimePicker, CapacitySelector, TagSelector, formatTime } from "../invitaion/InputField";
 import { createEqualOrBefore, createEqualOrAfter } from "../invitaion/InvitationForm";
 
-import { makeStyles } from "@material-ui/core/styles";
+import { makeStyles, fade } from "@material-ui/core/styles";
 import {
     Grid,
     TextField,
-    IconButton,
     Popover,
     Typography,
     Box,
     Button,
+    InputBase,
 } from "@material-ui/core";
 import { Search } from "@material-ui/icons";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
@@ -34,6 +34,33 @@ const useStyles = makeStyles((theme) => ({
         "& > *:not(:last-child)": {
             marginRight: theme.spacing(1)
         }
+    },
+    search: {
+        position: 'relative',
+        borderRadius: theme.shape.borderRadius,
+        backgroundColor: fade(theme.palette.common.white, 0.15),
+        '&:hover': {
+          backgroundColor: fade(theme.palette.common.white, 0.25),
+        },
+        width: '100%',
+    },
+    searchIcon: {
+        padding: theme.spacing(0, 2),
+        height: '100%',
+        position: 'absolute',
+        pointerEvents: 'none',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    inputRoot: {
+      color: 'inherit',
+      width: "100%",
+    },
+    inputInput: {
+        padding: theme.spacing(1, 1, 1, 0),
+        paddingLeft: `calc(1.5em + ${theme.spacing(4)}px)`,
+        width: '100%',
     }
 }));
 
@@ -62,9 +89,20 @@ export default function SearchFormPopover() {
 
     return (
         <>
-            <IconButton color="inherit" onClick={handleClick}>
-                <Search />
-            </IconButton>
+            <div className={classes.search}>
+                <div className={classes.searchIcon}>
+                    <Search />
+                </div>
+                <InputBase 
+                    placeholder="検索"
+                    readOnly
+                    classes={{
+                        root: classes.inputRoot,
+                        input: classes.inputInput
+                    }}
+                    onClick={handleClick}
+                />
+            </div>
 
             <Popover
                 open={Boolean(anchorEl)}
@@ -72,7 +110,11 @@ export default function SearchFormPopover() {
                 onClose={handleClose}
                 anchorOrigin={{
                     vertical: 'top',
-                    horizontal: 'right',
+                    horizontal: 'center',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'center',
                 }}
                 PaperProps={{ className: classes.paper }}
             >
