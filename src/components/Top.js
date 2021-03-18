@@ -22,6 +22,7 @@ import {
     Avatar,
     Box,
     Chip,
+    Button,
 } from "@material-ui/core";
 import { Pagination, PaginationItem }from "@material-ui/lab";
 import { MoreVert } from '@material-ui/icons';
@@ -83,10 +84,27 @@ export default function Top() {
         })();
     }, [query]);
 
+    const noItemMessage = (
+        <>
+            <Typography variant="h5" component="div" paragraph>
+                現在表示できる募集がありません
+            </Typography>
+            <Typography variant="body1" color="textSecondary" paragraph>
+                募集を新規作成してみましょう
+            </Typography>
+            <SimpleLink to="/invitations/new">
+                <Button color="primary" variant="contained">新規作成</Button>
+            </SimpleLink>
+        </>
+    );
+
     return(
         <MainContainer errors={errors} resources={resources} maxWidth="lg">
             <Box mb={4}>
-                <InvitationList invitations={invitationAPI.data?.invitations} />
+                <InvitationList
+                    invitations={invitationAPI.data?.invitations}
+                    noItemMessage={noItemMessage}
+                    />
             </Box>
 
             <Box>
@@ -99,8 +117,20 @@ export default function Top() {
 /**
  * 募集一覧
  */
-export function InvitationList({ invitations }) {
+export function InvitationList({ invitations, noItemMessage = <></> }) {
     const classes = useStyles();
+
+    if (invitations.length === 0) {
+        return (
+            <Grid container justify="center">
+                <Grid item>
+                    <Box mt={30} className={classes.noItemMessage}>
+                        {noItemMessage}
+                    </Box>
+                </Grid>
+            </Grid>
+        );
+    }
 
     return (
         <Grid container spacing={2} className={classes.list}>
@@ -322,23 +352,6 @@ export function Paginator({ meta }) {
                         />
                     )}
                 />
-            </Grid>
-        </Grid>
-    );
-}
-
-/**
- * 
- */
-export function NoItemMessage({children}) {
-    const classes = useStyles();
-
-    return (
-        <Grid container justify="center">
-            <Grid item>
-                <Box mt={30} className={classes.noItemMessage}>
-                    {children}
-                </Box>
             </Grid>
         </Grid>
     );
