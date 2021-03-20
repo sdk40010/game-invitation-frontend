@@ -16,7 +16,6 @@ import Heading from "../utils/Heading";
 import { CommentList } from "./Comment";
 import SimpleMenu from "../utils/SimpleMenu";
 import SimpleLink from "../utils/SimpleLink";
-import CustomChip from "../utils/CustomChip";
 import UserProfile from "./UserProfile"
 
 import { makeStyles } from "@material-ui/core/styles";
@@ -42,11 +41,21 @@ const useStyles = makeStyles((theme) => ({
         marginTop: 0,
         marginRight: 0
     },
+    defaultButton: {
+        color: theme.palette.text.primary,
+        backgroundColor: theme.palette.type === "light"
+            ? theme.palette.grey[300]
+            : theme.palette.grey[600],
+        "&:hover": {
+            backgroundColor: theme.palette.type === "light"
+                ? theme.palette.grey["A100"]
+                : theme.palette.grey[700]
+        }
+    },
     disabledButton: {
         backgroundColor: theme.palette.action.disabledBackground + " !important",
         color: theme.palette.text.secondary + " !important",
     },
-    
     groupAvatar: {
         "&:hover": {
             transform: "scale(1.1)",
@@ -156,7 +165,10 @@ function InvitationCard({invitationAPI, participationAPI, followingAPI}) {
     // 参加ボタン
     const participationButton 
         = isPoster ? <DisabledButton>主催者として参加済み</DisabledButton>
-        : participatedIn ? <Button variant="contained" onClick={handleCancel}>参加済み</Button>
+        : participatedIn ?
+            <Button variant="contained" onClick={handleCancel} classes={{ contained: classes.defaultButton }}>
+                参加済み
+            </Button>
         : !canParticipateIn ? <DisabledButton>募集終了</DisabledButton>
         : <Button color="primary" variant="contained" onClick={handleParticipate}>参加する</Button>;
 

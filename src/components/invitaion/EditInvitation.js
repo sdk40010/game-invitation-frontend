@@ -112,7 +112,7 @@ export default function EditInvitation() {
     if (sumbitSuccess) {
         return <Redirect to={`/invitations/${id}`}/>;
     } else if (deleteSuccess) {
-        return <Redirect to="/"/>
+        return <Redirect to={`/users/${auth.user.id}`}/>
     }
 
     return (

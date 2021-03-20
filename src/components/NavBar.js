@@ -21,14 +21,20 @@ const useStyles = makeStyles((theme) => ({
     appBar: {
         backgroundColor: theme.palette.type === "light"
             ? theme.palette.primary.main
-            : theme.palette.background.default
+            : theme.palette.background.default,
+        color: theme.palette.common.white,
     },
     button: {
-        backgroundColor: theme.palette.common.white,
-        borderColor: theme.palette.primary.main,
-        color: theme.palette.primary.main,
+        backgroundColor: theme.palette.type === "light"
+            ? theme.palette.primary.contrastText
+            : theme.palette.primary.main,
+        color: theme.palette.type === "light"
+            ? theme.palette.primary.main
+            : theme.palette.primary.contrastText,
         "&:hover": {
-            backgroundColor: theme.palette.grey[300]
+            backgroundColor: theme.palette.type === "light"
+                ? theme.palette.grey[300]
+                : theme.palette.primary.dark
         }
     },
 }));

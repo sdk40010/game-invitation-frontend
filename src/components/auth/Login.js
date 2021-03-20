@@ -11,15 +11,29 @@ import {
     CardHeader,
     CardContent,
     Button,
-    Typography
+    Typography,
+    Grid
 } from "@material-ui/core";
+
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 
 
 const useStyles = makeStyles((theme) => ({
-    root: {
+    card: {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
+    },
+    cardContent: {
+        width: "100%"
+    },
+    buttonLabel: {
+        margin: "0 auto",
+    },
+    endIcon: {
+        width: "22px",
+        height: "22px"
     }
 }));
 
@@ -29,18 +43,36 @@ export default function Login() {
     const from = location.state ? location.state.from : "/";
     const classes = useStyles();
 
+    const handleLogin = () => {
+        auth.login();
+    }
+
     if (auth.user) {
         return <Redirect to={from} />;
     }
 
     return (
         <MainContainer maxWidth="xs">
-            <Card className={classes.root}>
+            <Card className={classes.card}>
                 <CardHeader 
                     title={<Typography variant="h6" component="h1">ログイン</Typography>}
                 />
-                <CardContent>
-                    <Button variant="outlined" color="primary" onClick={() => auth.login()}>Gooleでログイン</Button>
+                <CardContent className={classes.cardContent}>
+                    <Grid container justify="center">
+                        <Grid item xs={10}>
+                            <Button
+                                variant="outlined"
+                                color="primary"
+                                onClick={handleLogin}
+                                startIcon={<FontAwesomeIcon icon={faGoogle} />}
+                                endIcon={<span className={classes.endIcon} />} // ラベルを中央に配置するために空のendIconを設定する
+                                fullWidth
+                                size="large"
+                            >
+                                <span className={classes.buttonLabel}>Gooleでログイン</span>
+                            </Button>
+                        </Grid>
+                    </Grid>
                 </CardContent>
             </Card>
         </MainContainer>

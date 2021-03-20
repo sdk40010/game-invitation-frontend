@@ -38,7 +38,7 @@ const useStyles = makeStyles((theme) => ({
         }
     },
     replyToLink: {
-        color: "#065fd4",
+        color: theme.palette.link.main,
     },
     actionText: {
         cursor: "pointer",
