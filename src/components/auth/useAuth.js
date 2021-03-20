@@ -87,7 +87,7 @@ function useAuthProvider() {
                     setUser(json.user);
                     setError(false);
                 } else {
-                    logout();
+                    await firebase.auth().signOut();
                 }
             } catch (err) {
                 setError(err);
