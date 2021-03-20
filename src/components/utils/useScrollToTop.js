@@ -4,7 +4,7 @@ import { useLocation } from "react-router-dom";
 /**
  * ページ遷移時に自動でトップにスクロールさせるためのフック
  */
-export default function ScrollToTop() {
+export default function useScrollToTop() {
   const location = useLocation();
 
   useEffect(() => {

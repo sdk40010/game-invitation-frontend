@@ -64,6 +64,7 @@ export default function UserFollowings() {
                     snackbar={snackbar}
                     followingAPI={followingAPI}
                     userAPI={userAPI}
+                    onUserListUpdate={handleFollowingListUpdate}
                 />
             </Box>
 

@@ -2,6 +2,7 @@ import { useEffect } from "react";
 
 import useInvitationAPI from "../http/invitationAPI";
 import useQuery from "../utils/useQuery";
+import useScrollToTop from "../utils/useScrollToTop";
 
 import MainContainer from "../utils/MainContainer";
 import { InvitationList, Paginator } from "../Top";
@@ -21,6 +22,8 @@ export default function SearchResult() {
     const resources = [invitationAPI.data];
 
     const query = useQuery();
+
+    useScrollToTop();
 
     // 検索結果の取得
     useEffect(() => {

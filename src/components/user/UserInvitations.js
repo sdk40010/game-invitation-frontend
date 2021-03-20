@@ -34,14 +34,14 @@ export default function UserInvitations() {
     // ユーザーを取得する
     useEffect(() => {
         userAPI.get();
-    }, []);
+    }, [id]);
 
     // ユーザーの投稿履歴を取得する
     useEffect(() => {
         (async () => {
             await userAPI.getAllPosted(query);
         })();
-    }, [query]);
+    }, [id, query]);
 
     return (
         <MainContainer errors={errors} resources={resources} maxWidth="lg">
