@@ -2,6 +2,26 @@
 ゲーム仲間を募集できるサービスです。
 
 ## デモ
+- トップページ
+![トップページ](https://raw.githubusercontent.com/sdk40010/game-invitation-frontend/images/top.png)
+
+- 募集投稿ページ
+![募集投稿ページ](https://raw.githubusercontent.com/sdk40010/game-invitation-frontend/images/newInvitation.png)
+
+- 募集詳細ページ
+![募集詳細ページ](https://raw.githubusercontent.com/sdk40010/game-invitation-frontend/images/showInvitation.png)
+
+- コメント
+![コメント](https://raw.githubusercontent.com/sdk40010/game-invitation-frontend/images/comment.png)
+
+- 参加履歴ページ
+[募集詳細ページ](https://raw.githubusercontent.com/sdk40010/game-invitation-frontend/images/history.png)
+
+- フォロ一覧ページ
+[フォロー一覧ページ](https://raw.githubusercontent.com/sdk40010/game-invitation-frontend/images/followings.png)
+
+- ダークテーマ
+[ダークテーマ](https://raw.githubusercontent.com/sdk40010/game-invitation-frontend/images/dartTheme.png)
 
 ##　特徴
 開始時刻と終了時刻を指定して募集できる
