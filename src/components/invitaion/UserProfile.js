@@ -1,7 +1,5 @@
 import { useAuth } from "../auth/useAuth";
 
-import { useSnackbar } from "../utils/useOpenState";
-
 import SimpleLink from "../utils/SimpleLink";
 import CustomChip from "../utils/CustomChip";
 
@@ -12,7 +10,6 @@ import {
     Avatar,
     Grid,
     Box,
-    Snackbar,
 } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
@@ -40,8 +37,6 @@ const useStyles = makeStyles((theme) => ({
     const auth = useAuth();
 
     const classes = useStyles();
-
-    // const snackbar = useSnackbar();
 
     // フォロー
     const handleFollow = async (event) => {
@@ -126,13 +121,6 @@ const useStyles = makeStyles((theme) => ({
                     : (
                         <Button variant="outlined" onClick={handleFollow} component="span">フォロー</Button>
                     )}
-                    <Snackbar 
-                        anchorOrigin={{ vertical: "bottom", horizontal: "left"}}
-                        open={snackbar.open}
-                        message={snackbar.message}
-                        autoHideDuration={3000}
-                        onClose={snackbar.handleClose}
-                    />
                 </Grid>
             )}
 
