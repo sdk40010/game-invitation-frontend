@@ -332,11 +332,29 @@ function NestedGrid({items}) {
  * ページ一覧
  */
 export function Paginator({ meta }) {
-    const path = useLocation().pathname;
+    const { pathname, search } = useLocation();
 
     if (meta.lastPage === 1) {
         return <></>;
-    } 
+    }
+
+    const renderItem = (item) => {
+        const query = new URLSearchParams(search);
+        query.delete("page");
+
+        if (item.page !== 1) {
+            query.append("page", item.page);
+        }
+        const queryString = query.toString() ? `?${query.toString()}` : "";
+        
+        return (
+            <PaginationItem
+                component={SimpleLink}
+                to={pathname + queryString}
+                {...item}
+            />
+        );
+    }
 
     return (
         <Grid container justify="center">
@@ -344,13 +362,7 @@ export function Paginator({ meta }) {
                 <Pagination
                     page={meta.currentPage}
                     count={meta.lastPage}
-                    renderItem={item => (
-                        <PaginationItem
-                            component={SimpleLink}
-                            to={`${path}${item.page === 1 ? "" : `?page=${item.page}`}`}
-                            {...item}
-                        />
-                    )}
+                    renderItem={renderItem}
                 />
             </Grid>
         </Grid>
