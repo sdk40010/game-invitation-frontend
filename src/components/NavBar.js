@@ -64,7 +64,7 @@ export default function NavBar({onToggleTheme}) {
 
                     <Grid item>
                         <SimpleLink to="/" display="inline-block">
-                            <Typography variant="h6" component="span">SITE NAME</Typography>
+                            <Typography variant="h6" component="span">GGFriend</Typography>
                         </SimpleLink>
                     </Grid>
 
