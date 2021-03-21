@@ -16,6 +16,9 @@ import {
 } from "@material-ui/core";
 import { Brightness2, Brightness7 } from "@material-ui/icons";
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGithub } from "@fortawesome/free-brands-svg-icons";
+
 
 const useStyles = makeStyles((theme) => ({
     appBar: {
@@ -37,6 +40,9 @@ const useStyles = makeStyles((theme) => ({
                 : theme.palette.primary.dark
         }
     },
+    anchor: {
+        color: "inherit"
+    }
 }));
 
 export default function NavBar({onToggleTheme}) {
@@ -73,6 +79,16 @@ export default function NavBar({onToggleTheme}) {
                     </Grid>
 
                     <Grid item>
+                        <a
+                            href="https://github.com/sdk40010/game-invitation-frontend"
+                            target="_blank"
+                            className={classes.anchor}
+                        >
+                            <IconButton color="inherit">
+                                <FontAwesomeIcon icon={faGithub} />
+                            </IconButton>
+                        </a>
+
                         <IconButton color="inherit" onClick={onToggleTheme}>
                             {theme.palette.type === "light"
                                 ? <Brightness2 />
