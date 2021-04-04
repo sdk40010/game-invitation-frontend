@@ -314,9 +314,19 @@ function CustomAvatarGroup(props) {
 
     const classes = useStyles();
 
-    // SimpleMenuに渡すイベントエミッター
+    // SimpleMenuとAvatarGroupの末尾のAvatarを連携させるためのイベントエミッター
     const eventEmitter = useMemo(() => new EventEmitter(), []);
     const eventName = "clickShowMore";
+
+    // SimpleMenuに渡すイベントハンドラーの登録・削除処理
+    const addEventListener = (handleClick) => {
+        eventEmitter.on(eventName, handleClick);
+    }
+    const removeEventListener = (handleClick) => {
+        eventEmitter.off(eventName, handleClick);
+    }
+
+    // 参加者一覧を表示するメニューを開く
     const handleClickShowMore = (event) => {
         eventEmitter.emit(eventName, event);
     }
@@ -340,10 +350,9 @@ function CustomAvatarGroup(props) {
 
         return {
             content: content,
-            onClick: () => {},
             disableTypography: true,
             link: `/users/${participant.id}`
-        }
+        };
     });
 
     return (
@@ -368,7 +377,9 @@ function CustomAvatarGroup(props) {
             <SimpleMenu 
                 menuItems={menuItems}
                 PaperProps={{ style: { maxHeight: ITEM_HEIGHT * 4 + ITEM_PADDING_TOP } }}
-                eventProps={{ name: eventName, emitter: eventEmitter }}
+                // eventProps={{ name: eventName, emitter: eventEmitter }}
+                addEventListener={addEventListener}
+                removeEventListener={removeEventListener}
             />
         </>
     );

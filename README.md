@@ -30,7 +30,7 @@
 
     ![ダークテーマ](https://raw.githubusercontent.com/sdk40010/game-invitation-frontend/images/darkTheme.png)
 
-## 環境
+## 依存関係
 - Node.js 14.x
 - React 17.x
 - Material-UI

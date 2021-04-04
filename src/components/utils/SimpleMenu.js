@@ -7,7 +7,6 @@ import {
     Menu,
     MenuItem,
     Typography,
-    Box
 } from "@material-ui/core";
 
 /**
@@ -16,11 +15,12 @@ import {
 export default function SimpleMenu(props) {
     const {
         icon,
-        enableStopPropagation,
+        enableStopPropagation = false,
         menuItems,
         IconButtonProps,
         PaperProps,
-        eventProps
+        addEventListener = () => {},
+        removeEventListener = () => {},
     } = props;
 
     const [anchorEl, setAnchorEl] = useState(null);
@@ -40,17 +40,12 @@ export default function SimpleMenu(props) {
     };
 
     useEffect(() => {
-        // 外部のコンポーネントで指定されたイベントが発生したときの処理を登録
-        if (eventProps) {
-            eventProps.emitter.on(eventProps.name, handleClick);
-        }
-
+        // 外部のコンポーネントでメニューを開くきっかけとなるイベントが発生したときの処理を登録
+        addEventListener(handleClick);
         return () => {
-            if (eventProps) {
-                eventProps.emitter.off(eventProps.name, handleClick);
-            }
+            removeEventListener(handleClick);
         }
-    })
+    }, []);
 
     return (
         <>
