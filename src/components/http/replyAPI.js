@@ -39,14 +39,7 @@ export default function useReplyAPI() {
      */
     const post = async (input, id) => {
         try {
-            const replies = await apiCall(`/api/v1/comments/${id}/replies`, "POST", input);
-            setData(prevData => {
-                if (prevData) {
-                    return new Map([...prevData.set(id, replies).entries()]);
-                } else {
-                    return new Map([ [id, replies] ]);
-                }
-            });
+            await apiCall(`/api/v1/comments/${id}/replies`, "POST", input);
             return true;
         } catch (err) {
             setError(err);

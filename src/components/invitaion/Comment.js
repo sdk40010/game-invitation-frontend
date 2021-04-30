@@ -223,9 +223,10 @@ function CommentListItem({comment}) {
     // 返信の投稿
     const handleReplySubmit = async (input) => {
         const success1 = await replyAPI.post(input, comment.id);
+        const success2 = await replyAPI.getAll(comment.id);
         // コメントの返信件数を更新するために、返信先のコメントを再取得する
-        const success2 = await commentAPI.get(comment.invitationId, comment.id);
-        return Boolean(success1 && success2);
+        const success3 = await commentAPI.get(comment.invitationId, comment.id);
+        return Boolean(success1 && success2 && success3);
     }
 
     // CommentとReplyListで共有するイベントエミッター
@@ -315,12 +316,13 @@ function Comment(props) {
 
     // 返信の投稿
     const handleReplySubmit = async (input) => {
-        const success = await onReplySubmit(input);
         replyCollapse.handleClose();
         if (eventEmitter) {
             // ReplyListの返信一覧を開く処理を呼び出す
             eventEmitter.emit("replySubmit");
         }
+
+        const success = await onReplySubmit(input);
         if (success) {
             snackbar.handleOpen("返信を投稿しました");
         }
