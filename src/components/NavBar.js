@@ -82,6 +82,7 @@ export default function NavBar({onToggleTheme}) {
                         <a
                             href="https://github.com/sdk40010/game-invitation-frontend"
                             target="_blank"
+                            rel="noreferrer"
                             className={classes.anchor}
                         >
                             <IconButton color="inherit">

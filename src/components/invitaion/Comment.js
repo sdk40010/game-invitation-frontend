@@ -393,17 +393,18 @@ function Comment(props) {
 
                     <Grid item>
                         {auth.user.id === comment.user.id ? (
-                            <SimpleMenu icon={<MoreVert />} menuItems={menuItems} />
+                            <>
+                                <SimpleMenu icon={<MoreVert />} menuItems={menuItems} />
+                                <DeleteDialog 
+                                    open={dialog.open}
+                                    itemName={inputProps.label}
+                                    onClose={dialog.handleClose}
+                                    onDelete={handleCommentDelete}
+                                />
+                            </>
                         ) : (
                             <Box ml={6}/>
                         )}
-
-                        <DeleteDialog 
-                            open={dialog.open}
-                            itemName={inputProps.label}
-                            onClose={dialog.handleClose}
-                            onDelete={handleCommentDelete}
-                        />
                     </Grid>
 
                 </Grid>
