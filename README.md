@@ -33,8 +33,8 @@
 ## 依存関係
 - Node.js 14.x
 - React 17.x
-- Material-UI
-- Firebase Authentication
+- Material-UI 4.x
+- Firebase 8.x
 
 ## 特徴
 - 開始時刻と終了時刻を指定して募集を投稿できる
